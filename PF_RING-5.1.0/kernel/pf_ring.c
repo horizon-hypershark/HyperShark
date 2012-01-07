@@ -133,6 +133,16 @@
 
 /* ************************************************* */
 
+//hypershark mmap change
+
+#ifdef HS_ENABLED
+struct pf_ring_socket *hs_pfr;
+EXPORT_SYMBOL(hs_pfr);
+#endif
+
+
+
+
 const static ip_addr ip_zero = { IN6ADDR_ANY_INIT };
 
 static u_int8_t pfring_enabled = 0;
@@ -918,9 +928,16 @@ static int ring_proc_get_info(char *buf, char **start, off_t offset,
   struct pf_ring_socket *pfr;
   FlowSlotInfo *fsi;
 
+  /*HyperShark CHANGE*/
+  #ifdef HS_ENABLED
+  rlen = sprintf(buf + rlen, "HS Ring? : %d\n",
+  pfr->hs_ring?1:0);
+  #endif
+  /*Hypershark CHANGE ENDS*/
+
   if(data == NULL) {
     /* /proc/net/pf_ring/info */
-    rlen = sprintf(buf, "PF_RING Version     : %s ($Revision: %s$)\n", RING_VERSION, SVN_REV);
+    rlen += sprintf(buf, "PF_RING Version     : %s ($Revision: %s$)\n", RING_VERSION, SVN_REV);
     rlen += sprintf(buf + rlen, "Ring slots          : %d\n", min_num_slots);
     rlen += sprintf(buf + rlen, "Slot version        : %d\n", RING_FLOWSLOT_VERSION);
     rlen += sprintf(buf + rlen, "Capture TX          : %s\n", enable_tx_capture ? "Yes [RX+TX]" : "No [RX only]");
@@ -2450,6 +2467,24 @@ static int add_skb_to_ring(struct sk_buff *skb,
   u_int8_t free_parse_mem = 0;
   u_int last_matched_plugin = 0;
   u_int8_t hash_found = 0;
+	
+//hypershark mmap change
+	// Ravelling...
+#ifdef PKAP_ENABLED
+atomic_inc(&pfr->num_ring_users);
+#else
+/* PKAP */
+atomic_set(&pfr->num_ring_users, 1);
+#endif /* PKAP */
+// Unravelling...
+#ifdef PKAP_ENABLED
+atomic_dec(&pfr->num_ring_users);
+#else
+/* PKAP */
+atomic_set(&pfr->num_ring_users, 0);
+#endif /* PKAP */
+
+
 
   if(pfr && pfr->rehash_rss && skb->dev)
     channel_id = hash_pkt_header(hdr, 0, 0) % get_num_rx_queues(skb->dev);  
@@ -4874,14 +4909,41 @@ static int ring_setsockopt(struct socket *sock,
 #endif //VPFRING_SUPPORT
 
   if(pfr == NULL)
-    return(-EINVAL);
-
-  if(get_user(val, (int *)optval))
-    return -EFAULT;
+    {
+	printk("returning from pfr = nULL\n");	
+	return(-EINVAL);
+	}
+  //if(get_user(val, (int *)optval))
+    //return -EFAULT;
 
   found = 1;
 
   switch(optname) {
+	
+
+     #ifdef HS_ENABLED
+	case SO_SET_HS_RING:
+	if (hs_pfr && (hs_pfr->hs_ring == 0)) {
+	printk("ERROR: Can only be one HS Ring!\n");
+	return -EINVAL;
+	} else if (hs_pfr && (hs_pfr->hs_ring == 1)) {
+	printk("WARNING: This ring is already a HS Ring...\n");
+	ret = 0;
+	} else {
+	hs_pfr = pfr;
+	/* This exports the current pfr to kernel
+	space so a PKAP-enable kernel thread can
+	read from this ring through an extern
+	declared hs_pfr variable */
+	hs_pfr->hs_ring = 1;
+	printk("Converted PF_RING to HS_RING\n");
+	ret = 0;
+	}
+	break;
+	#endif /* HS_ENABLED */
+/*Hypershark CHANGE ENDS*/
+
+
   case SO_ATTACH_FILTER:
     ret = -EINVAL;
 
@@ -5257,11 +5319,15 @@ static int ring_setsockopt(struct socket *sock,
 
   case SO_RING_BUCKET_LEN:
     if(optlen != sizeof(u_int32_t))
-      return -EINVAL;
+      {
+	printk(KERN_ALERT "returning from optlen case\n");
+	return -EINVAL;
+      }
     else {
-      if(copy_from_user(&pfr->bucket_len, optval, optlen))
-	return -EFAULT;
 
+      /*if(copy_from_user(&pfr->bucket_len, optval, optlen))
+	return -EFAULT;*/
+	pfr->bucket_len=(char __user *)128;
       if(unlikely(enable_debug))
 	printk("[PF_RING] --> SO_RING_BUCKET_LEN=%d\n", pfr->bucket_len);
     }
@@ -5831,7 +5897,7 @@ static int ring_getsockopt(struct socket *sock,
     }
     break;
 
-  default:
+	default:
     return -ENOPROTOOPT;
   }
 
@@ -6174,7 +6240,7 @@ static int ring_notifier(struct notifier_block *this, unsigned long msg, void *d
 
     /* Skip non ethernet interfaces */
     if(strncmp(dev->name, "eth", 3) 
-       && strncmp(dev->name, "lan", 3)
+       && strncmp(dev->name, "wlan", 4)
        && strncmp(dev->name, "dna", 3)
        && strncmp(dev->name, "tnapi", 4)
        && strncmp(dev->name, "bond", 4)) {

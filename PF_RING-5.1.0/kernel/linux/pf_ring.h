@@ -41,6 +41,7 @@
 #define RING_VERSION_NUM           0x050100
 
 /* Set */
+#define SO_SET_HS_RING		 300
 #define SO_ADD_TO_CLUSTER                 99
 #define SO_REMOVE_FROM_CLUSTER           100
 #define SO_SET_STRING                    101
@@ -93,6 +94,14 @@
 #ifndef NETDEV_PRE_UP
 #define NETDEV_PRE_UP  0x000D
 #endif
+
+/*HyperShark CHANGE*/
+
+#define HS_ENABLED
+
+/*Hypershark CHANGE ENDS*/
+
+
 
 /* *********************************** */
 
@@ -811,6 +820,10 @@ struct pf_ring_socket {
 #ifdef VPFRING_SUPPORT
   struct eventfd_ctx *vpfring_host_eventfd_ctx;   /* host  -> guest */
 #endif /* VPFRING_SUPPORT */
+//hypershark mmap change
+  u_int8_t hs_ring; // 0=not_hs 1=is_hs
+
+
 };
 
 /* **************************************** */
