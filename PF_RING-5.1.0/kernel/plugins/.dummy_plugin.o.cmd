@@ -1,8 +1,9 @@
-cmd_/home/varun/Documents/HyperShark/pf_kernel/pf_kernel.mod.o := gcc -Wp,-MD,/home/varun/Documents/HyperShark/pf_kernel/.pf_kernel.mod.o.d  -nostdinc -isystem /usr/lib/gcc/i486-linux-gnu/4.4.3/include  -Iinclude  -I/usr/src/linux-headers-2.6.32-33-generic/arch/x86/include -include include/linux/autoconf.h -Iubuntu/include  -D__KERNEL__ -Wall -Wundef -Wstrict-prototypes -Wno-trigraphs -fno-strict-aliasing -fno-common -Werror-implicit-function-declaration -Wno-format-security -fno-delete-null-pointer-checks -O2 -m32 -msoft-float -mregparm=3 -freg-struct-return -mpreferred-stack-boundary=2 -march=i586 -mtune=generic -maccumulate-outgoing-args -Wa,-mtune=generic32 -ffreestanding -fstack-protector -DCONFIG_AS_CFI=1 -DCONFIG_AS_CFI_SIGNAL_FRAME=1 -pipe -Wno-sign-compare -fno-asynchronous-unwind-tables -mno-sse -mno-mmx -mno-sse2 -mno-3dnow -Wframe-larger-than=1024 -fno-omit-frame-pointer -fno-optimize-sibling-calls -pg -Wdeclaration-after-statement -Wno-pointer-sign -fno-strict-overflow -fno-dwarf2-cfi-asm -fconserve-stack  -D"KBUILD_STR(s)=\#s" -D"KBUILD_BASENAME=KBUILD_STR(pf_kernel.mod)"  -D"KBUILD_MODNAME=KBUILD_STR(pf_kernel)"  -DMODULE -c -o /home/varun/Documents/HyperShark/pf_kernel/pf_kernel.mod.o /home/varun/Documents/HyperShark/pf_kernel/pf_kernel.mod.c
+cmd_/home/varun/Documents/HyperShark/PF_RING-5.1.0/kernel/plugins/dummy_plugin.o := gcc -Wp,-MD,/home/varun/Documents/HyperShark/PF_RING-5.1.0/kernel/plugins/.dummy_plugin.o.d  -nostdinc -isystem /usr/lib/gcc/i486-linux-gnu/4.4.3/include  -Iinclude  -I/usr/src/linux-headers-2.6.32-33-generic/arch/x86/include -include include/linux/autoconf.h -Iubuntu/include  -D__KERNEL__ -Wall -Wundef -Wstrict-prototypes -Wno-trigraphs -fno-strict-aliasing -fno-common -Werror-implicit-function-declaration -Wno-format-security -fno-delete-null-pointer-checks -O2 -m32 -msoft-float -mregparm=3 -freg-struct-return -mpreferred-stack-boundary=2 -march=i586 -mtune=generic -maccumulate-outgoing-args -Wa,-mtune=generic32 -ffreestanding -fstack-protector -DCONFIG_AS_CFI=1 -DCONFIG_AS_CFI_SIGNAL_FRAME=1 -pipe -Wno-sign-compare -fno-asynchronous-unwind-tables -mno-sse -mno-mmx -mno-sse2 -mno-3dnow -Wframe-larger-than=1024 -fno-omit-frame-pointer -fno-optimize-sibling-calls -pg -Wdeclaration-after-statement -Wno-pointer-sign -fno-strict-overflow -fno-dwarf2-cfi-asm -fconserve-stack -I/home/varun/Documents/HyperShark/PF_RING-5.1.0/kernel/plugins/..  -DMODULE -D"KBUILD_STR(s)=\#s" -D"KBUILD_BASENAME=KBUILD_STR(dummy_plugin)"  -D"KBUILD_MODNAME=KBUILD_STR(dummy_plugin)"  -c -o /home/varun/Documents/HyperShark/PF_RING-5.1.0/kernel/plugins/.tmp_dummy_plugin.o /home/varun/Documents/HyperShark/PF_RING-5.1.0/kernel/plugins/dummy_plugin.c
 
-deps_/home/varun/Documents/HyperShark/pf_kernel/pf_kernel.mod.o := \
-  /home/varun/Documents/HyperShark/pf_kernel/pf_kernel.mod.c \
-    $(wildcard include/config/module/unload.h) \
+deps_/home/varun/Documents/HyperShark/PF_RING-5.1.0/kernel/plugins/dummy_plugin.o := \
+  /home/varun/Documents/HyperShark/PF_RING-5.1.0/kernel/plugins/dummy_plugin.c \
+    $(wildcard include/config/inet.h) \
+  include/linux/version.h \
   include/linux/module.h \
     $(wildcard include/config/modules.h) \
     $(wildcard include/config/modversions.h) \
@@ -13,6 +14,7 @@ deps_/home/varun/Documents/HyperShark/pf_kernel/pf_kernel.mod.o := \
     $(wildcard include/config/tracing.h) \
     $(wildcard include/config/event/tracing.h) \
     $(wildcard include/config/ftrace/mcount/record.h) \
+    $(wildcard include/config/module/unload.h) \
     $(wildcard include/config/smp.h) \
     $(wildcard include/config/constructors.h) \
     $(wildcard include/config/sysfs.h) \
@@ -436,9 +438,361 @@ deps_/home/varun/Documents/HyperShark/pf_kernel/pf_kernel.mod.o := \
     $(wildcard include/config/mgeode/lx.h) \
   include/asm-generic/module.h \
   include/trace/events/module.h \
-  include/linux/vermagic.h \
-  include/linux/utsrelease.h \
+  include/linux/socket.h \
+  /usr/src/linux-headers-2.6.32-33-generic/arch/x86/include/asm/socket.h \
+  include/asm-generic/socket.h \
+  /usr/src/linux-headers-2.6.32-33-generic/arch/x86/include/asm/sockios.h \
+  include/asm-generic/sockios.h \
+  include/linux/sockios.h \
+  include/linux/uio.h \
+  include/linux/skbuff.h \
+    $(wildcard include/config/nf/conntrack.h) \
+    $(wildcard include/config/bridge/netfilter.h) \
+    $(wildcard include/config/has/dma.h) \
+    $(wildcard include/config/xfrm.h) \
+    $(wildcard include/config/net/sched.h) \
+    $(wildcard include/config/net/cls/act.h) \
+    $(wildcard include/config/ipv6/ndisc/nodetype.h) \
+    $(wildcard include/config/net/dma.h) \
+    $(wildcard include/config/network/secmark.h) \
+  include/linux/kmemcheck.h \
+  include/linux/net.h \
+    $(wildcard include/config/sysctl.h) \
+  include/linux/random.h \
+  include/linux/irqnr.h \
+  include/linux/fcntl.h \
+  /usr/src/linux-headers-2.6.32-33-generic/arch/x86/include/asm/fcntl.h \
+  include/asm-generic/fcntl.h \
+  include/linux/sysctl.h \
+  include/linux/textsearch.h \
+  include/net/checksum.h \
+  /usr/src/linux-headers-2.6.32-33-generic/arch/x86/include/asm/uaccess.h \
+    $(wildcard include/config/x86/wp/works/ok.h) \
+    $(wildcard include/config/x86/intel/usercopy.h) \
+  /usr/src/linux-headers-2.6.32-33-generic/arch/x86/include/asm/uaccess_32.h \
+  /usr/src/linux-headers-2.6.32-33-generic/arch/x86/include/asm/checksum.h \
+  /usr/src/linux-headers-2.6.32-33-generic/arch/x86/include/asm/checksum_32.h \
+  include/linux/in6.h \
+  include/linux/dmaengine.h \
+    $(wildcard include/config/dma/engine.h) \
+    $(wildcard include/config/async/tx/dma.h) \
+    $(wildcard include/config/async/tx/disable/channel/switch.h) \
+  include/linux/device.h \
+    $(wildcard include/config/debug/devres.h) \
+    $(wildcard include/config/devtmpfs.h) \
+  include/linux/klist.h \
+  include/linux/semaphore.h \
+  /usr/src/linux-headers-2.6.32-33-generic/arch/x86/include/asm/device.h \
+    $(wildcard include/config/dmar.h) \
+  include/linux/pm_wakeup.h \
+    $(wildcard include/config/pm.h) \
+  include/linux/dma-mapping.h \
+    $(wildcard include/config/have/dma/attrs.h) \
+  include/linux/dma-attrs.h \
+  include/linux/bug.h \
+  include/linux/scatterlist.h \
+    $(wildcard include/config/debug/sg.h) \
+  /usr/src/linux-headers-2.6.32-33-generic/arch/x86/include/asm/scatterlist.h \
+  include/asm-generic/scatterlist.h \
+  include/linux/mm.h \
+    $(wildcard include/config/stack/growsup.h) \
+    $(wildcard include/config/swap.h) \
+    $(wildcard include/config/debug/pagealloc.h) \
+  include/linux/debug_locks.h \
+    $(wildcard include/config/debug/locking/api/selftests.h) \
+  /usr/src/linux-headers-2.6.32-33-generic/arch/x86/include/asm/pgtable.h \
+  /usr/src/linux-headers-2.6.32-33-generic/arch/x86/include/asm/pgtable_32.h \
+  /usr/src/linux-headers-2.6.32-33-generic/arch/x86/include/asm/pgtable_32_types.h \
+  /usr/src/linux-headers-2.6.32-33-generic/arch/x86/include/asm/pgtable-2level.h \
+  include/asm-generic/pgtable.h \
+  include/linux/page-flags.h \
+    $(wildcard include/config/pageflags/extended.h) \
+    $(wildcard include/config/have/mlocked/page/bit.h) \
+    $(wildcard include/config/arch/uses/pg/uncached.h) \
+    $(wildcard include/config/memory/failure.h) \
+    $(wildcard include/config/s390.h) \
+  include/linux/vmstat.h \
+    $(wildcard include/config/vm/event/counters.h) \
+  /usr/src/linux-headers-2.6.32-33-generic/arch/x86/include/asm/io.h \
+  /usr/src/linux-headers-2.6.32-33-generic/arch/x86/include/asm/io_32.h \
+  include/asm-generic/iomap.h \
+  include/linux/vmalloc.h \
+  /usr/src/linux-headers-2.6.32-33-generic/arch/x86/include/asm/dma-mapping.h \
+    $(wildcard include/config/isa.h) \
+  include/linux/dma-debug.h \
+    $(wildcard include/config/dma/api/debug.h) \
+  /usr/src/linux-headers-2.6.32-33-generic/arch/x86/include/asm/swiotlb.h \
+    $(wildcard include/config/swiotlb.h) \
+  include/linux/swiotlb.h \
+  include/asm-generic/dma-coherent.h \
+    $(wildcard include/config/have/generic/dma/coherent.h) \
+  include/asm-generic/dma-mapping-common.h \
+  include/linux/hrtimer.h \
+    $(wildcard include/config/high/res/timers.h) \
+  include/linux/rtnetlink.h \
+  include/linux/netlink.h \
+  include/linux/capability.h \
+    $(wildcard include/config/security/file/capabilities.h) \
+  include/linux/if_link.h \
+  include/linux/if_addr.h \
+  include/linux/neighbour.h \
+  include/linux/in.h \
+  include/linux/inet.h \
+  include/linux/filter.h \
+  include/linux/ip.h \
+  include/linux/tcp.h \
+    $(wildcard include/config/tcp/md5sig.h) \
+  include/net/sock.h \
+    $(wildcard include/config/net/ns.h) \
+    $(wildcard include/config/security.h) \
+  include/linux/list_nulls.h \
+  include/linux/netdevice.h \
+    $(wildcard include/config/dcb.h) \
+    $(wildcard include/config/wlan/80211.h) \
+    $(wildcard include/config/ax25.h) \
+    $(wildcard include/config/mac80211/mesh.h) \
+    $(wildcard include/config/tr.h) \
+    $(wildcard include/config/net/ipip.h) \
+    $(wildcard include/config/net/ipgre.h) \
+    $(wildcard include/config/ipv6/sit.h) \
+    $(wildcard include/config/ipv6/tunnel.h) \
+    $(wildcard include/config/netpoll.h) \
+    $(wildcard include/config/net/poll/controller.h) \
+    $(wildcard include/config/fcoe.h) \
+    $(wildcard include/config/wireless/ext.h) \
+    $(wildcard include/config/net/dsa.h) \
+    $(wildcard include/config/net/dsa/tag/dsa.h) \
+    $(wildcard include/config/net/dsa/tag/trailer.h) \
+    $(wildcard include/config/netpoll/trap.h) \
+  include/linux/if.h \
+  include/linux/hdlc/ioctl.h \
+  include/linux/if_ether.h \
+  include/linux/if_packet.h \
+  include/linux/rculist.h \
+  include/linux/ethtool.h \
+  include/net/net_namespace.h \
+    $(wildcard include/config/ipv6.h) \
+    $(wildcard include/config/ip/dccp.h) \
+    $(wildcard include/config/netfilter.h) \
+    $(wildcard include/config/net.h) \
+  include/net/netns/core.h \
+  include/net/netns/mib.h \
+    $(wildcard include/config/xfrm/statistics.h) \
+  include/net/snmp.h \
+  include/linux/snmp.h \
+  include/net/netns/unix.h \
+  include/net/netns/packet.h \
+  include/net/netns/ipv4.h \
+    $(wildcard include/config/ip/multiple/tables.h) \
+    $(wildcard include/config/ip/mroute.h) \
+    $(wildcard include/config/ip/pimsm/v1.h) \
+    $(wildcard include/config/ip/pimsm/v2.h) \
+  include/net/inet_frag.h \
+  include/net/netns/ipv6.h \
+    $(wildcard include/config/ipv6/multiple/tables.h) \
+    $(wildcard include/config/ipv6/mroute.h) \
+    $(wildcard include/config/ipv6/pimsm/v2.h) \
+  include/net/dst_ops.h \
+  include/net/netns/dccp.h \
+  include/net/netns/x_tables.h \
+    $(wildcard include/config/bridge/nf/ebtables.h) \
+  include/linux/netfilter.h \
+    $(wildcard include/config/netfilter/debug.h) \
+    $(wildcard include/config/nf/nat/needed.h) \
+  include/net/flow.h \
+  include/linux/proc_fs.h \
+    $(wildcard include/config/proc/devicetree.h) \
+    $(wildcard include/config/proc/kcore.h) \
+  include/linux/fs.h \
+    $(wildcard include/config/dnotify.h) \
+    $(wildcard include/config/quota.h) \
+    $(wildcard include/config/fsnotify.h) \
+    $(wildcard include/config/inotify.h) \
+    $(wildcard include/config/fs/posix/acl.h) \
+    $(wildcard include/config/epoll.h) \
+    $(wildcard include/config/debug/writecount.h) \
+    $(wildcard include/config/file/locking.h) \
+    $(wildcard include/config/auditsyscall.h) \
+    $(wildcard include/config/block.h) \
+    $(wildcard include/config/fs/xip.h) \
+    $(wildcard include/config/migration.h) \
+  include/linux/limits.h \
+  include/linux/kdev_t.h \
+  include/linux/dcache.h \
+  include/linux/path.h \
+  include/linux/radix-tree.h \
+  include/linux/pid.h \
+  include/linux/fiemap.h \
+  include/linux/quota.h \
+  include/linux/dqblk_xfs.h \
+  include/linux/dqblk_v1.h \
+  include/linux/dqblk_v2.h \
+  include/linux/dqblk_qtree.h \
+  include/linux/nfs_fs_i.h \
+  include/linux/nfs.h \
+  include/linux/sunrpc/msg_prot.h \
+  include/linux/magic.h \
+  include/net/netns/conntrack.h \
+  include/net/netns/xfrm.h \
+  include/linux/xfrm.h \
+  include/linux/seq_file_net.h \
+  include/linux/seq_file.h \
+  include/net/dsa.h \
+  include/net/dcbnl.h \
+  include/linux/interrupt.h \
+    $(wildcard include/config/generic/irq/probe.h) \
+    $(wildcard include/config/debug/shirq.h) \
+  include/linux/irqreturn.h \
+  include/linux/hardirq.h \
+    $(wildcard include/config/virt/cpu/accounting.h) \
+    $(wildcard include/config/irq/time/accounting.h) \
+  include/linux/ftrace_irq.h \
+    $(wildcard include/config/ftrace/nmi/enter.h) \
+  /usr/src/linux-headers-2.6.32-33-generic/arch/x86/include/asm/hardirq.h \
+    $(wildcard include/config/x86/mce.h) \
+    $(wildcard include/config/x86/mce/threshold.h) \
+  include/linux/irq.h \
+    $(wildcard include/config/irq/per/cpu.h) \
+    $(wildcard include/config/irq/release/method.h) \
+    $(wildcard include/config/intr/remap.h) \
+    $(wildcard include/config/generic/pending/irq.h) \
+    $(wildcard include/config/numa/irq/desc.h) \
+    $(wildcard include/config/generic/hardirqs/no//do/irq.h) \
+    $(wildcard include/config/cpumasks/offstack.h) \
+  /usr/src/linux-headers-2.6.32-33-generic/arch/x86/include/asm/irq.h \
+  /usr/src/linux-headers-2.6.32-33-generic/arch/x86/include/asm/irq_regs.h \
+  /usr/src/linux-headers-2.6.32-33-generic/arch/x86/include/asm/hw_irq.h \
+  include/linux/profile.h \
+    $(wildcard include/config/profiling.h) \
+  /usr/src/linux-headers-2.6.32-33-generic/arch/x86/include/asm/sections.h \
+  include/asm-generic/sections.h \
+  include/linux/security.h \
+    $(wildcard include/config/security/path.h) \
+    $(wildcard include/config/security/network.h) \
+    $(wildcard include/config/security/network/xfrm.h) \
+    $(wildcard include/config/keys.h) \
+    $(wildcard include/config/audit.h) \
+    $(wildcard include/config/securityfs.h) \
+  include/linux/binfmts.h \
+  include/linux/signal.h \
+  /usr/src/linux-headers-2.6.32-33-generic/arch/x86/include/asm/signal.h \
+  include/asm-generic/signal-defs.h \
+  /usr/src/linux-headers-2.6.32-33-generic/arch/x86/include/asm/siginfo.h \
+  include/asm-generic/siginfo.h \
+  include/linux/resource.h \
+  /usr/src/linux-headers-2.6.32-33-generic/arch/x86/include/asm/resource.h \
+  include/asm-generic/resource.h \
+  include/linux/sem.h \
+    $(wildcard include/config/sysvipc.h) \
+  include/linux/ipc.h \
+  /usr/src/linux-headers-2.6.32-33-generic/arch/x86/include/asm/ipcbuf.h \
+  include/asm-generic/ipcbuf.h \
+  /usr/src/linux-headers-2.6.32-33-generic/arch/x86/include/asm/sembuf.h \
+  include/linux/shm.h \
+  /usr/src/linux-headers-2.6.32-33-generic/arch/x86/include/asm/shmparam.h \
+  /usr/src/linux-headers-2.6.32-33-generic/arch/x86/include/asm/shmbuf.h \
+  include/asm-generic/shmbuf.h \
+  include/linux/msg.h \
+  /usr/src/linux-headers-2.6.32-33-generic/arch/x86/include/asm/msgbuf.h \
+  include/asm-generic/msgbuf.h \
+  include/linux/sched.h \
+    $(wildcard include/config/sched/debug.h) \
+    $(wildcard include/config/detect/softlockup.h) \
+    $(wildcard include/config/detect/hung/task.h) \
+    $(wildcard include/config/core/dump/default/elf/headers.h) \
+    $(wildcard include/config/bsd/process/acct.h) \
+    $(wildcard include/config/taskstats.h) \
+    $(wildcard include/config/inotify/user.h) \
+    $(wildcard include/config/posix/mqueue.h) \
+    $(wildcard include/config/perf/events.h) \
+    $(wildcard include/config/schedstats.h) \
+    $(wildcard include/config/task/delay/acct.h) \
+    $(wildcard include/config/fair/group/sched.h) \
+    $(wildcard include/config/rt/group/sched.h) \
+    $(wildcard include/config/blk/dev/io/trace.h) \
+    $(wildcard include/config/rt/mutexes.h) \
+    $(wildcard include/config/task/xacct.h) \
+    $(wildcard include/config/cpusets.h) \
+    $(wildcard include/config/cgroups.h) \
+    $(wildcard include/config/futex.h) \
+    $(wildcard include/config/fault/injection.h) \
+    $(wildcard include/config/latencytop.h) \
+    $(wildcard include/config/function/graph/tracer.h) \
+    $(wildcard include/config/have/unstable/sched/clock.h) \
+    $(wildcard include/config/cgroup/sched.h) \
+  /usr/src/linux-headers-2.6.32-33-generic/arch/x86/include/asm/cputime.h \
+  include/asm-generic/cputime.h \
+  include/linux/proportions.h \
+  include/linux/percpu_counter.h \
+  include/linux/seccomp.h \
+    $(wildcard include/config/seccomp.h) \
+  /usr/src/linux-headers-2.6.32-33-generic/arch/x86/include/asm/seccomp.h \
+  /usr/src/linux-headers-2.6.32-33-generic/arch/x86/include/asm/seccomp_32.h \
+  include/linux/unistd.h \
+  /usr/src/linux-headers-2.6.32-33-generic/arch/x86/include/asm/unistd.h \
+  /usr/src/linux-headers-2.6.32-33-generic/arch/x86/include/asm/unistd_32.h \
+  include/linux/rtmutex.h \
+    $(wildcard include/config/debug/rt/mutexes.h) \
+  include/linux/plist.h \
+    $(wildcard include/config/debug/pi/list.h) \
+  include/linux/task_io_accounting.h \
+    $(wildcard include/config/task/io/accounting.h) \
+  include/linux/latencytop.h \
+  include/linux/cred.h \
+    $(wildcard include/config/debug/credentials.h) \
+  include/linux/key.h \
+  include/linux/selinux.h \
+    $(wildcard include/config/security/selinux.h) \
+  include/linux/aio.h \
+  include/linux/aio_abi.h \
+  include/linux/rculist_nulls.h \
+  include/linux/poll.h \
+  /usr/src/linux-headers-2.6.32-33-generic/arch/x86/include/asm/poll.h \
+  include/asm-generic/poll.h \
+  include/net/dst.h \
+    $(wildcard include/config/net/cls/route.h) \
+  include/net/neighbour.h \
+  include/net/rtnetlink.h \
+  include/net/netlink.h \
+  include/net/inet_connection_sock.h \
+  include/net/inet_sock.h \
+  include/linux/jhash.h \
+  include/net/request_sock.h \
+  include/net/netns/hash.h \
+  include/net/inet_timewait_sock.h \
+  include/net/tcp_states.h \
+  include/net/timewait_sock.h \
+  include/linux/udp.h \
+  include/net/xfrm.h \
+    $(wildcard include/config/xfrm/sub/policy.h) \
+    $(wildcard include/config/xfrm/migrate.h) \
+  include/linux/pfkeyv2.h \
+  include/linux/ipsec.h \
+  include/linux/audit.h \
+    $(wildcard include/config/change.h) \
+  include/net/ip.h \
+  include/linux/ipv6.h \
+    $(wildcard include/config/ipv6/privacy.h) \
+    $(wildcard include/config/ipv6/router/pref.h) \
+    $(wildcard include/config/ipv6/route/info.h) \
+    $(wildcard include/config/ipv6/optimistic/dad.h) \
+    $(wildcard include/config/ipv6/mip6.h) \
+    $(wildcard include/config/ipv6/subtrees.h) \
+  include/linux/icmpv6.h \
+  include/net/route.h \
+  include/net/inetpeer.h \
+  include/linux/in_route.h \
+  include/linux/route.h \
+  include/net/ipv6.h \
+  include/net/if_inet6.h \
+  include/net/ndisc.h \
+  include/net/ip6_fib.h \
+  include/linux/ipv6_route.h \
+  include/net/inet_common.h \
+  /home/varun/Documents/HyperShark/PF_RING-5.1.0/kernel/plugins/../linux/pf_ring.h \
+    $(wildcard include/config/textsearch.h) \
+  /home/varun/Documents/HyperShark/PF_RING-5.1.0/kernel/plugins/dummy_plugin.h \
 
-/home/varun/Documents/HyperShark/pf_kernel/pf_kernel.mod.o: $(deps_/home/varun/Documents/HyperShark/pf_kernel/pf_kernel.mod.o)
+/home/varun/Documents/HyperShark/PF_RING-5.1.0/kernel/plugins/dummy_plugin.o: $(deps_/home/varun/Documents/HyperShark/PF_RING-5.1.0/kernel/plugins/dummy_plugin.o)
 
-$(deps_/home/varun/Documents/HyperShark/pf_kernel/pf_kernel.mod.o):
+$(deps_/home/varun/Documents/HyperShark/PF_RING-5.1.0/kernel/plugins/dummy_plugin.o):

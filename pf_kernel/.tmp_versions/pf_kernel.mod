@@ -1,2 +1,2 @@
-/home/varun/Desktop/pfring/pf_kernel/pf_kernel.ko
-/home/varun/Desktop/pfring/pf_kernel/pf_kernel.o
+/home/varun/Documents/HyperShark/pf_kernel/pf_kernel.ko
+/home/varun/Documents/HyperShark/pf_kernel/pf_kernel.o

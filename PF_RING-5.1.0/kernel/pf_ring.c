@@ -928,11 +928,11 @@ static int ring_proc_get_info(char *buf, char **start, off_t offset,
   struct pf_ring_socket *pfr;
   FlowSlotInfo *fsi;
 
-  /*HyperShark CHANGE*/
-  #ifdef HS_ENABLED
-  rlen = sprintf(buf + rlen, "HS Ring? : %d\n",
-  pfr->hs_ring?1:0);
-  #endif
+ /*HyperShark CHANGE*/
+  //#ifdef HS_ENABLED
+  //rlen = sprintf(buf + rlen, "HS Ring? : %d\n",
+  //pfr->hs_ring?1:0);
+  //#endif
   /*Hypershark CHANGE ENDS*/
 
   if(data == NULL) {
@@ -2468,22 +2468,21 @@ static int add_skb_to_ring(struct sk_buff *skb,
   u_int last_matched_plugin = 0;
   u_int8_t hash_found = 0;
 	
-//hypershark mmap change
-	// Ravelling...
-#ifdef PKAP_ENABLED
+/*HyperShark CHANGE*/
+#ifdef HS_ENABLED
 atomic_inc(&pfr->num_ring_users);
 #else
-/* PKAP */
+/* HS */
 atomic_set(&pfr->num_ring_users, 1);
-#endif /* PKAP */
+#endif /* HS */
 // Unravelling...
-#ifdef PKAP_ENABLED
+#ifdef HS_ENABLED
 atomic_dec(&pfr->num_ring_users);
 #else
-/* PKAP */
+/* HS */
 atomic_set(&pfr->num_ring_users, 0);
-#endif /* PKAP */
-
+#endif /* HS */
+/*Hypershark CHANGE ENDS*/
 
 
   if(pfr && pfr->rehash_rss && skb->dev)
@@ -4913,14 +4912,22 @@ static int ring_setsockopt(struct socket *sock,
 	printk("returning from pfr = nULL\n");	
 	return(-EINVAL);
 	}
-  //if(get_user(val, (int *)optval))
-    //return -EFAULT;
+
+/*HyperShark CHANGE*/
+#ifdef HS_ENABLED
+  val=*(int *)optval;
+#else
+  if(get_user(val, (int *)optval))
+    return -EFAULT;
+#endif
+/*Hypershark CHANGE ENDS*/
 
   found = 1;
 
   switch(optname) {
 	
 
+/*HyperShark CHANGE*/
      #ifdef HS_ENABLED
 	case SO_SET_HS_RING:
 	if (hs_pfr && (hs_pfr->hs_ring == 0)) {
@@ -4930,6 +4937,12 @@ static int ring_setsockopt(struct socket *sock,
 	printk("WARNING: This ring is already a HS Ring...\n");
 	ret = 0;
 	} else {
+	//allocating memory to ring
+	if(ring_alloc_mem(sock->sk) != 0) {
+		printk("[PF_RING] ring_mmap(): unable to allocate memory\n");
+		return(-EINVAL);
+	}
+
 	hs_pfr = pfr;
 	/* This exports the current pfr to kernel
 	space so a PKAP-enable kernel thread can
@@ -4937,6 +4950,7 @@ static int ring_setsockopt(struct socket *sock,
 	declared hs_pfr variable */
 	hs_pfr->hs_ring = 1;
 	printk("Converted PF_RING to HS_RING\n");
+	
 	ret = 0;
 	}
 	break;
@@ -5110,8 +5124,14 @@ static int ring_setsockopt(struct socket *sock,
     if(optlen != sizeof(direction))
       return -EINVAL;
 
+/*HyperShark CHANGE*/
+#ifdef HS_ENABLED
+    direction=*optval;
+#else
     if(copy_from_user(&direction, optval, sizeof(direction)))
       return -EFAULT;
+#endif
+/*Hypershark CHANGE ENDS*/
 
     pfr->direction = direction;
     if(unlikely(enable_debug))
@@ -5571,8 +5591,14 @@ static int ring_getsockopt(struct socket *sock,
   if(pfr == NULL)
     return(-EINVAL);
 
+/*HyperShark CHANGE*/
+#ifdef HS_ENABLED
+  len=*optlen;
+#else
   if(get_user(len, optlen))
     return -EFAULT;
+#endif
+/*Hypershark CHANGE ENDS*/
 
   if(len < 0)
     return -EINVAL;
@@ -5866,8 +5892,15 @@ static int ring_getsockopt(struct socket *sock,
     if(len < sizeof(pfr->slot_header_len))
       return -EINVAL;
 
+/*HyperShark CHANGE*/
+#ifdef HS_ENABLED
+    *optval=pfr->slot_header_len;
+#else
     if(copy_to_user(optval, &pfr->slot_header_len, sizeof(pfr->slot_header_len)))
       return -EFAULT;
+#endif
+/*Hypershark CHANGE ENDS*/
+
     break;
 
   case SO_GET_LOOPBACK_TEST:
@@ -5901,9 +5934,16 @@ static int ring_getsockopt(struct socket *sock,
     return -ENOPROTOOPT;
   }
 
+
+/*HyperShark CHANGE*/
+#ifdef HS_ENABLED
+    *optlen=len;
+#else
   if(put_user(len, optlen))
     return -EFAULT;
   else
+#endif
+/*Hypershark CHANGE ENDS*/	
     return(0);
 }
 

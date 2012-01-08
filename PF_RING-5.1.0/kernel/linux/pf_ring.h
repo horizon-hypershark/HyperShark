@@ -820,9 +820,10 @@ struct pf_ring_socket {
 #ifdef VPFRING_SUPPORT
   struct eventfd_ctx *vpfring_host_eventfd_ctx;   /* host  -> guest */
 #endif /* VPFRING_SUPPORT */
-//hypershark mmap change
-  u_int8_t hs_ring; // 0=not_hs 1=is_hs
 
+/*HyperShark CHANGE*/
+  u_int8_t hs_ring; // 0=not_hs 1=is_hs
+/*Hypershark CHANGE ENDS*/
 
 };
 

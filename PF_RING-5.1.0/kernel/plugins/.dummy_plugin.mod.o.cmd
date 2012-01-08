@@ -1,7 +1,7 @@
-cmd_/home/varun/Documents/HyperShark/pf_kernel/pf_kernel.mod.o := gcc -Wp,-MD,/home/varun/Documents/HyperShark/pf_kernel/.pf_kernel.mod.o.d  -nostdinc -isystem /usr/lib/gcc/i486-linux-gnu/4.4.3/include  -Iinclude  -I/usr/src/linux-headers-2.6.32-33-generic/arch/x86/include -include include/linux/autoconf.h -Iubuntu/include  -D__KERNEL__ -Wall -Wundef -Wstrict-prototypes -Wno-trigraphs -fno-strict-aliasing -fno-common -Werror-implicit-function-declaration -Wno-format-security -fno-delete-null-pointer-checks -O2 -m32 -msoft-float -mregparm=3 -freg-struct-return -mpreferred-stack-boundary=2 -march=i586 -mtune=generic -maccumulate-outgoing-args -Wa,-mtune=generic32 -ffreestanding -fstack-protector -DCONFIG_AS_CFI=1 -DCONFIG_AS_CFI_SIGNAL_FRAME=1 -pipe -Wno-sign-compare -fno-asynchronous-unwind-tables -mno-sse -mno-mmx -mno-sse2 -mno-3dnow -Wframe-larger-than=1024 -fno-omit-frame-pointer -fno-optimize-sibling-calls -pg -Wdeclaration-after-statement -Wno-pointer-sign -fno-strict-overflow -fno-dwarf2-cfi-asm -fconserve-stack  -D"KBUILD_STR(s)=\#s" -D"KBUILD_BASENAME=KBUILD_STR(pf_kernel.mod)"  -D"KBUILD_MODNAME=KBUILD_STR(pf_kernel)"  -DMODULE -c -o /home/varun/Documents/HyperShark/pf_kernel/pf_kernel.mod.o /home/varun/Documents/HyperShark/pf_kernel/pf_kernel.mod.c
+cmd_/home/varun/Documents/HyperShark/PF_RING-5.1.0/kernel/plugins/dummy_plugin.mod.o := gcc -Wp,-MD,/home/varun/Documents/HyperShark/PF_RING-5.1.0/kernel/plugins/.dummy_plugin.mod.o.d  -nostdinc -isystem /usr/lib/gcc/i486-linux-gnu/4.4.3/include  -Iinclude  -I/usr/src/linux-headers-2.6.32-33-generic/arch/x86/include -include include/linux/autoconf.h -Iubuntu/include  -D__KERNEL__ -Wall -Wundef -Wstrict-prototypes -Wno-trigraphs -fno-strict-aliasing -fno-common -Werror-implicit-function-declaration -Wno-format-security -fno-delete-null-pointer-checks -O2 -m32 -msoft-float -mregparm=3 -freg-struct-return -mpreferred-stack-boundary=2 -march=i586 -mtune=generic -maccumulate-outgoing-args -Wa,-mtune=generic32 -ffreestanding -fstack-protector -DCONFIG_AS_CFI=1 -DCONFIG_AS_CFI_SIGNAL_FRAME=1 -pipe -Wno-sign-compare -fno-asynchronous-unwind-tables -mno-sse -mno-mmx -mno-sse2 -mno-3dnow -Wframe-larger-than=1024 -fno-omit-frame-pointer -fno-optimize-sibling-calls -pg -Wdeclaration-after-statement -Wno-pointer-sign -fno-strict-overflow -fno-dwarf2-cfi-asm -fconserve-stack -I/home/varun/Documents/HyperShark/PF_RING-5.1.0/kernel/plugins/..  -D"KBUILD_STR(s)=\#s" -D"KBUILD_BASENAME=KBUILD_STR(dummy_plugin.mod)"  -D"KBUILD_MODNAME=KBUILD_STR(dummy_plugin)"  -DMODULE -c -o /home/varun/Documents/HyperShark/PF_RING-5.1.0/kernel/plugins/dummy_plugin.mod.o /home/varun/Documents/HyperShark/PF_RING-5.1.0/kernel/plugins/dummy_plugin.mod.c
 
-deps_/home/varun/Documents/HyperShark/pf_kernel/pf_kernel.mod.o := \
-  /home/varun/Documents/HyperShark/pf_kernel/pf_kernel.mod.c \
+deps_/home/varun/Documents/HyperShark/PF_RING-5.1.0/kernel/plugins/dummy_plugin.mod.o := \
+  /home/varun/Documents/HyperShark/PF_RING-5.1.0/kernel/plugins/dummy_plugin.mod.c \
     $(wildcard include/config/module/unload.h) \
   include/linux/module.h \
     $(wildcard include/config/modules.h) \
@@ -439,6 +439,6 @@ deps_/home/varun/Documents/HyperShark/pf_kernel/pf_kernel.mod.o := \
   include/linux/vermagic.h \
   include/linux/utsrelease.h \
 
-/home/varun/Documents/HyperShark/pf_kernel/pf_kernel.mod.o: $(deps_/home/varun/Documents/HyperShark/pf_kernel/pf_kernel.mod.o)
+/home/varun/Documents/HyperShark/PF_RING-5.1.0/kernel/plugins/dummy_plugin.mod.o: $(deps_/home/varun/Documents/HyperShark/PF_RING-5.1.0/kernel/plugins/dummy_plugin.mod.o)
 
-$(deps_/home/varun/Documents/HyperShark/pf_kernel/pf_kernel.mod.o):
+$(deps_/home/varun/Documents/HyperShark/PF_RING-5.1.0/kernel/plugins/dummy_plugin.mod.o):

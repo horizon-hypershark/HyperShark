@@ -14,6 +14,9 @@
 #include<linux/icmp.h>
 #include<linux/pf_ring.h>
 #include<linux/unistd.h>
+#include<linux/delay.h>
+#include<linux/time.h>
+#include"pf_kernel.h"
 
 #define DOMAIN PF_RING
 #define TYPE SOCK_RAW
@@ -23,11 +26,207 @@
 //extern and global declarations
 
 FlowSlotInfo *slots_info;
-extern struct pf_ring_socket *pkap_pfr;
+extern struct pf_ring_socket *hs_pfr;
 struct socket *capture_sockfd;
 char *slots;
+struct sockaddr_in source,dest;
 u_int16_t slot_header_len;
 
+
+char *inet_ntoa(struct in_addr *in)
+{
+	char* str_ip = NULL;
+	u_int32_t int_ip = 0;
+	
+	str_ip = kmalloc(16 * sizeof(char), GFP_KERNEL);
+	if (!str_ip)
+		return NULL;
+	else
+		memset(str_ip, 0, 16);
+
+	int_ip = in->s_addr;
+	
+	sprintf(str_ip, "%d.%d.%d.%d",  (int_ip) & 0xFF,
+									(int_ip >> 8 ) & 0xFF,
+									(int_ip >> 16) & 0xFF,
+									(int_ip >> 24) & 0xFF);
+	return str_ip;
+}
+
+
+
+int parse_pkt(u_char *pkt, struct pfring_pkthdr *hdr)
+{
+	struct iphdr *ip;
+	struct eth_hdr *eh = (struct eth_hdr*)pkt;
+	u_int16_t displ;
+	int i;
+//	eh->h_dest[0];
+//return 0;
+	memset(&hdr->extended_hdr.parsed_pkt, 0, sizeof(struct pkt_parsing_info));
+	for(i=0;i<=5;i++)
+	{
+		hdr->extended_hdr.parsed_pkt.dmac[i]=eh->h_dest[i];
+		hdr->extended_hdr.parsed_pkt.smac[i]=eh->h_source[i];
+	}
+	
+	hdr->extended_hdr.parsed_header_len = 0;
+	hdr->extended_hdr.parsed_pkt.eth_type = ntohs(eh->h_proto);
+	hdr->extended_hdr.parsed_pkt.offset.eth_offset = 0;
+
+	if(hdr->extended_hdr.parsed_pkt.eth_type == 0x8100 /* 802.1q (VLAN) */)
+	{
+		hdr->extended_hdr.parsed_pkt.offset.vlan_offset = hdr->extended_hdr.parsed_pkt.offset.eth_offset + sizeof(struct eth_hdr);
+		hdr->extended_hdr.parsed_pkt.vlan_id = (pkt[hdr->extended_hdr.parsed_pkt.offset.eth_offset + 14] & 15) * 256
+		+ pkt[hdr->extended_hdr.parsed_pkt.offset.eth_offset + 15];
+		hdr->extended_hdr.parsed_pkt.eth_type = (pkt[hdr->extended_hdr.parsed_pkt.offset.eth_offset + 16]) * 256
+		+ pkt[hdr->extended_hdr.parsed_pkt.offset.eth_offset + 17];
+		displ = 4;
+	}
+	else
+	{
+		displ = 0;
+		hdr->extended_hdr.parsed_pkt.vlan_id = 0; /* Any VLAN */
+	}
+
+	if(hdr->extended_hdr.parsed_pkt.eth_type == 0x0800 /* IP */) {
+		hdr->extended_hdr.parsed_pkt.offset.l3_offset = hdr->extended_hdr.parsed_pkt.offset.eth_offset+displ+sizeof(struct eth_hdr);
+		ip = (struct iphdr*)(pkt+hdr->extended_hdr.parsed_pkt.offset.l3_offset);
+
+		hdr->extended_hdr.parsed_pkt.ip_src.v4 = ntohl(ip->saddr), hdr->extended_hdr.parsed_pkt.ip_dst.v4 = ntohl(ip->daddr), hdr->extended_hdr.parsed_pkt.l3_proto = ip->protocol;
+		hdr->extended_hdr.parsed_pkt.ip_tos = ip->tos;
+
+		if((ip->protocol == IPPROTO_TCP) || (ip->protocol == IPPROTO_UDP))
+		{
+			u_int16_t ip_len = ip->ihl*4;
+
+			hdr->extended_hdr.parsed_pkt.offset.l4_offset = hdr->extended_hdr.parsed_pkt.offset.l3_offset+ip_len;
+
+			if(ip->protocol == IPPROTO_TCP) 
+			{
+				struct tcphdr *tcp = (struct tcphdr*)(pkt+hdr->extended_hdr.parsed_pkt.offset.l4_offset);
+				hdr->extended_hdr.parsed_pkt.l4_src_port = ntohs(tcp->source), hdr->extended_hdr.parsed_pkt.l4_dst_port = ntohs(tcp->dest);
+				hdr->extended_hdr.parsed_pkt.offset.payload_offset = hdr->extended_hdr.parsed_pkt.offset.l4_offset+(tcp->doff * 4);
+				hdr->extended_hdr.parsed_pkt.tcp.seq_num = ntohl(tcp->seq);
+				hdr->extended_hdr.parsed_pkt.tcp.ack_num = ntohl(tcp->ack_seq);
+				hdr->extended_hdr.parsed_pkt.tcp.flags = (tcp->fin * TH_FIN_MULTIPLIER) + (tcp->syn * TH_SYN_MULTIPLIER) + (tcp->rst * TH_RST_MULTIPLIER) +
+				  (tcp->psh * TH_PUSH_MULTIPLIER) + (tcp->ack * TH_ACK_MULTIPLIER) + (tcp->urg * TH_URG_MULTIPLIER);
+			} 
+			else if(ip->protocol == IPPROTO_UDP) 
+			{
+				struct udphdr *udp = (struct udphdr*)(pkt+hdr->extended_hdr.parsed_pkt.offset.l4_offset);
+				hdr->extended_hdr.parsed_pkt.l4_src_port = ntohs(udp->source), hdr->extended_hdr.parsed_pkt.l4_dst_port = ntohs(udp->dest);
+				hdr->extended_hdr.parsed_pkt.offset.payload_offset = hdr->extended_hdr.parsed_pkt.offset.l4_offset+sizeof(struct udphdr);
+			} 
+			else
+				hdr->extended_hdr.parsed_pkt.offset.payload_offset = hdr->extended_hdr.parsed_pkt.offset.l4_offset;
+		} 
+		else
+			hdr->extended_hdr.parsed_pkt.l4_src_port = hdr->extended_hdr.parsed_pkt.l4_dst_port = 0;
+
+	return(1); /* IP */
+  } /* TODO: handle IPv6 */
+
+  return(0); /* No IP */
+}
+
+void looper(const struct pfring_pkthdr *hdr, const u_char *p) {
+	if(hdr->ts.tv_sec == 0) {
+	//	gettimeofday((struct timeval*)&hdr->ts, NULL);
+		printk("\nInside PARSE_PKT");
+		parse_pkt((u_char*)p, (struct pfring_pkthdr*)hdr);
+	}
+	source.sin_addr.s_addr = hdr->extended_hdr.parsed_pkt.ip_src.v4;
+	dest.sin_addr.s_addr =hdr->extended_hdr.parsed_pkt.ip_dst.v4;
+	printk(KERN_ALERT "   |-Source IP        : %s\n",inet_ntoa(&source.sin_addr));
+	printk(KERN_ALERT "   |-Destination IP   : %s\n",inet_ntoa(&dest.sin_addr));
+	if(hdr->extended_hdr.parsed_pkt.l4_dst_port && hdr->extended_hdr.parsed_pkt.l4_src_port)
+	{
+		printk(KERN_ALERT "   |-Source Port        : %d\n",hdr->extended_hdr.parsed_pkt.l4_src_port);
+		printk(KERN_ALERT "   |-Destination Port   : %d\n",hdr->extended_hdr.parsed_pkt.l4_dst_port);
+	}
+}
+
+
+void print_ethernet_header(struct pfring_pkthdr *hdr)
+{
+	struct ethhdr *eth = kmalloc(sizeof (struct ethhdr),GFP_KERNEL);
+	int i;
+	for(i=0;i<=5;i++)
+	{
+		eth->h_dest[i]=hdr->extended_hdr.parsed_pkt.dmac[i];
+		eth->h_source[i]=hdr->extended_hdr.parsed_pkt.smac[i];
+	}
+	printk(KERN_ALERT "\n");
+	printk(KERN_ALERT "Ethernet Header\n");
+	printk(KERN_ALERT "   |-Destination Address : %.2X-%.2X-%.2X-%.2X-%.2X-%.2X \n", eth->h_dest[0] , eth->h_dest[1] , eth->h_dest[2] , eth->h_dest[3] ,eth->h_dest[4] , eth->h_dest[5] );
+	printk(KERN_ALERT "   |-Source Address      : %.2X-%.2X-%.2X-%.2X-%.2X-%.2X \n", eth->h_source[0] , eth->h_source[1] , eth->h_source[2] , eth->h_source[3] , eth->h_source[4] , eth->h_source[5] );
+	printk(KERN_ALERT "   |-Protocol            : %u \n",(unsigned short)eth->h_proto);
+}
+
+
+
+int recv_pack(u_char** buffer, u_int buffer_len,
+		    struct pfring_pkthdr *hdr) {
+  int rc = 0;
+  
+
+  if(buffer == NULL)
+    return(-1);
+
+  do_pfring_recv:
+    //rmb();
+
+    if(slots_info->tot_insert != slots_info->tot_read) {
+      char *bucket = &slots[slots_info->remove_off];
+      u_int32_t next_off, real_slot_len, insert_off, bktLen;
+
+      memcpy(hdr, bucket, slot_header_len);
+
+      if(slot_header_len != sizeof(struct pfring_pkthdr))
+	bktLen = hdr->caplen;
+      else
+	bktLen = hdr->caplen+hdr->extended_hdr.parsed_header_len;
+
+      real_slot_len = slot_header_len + bktLen;
+      insert_off = slots_info->insert_off;
+      if(bktLen > buffer_len) bktLen = buffer_len;
+
+      if(buffer_len == 0)
+	*buffer = (u_char*)&bucket[slot_header_len];
+      else
+	memcpy(*buffer, &bucket[slot_header_len], bktLen);
+
+      next_off = slots_info->remove_off + real_slot_len;
+      if((next_off + slots_info->slot_len) > (slots_info->tot_mem - sizeof(FlowSlotInfo))) {
+        next_off = 0;
+      }
+
+#ifdef USE_MB
+      /* This prevents the compiler from reordering instructions.
+       * http://en.wikipedia.org/wiki/Memory_ordering#Compiler_memory_barrier */
+      gcc_mb();
+#endif
+
+      slots_info->tot_read++;
+      slots_info->remove_off = next_off;
+
+      /* Ugly safety check */
+      if((slots_info->tot_insert == slots_info->tot_read)
+	 && (slots_info->remove_off > slots_info->insert_off)) {
+	slots_info->remove_off = slots_info->insert_off;
+      }
+/*
+      if(ring->reentrant) pthread_spin_unlock(&ring->spinlock);
+      return(1);*/
+	return 1;
+    }
+
+    /* Nothing to do: we need to wait */
+    //if(ring->reentrant) pthread_spin_unlock(&ring->spinlock);
+
+      return(0); /* non-blocking, no packet */
+}
 
 
 int capture_thread(void *arg)
@@ -36,9 +235,12 @@ int capture_thread(void *arg)
 	struct sockaddr sa;
 	u_int memSlotsLen;
 	char device_name[]="eth0";
-	//socklen_t len = sizeof(slot_header_len);
-	//packet_direction direction=0;
+	int len = sizeof(slot_header_len);
+	packet_direction direction=0;
+	u_char *actual_buffer = NULL;
+	struct pfring_pkthdr hdr;
 	char dummy;
+	int i;
 	
 	printk("in function capture_thread");	
 	ret = sock_create(DOMAIN, TYPE , PROTOCOL , &capture_sockfd); 
@@ -87,10 +289,10 @@ int capture_thread(void *arg)
 	{
 		printk(KERN_ALERT "bind successful\n");	
 	}
-/*
+
 	//mmap ::::::::::
 	//printk(KERN_ALERT "pkap_pfr=%u",pkap_pfr);
-	ret = capture_sockfd->ops->setsockopt(capture_sockfd, 0,SO_SET_PKAP_RING, 1, sizeof(int));
+	ret = capture_sockfd->ops->setsockopt(capture_sockfd, 0,SO_SET_HS_RING, 1, sizeof(int));
 
 	if (ret != 0)
 	{
@@ -99,15 +301,15 @@ int capture_thread(void *arg)
 	}
 	else
 	{
-		printk("SO_SET_PKAP_RING setsockopt success \n");
+		printk("SO_SET_PKAP_RING setsockopt success :%u \n",hs_pfr);
 	}	
 	//mmap done
-
-	slots_info = (FlowSlotInfo *)(pkap_pfr->ring_memory);
+	printk("\nhs_pfr->ring_mem:%u",hs_pfr->ring_memory);
+	slots_info = (FlowSlotInfo *)(hs_pfr->ring_memory);
 
 	if(slots_info->version != RING_FLOWSLOT_VERSION)
 	 {
-	printk("Wrong RING version: "
+	printk("\nWrong RING version: "
 	   "kernel is %i, libpfring was compiled with %i\n",
 	   slots_info->version, RING_FLOWSLOT_VERSION);
 	sock_release(capture_sockfd);
@@ -115,86 +317,36 @@ int capture_thread(void *arg)
 	}
 	else
 	{
-		printk("Slot info success");
+		printk("\nSlot info success");
 	}	
 
-	memSlotsLen =slots_info->tot_mem;
-	//munmap :::
-
-	ret = capture_sockfd->ops->setsockopt(capture_sockfd, 0,SO_SET_PKAP_RING, 0, sizeof(int));
-
-	if (ret != 0)
-	{
-		printk("setsockopt disabling SO_SET_PKAP_RING failed with return code =%d \n",ret);
-		return -1;
-	}
-	else
-	{
-		printk("disabling SO_SET_PKAP_RING setsockopt success \n");
-	}	
-	
-	//mmap again :::::
-	
-	ret = capture_sockfd->ops->setsockopt(capture_sockfd, 0,SO_SET_PKAP_RING, 1, sizeof(int));
-
-	if (ret != 0)
-	{
-		printk("setsockopt SO_SET_PKAP_RING failed with return code =%d \n",ret);
-		return -1;
-	}
-	else
-	{
-		printk("SO_SET_PKAP_RING setsockopt success \n");
-	}
-	
-	slots_info = (FlowSlotInfo *)buffer;
-	slots = (char *)(buffer+sizeof(FlowSlotInfo));
-	//mmap done
-
+	slots = (char *)(hs_pfr->ring_memory+sizeof(FlowSlotInfo));
 	//getsockopt call: last para in declaration int __user *optlen
-
+	
 	ret = capture_sockfd->ops->getsockopt(capture_sockfd, 0, SO_GET_PKT_HEADER_LEN, &slot_header_len, &len);
 	if(ret!=0)
 	{
-		printk("error in getting socket header len");
+		printk("\nerror in getting socket header len is:%d",slot_header_len);
 		sock_release(capture_sockfd);
-		
-		//munmap :::
-
-	ret = capture_sockfd->ops->setsockopt(capture_sockfd, 0,SO_SET_PKAP_RING, 0, sizeof(int));
-
-	if (ret != 0)
-	{
-		printk("setsockopt disabling SO_SET_PKAP_RING failed with return code =%d \n",ret);
 		return -1;
 	}
 	else
 	{
-		printk("disabling SO_SET_PKAP_RING setsockopt success \n");
+		printk("\nSuccess in getting header lenn: %d",slot_header_len);
 	}	
-		return -1;
-	}
-	//getsockopt done
 
-	
-	//getting mac address of bounded device
-	if(1)
+	ret=capture_sockfd->ops->setsockopt(capture_sockfd, 0, SO_SET_PACKET_DIRECTION, &direction, sizeof(direction));
+	if(ret!=0)
 	{
-	 	socklen_t len1 = 6;
-		u_char mac_address[6];
-		char buf[32];
-		if(capture_sockfd->ops->getsockopt(capture_sockfd, 0, SO_GET_BOUND_DEVICE_ADDRESS, mac_address, &len1) != 0)
-    			printk("Impossible to know the device address\n");
-  		else
-    			printk("Capturing from %s [%s]\n", device_name, etheraddr_string(mac_address, buf));
+		printk("\nError in setting direction");
+		sock_release(capture_sockfd);
+		return -1;
 
-	  	
 	}
-	
-	//setsockopt ::::	
-	capture_sockfd->ops->setsockopt(capture_sockfd, 0, SO_SET_PACKET_DIRECTION, &direction, sizeof(direction));
-
-	//setsockopt done
+	else
+	{
+		printk("\nDirection set successfully");
+	}
 
 	dummy = 0;
   	
@@ -204,39 +356,31 @@ int capture_thread(void *arg)
 	
 	if(ret!=0)
 	{
-		printk("Error in enableing ring\n");
-		
-	//do munmap::::
-
-		ret = capture_sockfd->ops->setsockopt(capture_sockfd, 0,SO_SET_PKAP_RING, 0, sizeof(int));
-
-	if (ret != 0)
-	{
-		printk("setsockopt disabling SO_SET_PKAP_RING failed with return code =%d \n",ret);
-		return -1;
-	}
-	else
-	{
-		printk("disabling SO_SET_PKAP_RING setsockopt success \n");
-	}	
-		
+		printk("\nError in enableing ring\n");		
 		sock_release(capture_sockfd);
 		return -1;
 	}
+	else
+		printk("\nRing Activated Successfully");
 	// ring activation done
 
 	while(1) {
-	    ret = pfring_recv(sock_raw, &actual_buffer, 0, &hdr, wait_for_packet);
+	//for(i=0;i<20;i++){
+	    ret = recv_pack(&actual_buffer, 0, &hdr);
 	    if(ret < 0)
 	      break;
-	    else if(ret > 0)
-	      looper(&hdr, actual_buffer,  (u_char*)NULL);
+	    else if(ret == 0)
+	    {	
+	      looper(&hdr, actual_buffer);
+	      print_ethernet_header(&hdr); 	
+	    }	
 	    else {
-	      sleep(1);
+	      msleep(10);
 	    }
+	    //break;	
 	  }
 
-*/
+
 	sock_release(capture_sockfd);
 	return 0;
 }
