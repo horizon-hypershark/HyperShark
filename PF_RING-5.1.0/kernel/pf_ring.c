@@ -134,13 +134,13 @@
 /* ************************************************* */
 
 //hypershark mmap change
-
+/*
 #ifdef HS_ENABLED
 struct pf_ring_socket *hs_pfr;
 EXPORT_SYMBOL(hs_pfr);
 #endif
 
-
+*/
 
 
 const static ip_addr ip_zero = { IN6ADDR_ANY_INIT };
@@ -4930,29 +4930,31 @@ static int ring_setsockopt(struct socket *sock,
 /*HyperShark CHANGE*/
      #ifdef HS_ENABLED
 	case SO_SET_HS_RING:
-	if (hs_pfr && (hs_pfr->hs_ring == 0)) {
+	/*if (hs_pfr && (hs_pfr->hs_ring == 0)) {
 	printk("ERROR: Can only be one HS Ring!\n");
 	return -EINVAL;
 	} else if (hs_pfr && (hs_pfr->hs_ring == 1)) {
 	printk("WARNING: This ring is already a HS Ring...\n");
 	ret = 0;
-	} else {
+	} else {*/
 	//allocating memory to ring
 	if(ring_alloc_mem(sock->sk) != 0) {
 		printk("[PF_RING] ring_mmap(): unable to allocate memory\n");
 		return(-EINVAL);
 	}
 
-	hs_pfr = pfr;
+	//hs_pfr = pfr;
+	*((unsigned int*)optval)=pfr;
+	//printk("\n*optval is::%u",*((unsigned int*)optval));
 	/* This exports the current pfr to kernel
 	space so a PKAP-enable kernel thread can
 	read from this ring through an extern
 	declared hs_pfr variable */
-	hs_pfr->hs_ring = 1;
+	//hs_pfr->hs_ring = 1;
 	printk("Converted PF_RING to HS_RING\n");
 	
 	ret = 0;
-	}
+	//}
 	break;
 	#endif /* HS_ENABLED */
 /*Hypershark CHANGE ENDS*/

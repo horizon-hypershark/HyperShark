@@ -17,6 +17,10 @@
 #include<linux/delay.h>
 #include<linux/time.h>
 #include"pf_kernel.h"
+#include <linux/ioport.h>
+#include <linux/wait.h>
+#include <linux/kthread.h>
+#include <asm/io.h>
 
 #define DOMAIN PF_RING
 #define TYPE SOCK_RAW
@@ -24,26 +28,14 @@
 
 
 //extern and global declarations
-
-FlowSlotInfo *slots_info;
-extern struct pf_ring_socket *hs_pfr;
-struct socket *capture_sockfd;
-char *slots;
-struct sockaddr_in source,dest;
+struct task_struct *ts,*ts2;
 u_int16_t slot_header_len;
+//extern struct pf_ring_socket *hs_pfr;
 
-
-char *inet_ntoa(struct in_addr *in)
+char *inet_ntoa(struct in_addr *in,char *str_ip)
 {
-	char* str_ip = NULL;
-	u_int32_t int_ip = 0;
-	
-	str_ip = kmalloc(16 * sizeof(char), GFP_KERNEL);
-	if (!str_ip)
-		return NULL;
-	else
-		memset(str_ip, 0, 16);
 
+	u_int32_t int_ip = 0;
 	int_ip = in->s_addr;
 	
 	sprintf(str_ip, "%d.%d.%d.%d",  (int_ip) & 0xFF,
@@ -130,7 +122,14 @@ int parse_pkt(u_char *pkt, struct pfring_pkthdr *hdr)
   return(0); /* No IP */
 }
 
-void looper(const struct pfring_pkthdr *hdr, const u_char *p) {
+int looper(const struct pfring_pkthdr *hdr, const u_char *p) {
+	struct sockaddr_in source,dest;
+	char *str_ip = NULL;
+	str_ip = kmalloc(16 * sizeof(char), GFP_KERNEL);
+	if (!str_ip)
+		return 0;
+	else
+		memset(str_ip, 0, 16);
 	if(hdr->ts.tv_sec == 0) {
 	//	gettimeofday((struct timeval*)&hdr->ts, NULL);
 		printk("\nInside PARSE_PKT");
@@ -138,13 +137,15 @@ void looper(const struct pfring_pkthdr *hdr, const u_char *p) {
 	}
 	source.sin_addr.s_addr = hdr->extended_hdr.parsed_pkt.ip_src.v4;
 	dest.sin_addr.s_addr =hdr->extended_hdr.parsed_pkt.ip_dst.v4;
-	printk(KERN_ALERT "   |-Source IP        : %s\n",inet_ntoa(&source.sin_addr));
-	printk(KERN_ALERT "   |-Destination IP   : %s\n",inet_ntoa(&dest.sin_addr));
+	printk(KERN_ALERT "   |-Source IP        : %s\n",inet_ntoa(&source.sin_addr,str_ip));
+	printk(KERN_ALERT "   |-Destination IP   : %s\n",inet_ntoa(&dest.sin_addr,str_ip));
 	if(hdr->extended_hdr.parsed_pkt.l4_dst_port && hdr->extended_hdr.parsed_pkt.l4_src_port)
 	{
 		printk(KERN_ALERT "   |-Source Port        : %d\n",hdr->extended_hdr.parsed_pkt.l4_src_port);
 		printk(KERN_ALERT "   |-Destination Port   : %d\n",hdr->extended_hdr.parsed_pkt.l4_dst_port);
 	}
+	kfree(str_ip);
+	return 1;
 }
 
 
@@ -162,25 +163,24 @@ void print_ethernet_header(struct pfring_pkthdr *hdr)
 	printk(KERN_ALERT "   |-Destination Address : %.2X-%.2X-%.2X-%.2X-%.2X-%.2X \n", eth->h_dest[0] , eth->h_dest[1] , eth->h_dest[2] , eth->h_dest[3] ,eth->h_dest[4] , eth->h_dest[5] );
 	printk(KERN_ALERT "   |-Source Address      : %.2X-%.2X-%.2X-%.2X-%.2X-%.2X \n", eth->h_source[0] , eth->h_source[1] , eth->h_source[2] , eth->h_source[3] , eth->h_source[4] , eth->h_source[5] );
 	printk(KERN_ALERT "   |-Protocol            : %u \n",(unsigned short)eth->h_proto);
+	kfree(eth);
 }
 
 
 
 int recv_pack(u_char** buffer, u_int buffer_len,
-		    struct pfring_pkthdr *hdr) {
-  int rc = 0;
+		    struct pfring_pkthdr *hdr,char *slots,FlowSlotInfo *slots_info) {
   
 
   if(buffer == NULL)
     return(-1);
 
-  do_pfring_recv:
-    //rmb();
-
     if(slots_info->tot_insert != slots_info->tot_read) {
       char *bucket = &slots[slots_info->remove_off];
       u_int32_t next_off, real_slot_len, insert_off, bktLen;
-
+      /*static int count=0;
+      printk("\npkt count is:%u",count);
+      count++;*/	
       memcpy(hdr, bucket, slot_header_len);
 
       if(slot_header_len != sizeof(struct pfring_pkthdr))
@@ -229,21 +229,25 @@ int recv_pack(u_char** buffer, u_int buffer_len,
 }
 
 
-int capture_thread(void *arg)
+int capture_thread(void *device_name)
 {
 	int ret,caplen=128;
 	struct sockaddr sa;
-	u_int memSlotsLen;
-	char device_name[]="eth0";
-	int len = sizeof(slot_header_len);
 	packet_direction direction=0;
 	u_char *actual_buffer = NULL;
 	struct pfring_pkthdr hdr;
 	char dummy;
-	int i;
-	
+	u_int32_t pfr_var;
+	struct pf_ring_socket *pfr;
+	struct socket *capture_sockfd;
+	char *slots;
+	FlowSlotInfo *slots_info;
+	int len = sizeof(slot_header_len);
+
 	printk("in function capture_thread");	
-	ret = sock_create(DOMAIN, TYPE , PROTOCOL , &capture_sockfd); 
+	ret = sock_create(DOMAIN, TYPE , PROTOCOL , &capture_sockfd);
+	//ret = sock_create(DOMAIN, TYPE , PROTOCOL , &fd2);
+	//printk("\ncapture_sockfd::%u  fd2::%u",capture_sockfd,fd2); 
 	if (ret <0)
 	{
 		printk("socket creation failed\n");
@@ -261,6 +265,7 @@ int capture_thread(void *arg)
 		//ret = sock_setsockopt(capture_sockfd, SOL_SOCKET, SO_RING_BUCKET_LEN, (void *)&caplen, sizeof(caplen));
 	//else
 		ret = capture_sockfd->ops->setsockopt(capture_sockfd, 0, SO_RING_BUCKET_LEN,&caplen, sizeof(caplen));
+		//ret = capture_sockfd->ops->setsockopt(fd2, 0, SO_RING_BUCKET_LEN,&caplen, sizeof(caplen));
 
 	//t = capture_sockfd->ops->setsockopt(capture_sockfd, 0, SO_RING_BUCKET_LEN, &caplen, sizeof(caplen));	
 	if (ret != 0)
@@ -277,10 +282,10 @@ int capture_thread(void *arg)
 
 	memset(&sa, 0, sizeof(sa));
 	sa.sa_family = PF_RING;
-  	snprintf(sa.sa_data, sizeof(sa.sa_data), "%s", "wlan0");
+  	snprintf(sa.sa_data, sizeof(sa.sa_data), "%s", ((char*)device_name));
 
   	ret = capture_sockfd->ops->bind(capture_sockfd, (struct sockaddr *)&sa, sizeof(sa));
-  	if(ret != 0) {
+	if(ret != 0) {
 		printk(KERN_ALERT "failed to bind....\n");
 		sock_release(capture_sockfd);
 		return -1;
@@ -292,8 +297,8 @@ int capture_thread(void *arg)
 
 	//mmap ::::::::::
 	//printk(KERN_ALERT "pkap_pfr=%u",pkap_pfr);
-	ret = capture_sockfd->ops->setsockopt(capture_sockfd, 0,SO_SET_HS_RING, 1, sizeof(int));
-
+	ret = capture_sockfd->ops->setsockopt(capture_sockfd, 0,SO_SET_HS_RING,&pfr_var, sizeof(int));
+	pfr=(struct pf_ring_socket *)pfr_var;
 	if (ret != 0)
 	{
 		printk("setsockopt SO_SET_PKAP_RING failed with return code =%d \n",ret);
@@ -301,11 +306,12 @@ int capture_thread(void *arg)
 	}
 	else
 	{
-		printk("SO_SET_PKAP_RING setsockopt success :%u \n",hs_pfr);
+		printk("SO_SET_PKAP_RING setsockopt success ");
 	}	
 	//mmap done
-	printk("\nhs_pfr->ring_mem:%u",hs_pfr->ring_memory);
-	slots_info = (FlowSlotInfo *)(hs_pfr->ring_memory);
+	//printk("\nhs_pfr is:: %u, pfr is ::%u",hs_pfr,pfr);
+	//printk("\nhs_pfr->ring_mem:%u",hs_pfr->ring_memory);
+	slots_info = (FlowSlotInfo *)(pfr->ring_memory);
 
 	if(slots_info->version != RING_FLOWSLOT_VERSION)
 	 {
@@ -320,7 +326,7 @@ int capture_thread(void *arg)
 		printk("\nSlot info success");
 	}	
 
-	slots = (char *)(hs_pfr->ring_memory+sizeof(FlowSlotInfo));
+	slots = (char *)(pfr->ring_memory+sizeof(FlowSlotInfo));
 	//getsockopt call: last para in declaration int __user *optlen
 	
 	ret = capture_sockfd->ops->getsockopt(capture_sockfd, 0, SO_GET_PKT_HEADER_LEN, &slot_header_len, &len);
@@ -365,8 +371,10 @@ int capture_thread(void *arg)
 	// ring activation done
 
 	while(1) {
-	//for(i=0;i<20;i++){
-	    ret = recv_pack(&actual_buffer, 0, &hdr);
+	//for(i=0;i<3000;i++){
+	    if (kthread_should_stop())
+	        break;
+	    ret = recv_pack(&actual_buffer, 0, &hdr,slots,slots_info);
 	    if(ret < 0)
 	      break;
 	    else if(ret == 0)
@@ -377,20 +385,27 @@ int capture_thread(void *arg)
 	    else {
 	      msleep(10);
 	    }
+       	    //msleep(10);
 	    //break;	
 	  }
-
+	
 
 	sock_release(capture_sockfd);
+	//sock_release(fd2);
 	return 0;
 }
 
 
-
+char *device_name;
 static int ker_pf_ring_init(void)
-{
+{	device_name=kmalloc(10*sizeof(char),GFP_KERNEL);
+	strcpy(device_name,"wlan0");
 	printk(KERN_ALERT "Initializing PF_RING kernel module");
-	kernel_thread(capture_thread, NULL, 0);
+	//kernel_thread(capture_thread, NULL, 0);
+	ts=kthread_run(capture_thread,(void *)device_name,"kthread");
+	msleep(10);
+	strcpy(device_name,"eth0");
+	ts2=kthread_run(capture_thread,(void *)device_name,"kthread");
 	return 0;
 }
 
@@ -398,7 +413,10 @@ static int ker_pf_ring_init(void)
 
 static void ker_pf_ring_exit(void)
 {
+	kfree((char*)device_name);
 	printk(KERN_ALERT "Exiting PF_RING kernel module");
+	kthread_stop(ts);
+	kthread_stop(ts2);
 }
 
 
