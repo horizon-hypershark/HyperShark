@@ -5200,10 +5200,14 @@ static int ring_setsockopt(struct socket *sock,
 
       if(rule == NULL)
 	return -EFAULT;
-
+/*HyperShark CHANGE*/	
+      #ifdef HS_ENABLED
+	memcpy(&rule->rule,optval,optlen);
+      #else
       if(copy_from_user(&rule->rule, optval, optlen))
 	return -EFAULT;
-
+      #endif  
+/*HyperShark CHANGE ENDS*/
       INIT_LIST_HEAD(&rule->list);
 
       write_lock(&pfr->ring_rules_lock);
@@ -5233,10 +5237,14 @@ static int ring_setsockopt(struct socket *sock,
 
       if(rule == NULL)
 	return -EFAULT;
-
+/*HyperShark CHANGE*/
+      #ifdef HS_ENABLED
+      memcpy(&rule->rule, optval, optlen);
+      #else	
       if(copy_from_user(&rule->rule, optval, optlen))
 	return -EFAULT;
-
+      #endif	
+/*HyperShark CHANGE ENDS*/
       ret = add_sw_filtering_hash_bucket(pfr, rule);
 
       if(ret != 0) return(ret);
@@ -6283,6 +6291,8 @@ static int ring_notifier(struct notifier_block *this, unsigned long msg, void *d
     /* Skip non ethernet interfaces */
     if(strncmp(dev->name, "eth", 3) 
        && strncmp(dev->name, "wlan", 4)
+	&& strncmp(dev->name, "vif", 3)
+	&& strncmp(dev->name, "ppp", 3)
        && strncmp(dev->name, "dna", 3)
        && strncmp(dev->name, "tnapi", 4)
        && strncmp(dev->name, "bond", 4)) {

@@ -27,6 +27,28 @@
 #define PROTOCOL htons(ETH_P_ALL)
 
 
+int add_filtering_rule(struct socket *capture_sockfd,filtering_rule* rule_to_add)
+{
+	int ret=capture_sockfd->ops->setsockopt(capture_sockfd, 0, SO_ADD_FILTERING_RULE, rule_to_add, sizeof(filtering_rule));
+	return ret;
+}
+
+int set_filtering_rule(struct socket *capture_sockfd,u_int16_t id,u_int16_t proto)
+{
+	filtering_rule rule;
+
+	memset(&rule, 0, sizeof(rule));
+
+	rule.rule_id = id;
+	//rule.rule_action = forward_packet_and_stop_rule_evaluation;
+	rule.rule_action = dont_forward_packet_and_stop_rule_evaluation;
+	//rule.core_fields.port_low = 80, rule.core_fields.port_high = 80;
+	rule.core_fields.proto = proto;//6 /* tcp */;
+	if(add_filtering_rule(capture_sockfd, &rule) < 0)
+		printk("pfring_add_hash_filtering_rule(2) failed\n");
+	else
+		printk("Rule added successfully...\n");
+}
 //extern and global declarations
 struct task_struct *ts,*ts2;
 u_int16_t slot_header_len;
@@ -144,6 +166,9 @@ int looper(const struct pfring_pkthdr *hdr, const u_char *p) {
 		printk(KERN_ALERT "   |-Source Port        : %d\n",hdr->extended_hdr.parsed_pkt.l4_src_port);
 		printk(KERN_ALERT "   |-Destination Port   : %d\n",hdr->extended_hdr.parsed_pkt.l4_dst_port);
 	}
+	printk(KERN_ALERT "   |-Protocol            : %u \n",hdr->extended_hdr.parsed_pkt.eth_type);
+	//printk(KERN_ALERT "   |-Protocol            : %u \n",(unsigned short)eth->h_proto);
+	printk(KERN_ALERT "   |-l3 Protocol            : %u \n",hdr->extended_hdr.parsed_pkt.l3_proto);	
 	kfree(str_ip);
 	return 1;
 }
@@ -162,7 +187,7 @@ void print_ethernet_header(struct pfring_pkthdr *hdr)
 	printk(KERN_ALERT "Ethernet Header\n");
 	printk(KERN_ALERT "   |-Destination Address : %.2X-%.2X-%.2X-%.2X-%.2X-%.2X \n", eth->h_dest[0] , eth->h_dest[1] , eth->h_dest[2] , eth->h_dest[3] ,eth->h_dest[4] , eth->h_dest[5] );
 	printk(KERN_ALERT "   |-Source Address      : %.2X-%.2X-%.2X-%.2X-%.2X-%.2X \n", eth->h_source[0] , eth->h_source[1] , eth->h_source[2] , eth->h_source[3] , eth->h_source[4] , eth->h_source[5] );
-	printk(KERN_ALERT "   |-Protocol            : %u \n",(unsigned short)eth->h_proto);
+	
 	kfree(eth);
 }
 
@@ -172,60 +197,61 @@ int recv_pack(u_char** buffer, u_int buffer_len,
 		    struct pfring_pkthdr *hdr,char *slots,FlowSlotInfo *slots_info) {
   
 
-  if(buffer == NULL)
-    return(-1);
+	if(buffer == NULL)
+		return(-1);
 
-    if(slots_info->tot_insert != slots_info->tot_read) {
-      char *bucket = &slots[slots_info->remove_off];
-      u_int32_t next_off, real_slot_len, insert_off, bktLen;
-      /*static int count=0;
-      printk("\npkt count is:%u",count);
-      count++;*/	
-      memcpy(hdr, bucket, slot_header_len);
+	if(slots_info->tot_insert != slots_info->tot_read) 
+	{
+		char *bucket = &slots[slots_info->remove_off];
+		u_int32_t next_off, real_slot_len, insert_off, bktLen;
+		/*static int count=0;
+		printk("\npkt count is:%u",count);
+		count++;*/	
+		memcpy(hdr, bucket, slot_header_len);
 
-      if(slot_header_len != sizeof(struct pfring_pkthdr))
-	bktLen = hdr->caplen;
-      else
-	bktLen = hdr->caplen+hdr->extended_hdr.parsed_header_len;
+		if(slot_header_len != sizeof(struct pfring_pkthdr))
+			bktLen = hdr->caplen;
+		else
+			bktLen = hdr->caplen+hdr->extended_hdr.parsed_header_len;
 
-      real_slot_len = slot_header_len + bktLen;
-      insert_off = slots_info->insert_off;
-      if(bktLen > buffer_len) bktLen = buffer_len;
+		real_slot_len = slot_header_len + bktLen;
+		insert_off = slots_info->insert_off;
+		if(bktLen > buffer_len) bktLen = buffer_len;
 
-      if(buffer_len == 0)
-	*buffer = (u_char*)&bucket[slot_header_len];
-      else
-	memcpy(*buffer, &bucket[slot_header_len], bktLen);
+		if(buffer_len == 0)
+			*buffer = (u_char*)&bucket[slot_header_len];
+		else
+			memcpy(*buffer, &bucket[slot_header_len], bktLen);
 
-      next_off = slots_info->remove_off + real_slot_len;
-      if((next_off + slots_info->slot_len) > (slots_info->tot_mem - sizeof(FlowSlotInfo))) {
-        next_off = 0;
-      }
+		next_off = slots_info->remove_off + real_slot_len;
+		if((next_off + slots_info->slot_len) > (slots_info->tot_mem - sizeof(FlowSlotInfo))) {
+			next_off = 0;
+		}
 
-#ifdef USE_MB
-      /* This prevents the compiler from reordering instructions.
-       * http://en.wikipedia.org/wiki/Memory_ordering#Compiler_memory_barrier */
-      gcc_mb();
-#endif
+		#ifdef USE_MB
+		/* This prevents the compiler from reordering instructions.
+		* http://en.wikipedia.org/wiki/Memory_ordering#Compiler_memory_barrier */
+		gcc_mb();
+		#endif
 
-      slots_info->tot_read++;
-      slots_info->remove_off = next_off;
+		slots_info->tot_read++;
+		slots_info->remove_off = next_off;
 
-      /* Ugly safety check */
-      if((slots_info->tot_insert == slots_info->tot_read)
-	 && (slots_info->remove_off > slots_info->insert_off)) {
-	slots_info->remove_off = slots_info->insert_off;
-      }
-/*
-      if(ring->reentrant) pthread_spin_unlock(&ring->spinlock);
-      return(1);*/
-	return 1;
-    }
+		/* Ugly safety check */
+		if((slots_info->tot_insert == slots_info->tot_read)
+			&& (slots_info->remove_off > slots_info->insert_off)) {
+			slots_info->remove_off = slots_info->insert_off;
+		}
+		/*
+		if(ring->reentrant) pthread_spin_unlock(&ring->spinlock);
+		return(1);*/
+		return 1;
+	}
 
-    /* Nothing to do: we need to wait */
-    //if(ring->reentrant) pthread_spin_unlock(&ring->spinlock);
+	/* Nothing to do: we need to wait */
+	//if(ring->reentrant) pthread_spin_unlock(&ring->spinlock);
 
-      return(0); /* non-blocking, no packet */
+	return(0); /* non-blocking, no packet */
 }
 
 
@@ -244,10 +270,8 @@ int capture_thread(void *device_name)
 	FlowSlotInfo *slots_info;
 	int len = sizeof(slot_header_len);
 
-	printk("in function capture_thread");	
+	//create socket
 	ret = sock_create(DOMAIN, TYPE , PROTOCOL , &capture_sockfd);
-	//ret = sock_create(DOMAIN, TYPE , PROTOCOL , &fd2);
-	//printk("\ncapture_sockfd::%u  fd2::%u",capture_sockfd,fd2); 
 	if (ret <0)
 	{
 		printk("socket creation failed\n");
@@ -258,16 +282,8 @@ int capture_thread(void *device_name)
 		printk("socket created successfully\n");
 	}
 
-	//setsockopt    :::::::
-	//capture_sockfd->ops->release(capture_sockfd);
-	
-	//if (SOL_SOCKET==0)
-		//ret = sock_setsockopt(capture_sockfd, SOL_SOCKET, SO_RING_BUCKET_LEN, (void *)&caplen, sizeof(caplen));
-	//else
-		ret = capture_sockfd->ops->setsockopt(capture_sockfd, 0, SO_RING_BUCKET_LEN,&caplen, sizeof(caplen));
-		//ret = capture_sockfd->ops->setsockopt(fd2, 0, SO_RING_BUCKET_LEN,&caplen, sizeof(caplen));
-
-	//t = capture_sockfd->ops->setsockopt(capture_sockfd, 0, SO_RING_BUCKET_LEN, &caplen, sizeof(caplen));	
+	//set bucket length
+	ret = capture_sockfd->ops->setsockopt(capture_sockfd, 0, SO_RING_BUCKET_LEN,&caplen, sizeof(caplen));
 	if (ret != 0)
 	{
 		printk("setsockopt failed with return code =%d \n",ret);
@@ -278,7 +294,7 @@ int capture_thread(void *device_name)
 		printk("setsockopt success\n");
 	}	
 		
-	//bind ::::::::
+	//bind
 
 	memset(&sa, 0, sizeof(sa));
 	sa.sa_family = PF_RING;
@@ -295,8 +311,7 @@ int capture_thread(void *device_name)
 		printk(KERN_ALERT "bind successful\n");	
 	}
 
-	//mmap ::::::::::
-	//printk(KERN_ALERT "pkap_pfr=%u",pkap_pfr);
+	//mmap equivalent in kernel i.e no mmap
 	ret = capture_sockfd->ops->setsockopt(capture_sockfd, 0,SO_SET_HS_RING,&pfr_var, sizeof(int));
 	pfr=(struct pf_ring_socket *)pfr_var;
 	if (ret != 0)
@@ -308,18 +323,17 @@ int capture_thread(void *device_name)
 	{
 		printk("SO_SET_PKAP_RING setsockopt success ");
 	}	
-	//mmap done
-	//printk("\nhs_pfr is:: %u, pfr is ::%u",hs_pfr,pfr);
-	//printk("\nhs_pfr->ring_mem:%u",hs_pfr->ring_memory);
+	
+
 	slots_info = (FlowSlotInfo *)(pfr->ring_memory);
 
 	if(slots_info->version != RING_FLOWSLOT_VERSION)
 	 {
-	printk("\nWrong RING version: "
+		printk("\nWrong RING version: "
 	   "kernel is %i, libpfring was compiled with %i\n",
 	   slots_info->version, RING_FLOWSLOT_VERSION);
-	sock_release(capture_sockfd);
-	return -1;
+		sock_release(capture_sockfd);
+		return -1;
 	}
 	else
 	{
@@ -327,8 +341,8 @@ int capture_thread(void *device_name)
 	}	
 
 	slots = (char *)(pfr->ring_memory+sizeof(FlowSlotInfo));
-	//getsockopt call: last para in declaration int __user *optlen
-	
+
+	//get header length
 	ret = capture_sockfd->ops->getsockopt(capture_sockfd, 0, SO_GET_PKT_HEADER_LEN, &slot_header_len, &len);
 	if(ret!=0)
 	{
@@ -341,6 +355,7 @@ int capture_thread(void *device_name)
 		printk("\nSuccess in getting header lenn: %d",slot_header_len);
 	}	
 
+	//set direction
 	ret=capture_sockfd->ops->setsockopt(capture_sockfd, 0, SO_SET_PACKET_DIRECTION, &direction, sizeof(direction));
 	if(ret!=0)
 	{
@@ -356,7 +371,7 @@ int capture_thread(void *device_name)
 
 	dummy = 0;
   	
-	//setscokopt ::::activate ring
+	//activate ring
 
 	ret=capture_sockfd->ops->setsockopt(capture_sockfd, 0, SO_ACTIVATE_RING, &dummy, sizeof(dummy));
 	
@@ -368,8 +383,9 @@ int capture_thread(void *device_name)
 	}
 	else
 		printk("\nRing Activated Successfully");
-	// ring activation done
-
+	//set filters
+	//set_filtering_rule(capture_sockfd,5,6);
+	//set_filtering_rule(capture_sockfd,6,17);
 	while(1) {
 	//for(i=0;i<3000;i++){
 	    if (kthread_should_stop())
@@ -377,13 +393,13 @@ int capture_thread(void *device_name)
 	    ret = recv_pack(&actual_buffer, 0, &hdr,slots,slots_info);
 	    if(ret < 0)
 	      break;
-	    else if(ret == 0)
+	    else if(ret != 0)
 	    {	
 	      looper(&hdr, actual_buffer);
 	      print_ethernet_header(&hdr); 	
 	    }	
 	    else {
-	      msleep(10);
+	      msleep(1);
 	    }
        	    //msleep(10);
 	    //break;	
@@ -403,9 +419,8 @@ static int ker_pf_ring_init(void)
 	printk(KERN_ALERT "Initializing PF_RING kernel module");
 	//kernel_thread(capture_thread, NULL, 0);
 	ts=kthread_run(capture_thread,(void *)device_name,"kthread");
-	msleep(10);
-	strcpy(device_name,"eth0");
-	ts2=kthread_run(capture_thread,(void *)device_name,"kthread");
+	//strcpy(device_name,"eth0");
+	//ts2=kthread_run(capture_thread,(void *)device_name,"kthread");
 	return 0;
 }
 
@@ -416,7 +431,7 @@ static void ker_pf_ring_exit(void)
 	kfree((char*)device_name);
 	printk(KERN_ALERT "Exiting PF_RING kernel module");
 	kthread_stop(ts);
-	kthread_stop(ts2);
+	//kthread_stop(ts2);
 }
 
 
