@@ -83,17 +83,10 @@ struct pfring_pkthdr {
   struct pfring_extended_pkthdr extended_hdr; /* PF_RING extended header */
 };
 
-/*struct hs_pkt_hdr{
-	u_int32_t pkt_id;
-	struct pfring_pkthdr *pkf;
-	char *buffer;
-	int buffer_len;
-};*/
-
 typedef struct hs_pkt_hdr{
 	u_int32_t pkt_id;
 	struct pfring_pkthdr pkf;
-        char buffer[1500];//Has to be changed
+        unsigned char buffer[1500];//Has to be changed
 	u_int16_t buffer_len;
 }hs_pkt_hdr;
 
@@ -123,14 +116,14 @@ typedef struct vm_id
 {
   u_int32_t  v_id[4];
 }vm_id;
-//Customer Records Mapping Structure
+//Customer Records Mapping Structure	
 
 typedef struct ip_bits
 {
 	char octet_1[13];//for 100 bits
 	char octet_2[13];
 	char octet_3[13];
-	char octet_4[13];
+	char octet_4[13];		
 }ip_bits;
 
 typedef struct port_bits
@@ -138,10 +131,11 @@ typedef struct port_bits
 	char octet_1[13];
 }port_bits;
 
-typedef struct protcol_bits
-{
-	char octet_1[13];
-}protocol_bits;
+typedef port_bits protocol_bits;
+//typedef struct protcol_bits
+//{
+//	char octet_1[13];
+//}protocol_bits;
 
 typedef struct bitmap
 {
@@ -149,6 +143,15 @@ typedef struct bitmap
 	port_bits *src_port,*dst_port;//65536 instances
 	protocol_bits *protocol;//255 instances
 }bitmap;
+
+typedef struct bitmap_start_offsets
+{
+	u_int16_t src_ip_octet[4];	
+	u_int16_t dst_ip_octet[4];
+	u_int16_t src_port_octet;
+	u_int16_t dst_port_octet;
+	u_int16_t protocol_octet;		
+}bitmap_start_offsets;
 
 typedef struct maprecord{
   u_int32_t  cust_id;
