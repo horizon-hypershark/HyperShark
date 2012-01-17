@@ -3,10 +3,7 @@ package org.apache.jsp;
 import javax.servlet.*;
 import javax.servlet.http.*;
 import javax.servlet.jsp.*;
-import testpackage.testing;
-import testpackage.ReadFile;
-import testpackage.test2;
-import testpackage.test3;
+import Core.func2;
 
 public final class index_jsp extends org.apache.jasper.runtime.HttpJspBase
     implements org.apache.jasper.runtime.JspSourceDependent {
@@ -49,10 +46,6 @@ public final class index_jsp extends org.apache.jasper.runtime.HttpJspBase
       out.write("\n");
       out.write("\n");
       out.write("\n");
-      out.write("\n");
-      out.write("\n");
-      out.write("\n");
-      out.write("\n");
       out.write("<!DOCTYPE html>\n");
       out.write("<html>\n");
       out.write("    <head>\n");
@@ -60,13 +53,7 @@ public final class index_jsp extends org.apache.jasper.runtime.HttpJspBase
       out.write("        <title>JSP Page</title>\n");
       out.write("    </head>\n");
       out.write("    <body>\n");
-      out.write("        ");
- ReadFile rf=new ReadFile(); 
-        rf.loadFile();
-        //test t=new test();
-        out.println("test Data is :"+rf.pkt_id);
-        
-      out.write("\n");
+      out.write("        \n");
       out.write("        <h1>Hello World!</h1>\n");
       out.write("    </body>\n");
       out.write("</html>\n");

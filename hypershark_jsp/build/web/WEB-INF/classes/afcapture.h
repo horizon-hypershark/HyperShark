@@ -2,6 +2,8 @@
 #include<linux/in6.h>
 #include<linux/ip.h>
 #include<linux/if_ether.h>
+#include<linux/tcp.h>
+#include<linux/udp.h>
 
 struct eth_hdr {
   unsigned char   h_dest[ETH_ALEN];       /* destination eth addr */
