@@ -585,24 +585,23 @@ int write_bit_map(maprecord *path_cache)
 
 
 /***************************Function to write offset table to File********************/
-
 void write_offset_table(maprecord *path_cache)
 {
 	char *off_path=kmalloc(60,GFP_KERNEL);
 	char *off_name=kmalloc(20,GFP_KERNEL);
 	struct file *filp;
+	u_int32_t pktcount=0;
 	mm_segment_t oldfs;
 	loff_t offset=0;
 	int i;
 	strcpy(off_path,path_cache->path);
 	strcat(off_path,"Flowrecords/");
-	//sprintf(off_name,"%d_%d_off",path_cache->GFL,path_cache->GFL + (MAX_FLOW_REC-1));
 	sprintf(off_name,"offset_%d",path_cache->GFL);
 	strcat(off_path,off_name);
 	filp=file_open(off_path,O_WRONLY|O_APPEND|O_CREAT,0664);
 	//Fixing the Address Space Issue
 	if(filp!=NULL)
-	  {
+        {
 	    printk("\nNo problem in Opening offset file");
 	    oldfs=get_fs();
 	    set_fs(get_ds());
@@ -611,23 +610,24 @@ void write_offset_table(maprecord *path_cache)
 	    for(i=0;i<MAX_FLOW_REC;i++)
 	      {
 		offset_node *start=path_cache->off_table[i].start;
+		//Changes made
+		path_cache->flow_start[i].start_pkt_no=pktcount;
 	       	while(start)
-		  {
-		    filp->f_op->write(filp,&start->offset,sizeof(loff_t),&offset);//Writing Flow Records to File
-		    /*		if(i==0)
-				printk("%llu->",start->offset);
-				temp=start;*/
+	        {
+		   if(i==0)
+			printk("\nOffsets of Flow rec 0 are :%llu",start->offset);
+		    filp->f_op->write(filp,&start->offset,sizeof(loff_t),&offset);//Writing Flow Records to File//Change made &start to start in write
 		    start=start->next;
-		    //kfree(temp);
-		  }			
+		}			
+		pktcount+=path_cache->flow_start[i].nop;
 	      }
 	    set_fs(oldfs);
 	    printk("\nNo Problem in Writing");
 	  }
-	else
-	  {
+	 else
+	 {
 	    printk("Problem in opening filw for writing offsets");
-	  }
+	 }
 	file_close(filp);
 	//Clean Up and Updation Tasks	
 	kfree(off_name);
@@ -648,7 +648,6 @@ int write_flow_rec(maprecord *path_cache)
         printk(KERN_INFO "\nFlow Records Buffer Full !!!!");
 	strcpy(frpath,path_cache->path);
 	strcat(frpath,"Flowrecords/");
-	//sprintf(fname,"%d_%d",path_cache->GFL,path_cache->GFL + (MAX_FLOW_REC-1));
 	sprintf(fname,"flowrec_%d",path_cache->GFL);
 	strcat(frpath,fname);
 	printk("\nFlowFileName : %s",frpath);
@@ -661,7 +660,6 @@ int write_flow_rec(maprecord *path_cache)
 		set_fs(get_ds());
 		for(i=0;i<MAX_FLOW_REC;i++)
 		{
-			//path_cache->flow_start[i].flow_id=path_cache->GFL+i;
 			 ret=filp->f_op->write(filp,&path_cache->flow_start[i],sizeof(flow_record),&offset);//Writing Flow Records to File
 		}
 		set_fs(oldfs);
@@ -730,10 +728,11 @@ void create_flow_record(flow_record *fr,struct pfring_pkthdr *pkf,u_int32_t flow
 	fr->protocol=pkf->extended_hdr.parsed_pkt.l3_proto;
 	//fr->timestamp_ns=
 	fr->nxtfr=0;
-	fr->start_pkt_no=path_cache->GPC;
-	//Updation of Offset Field in path_cache
-	path_cache->pkt_offset+=sizeof(hs_pkt_hdr);
+	//fr->start_pkt_no=path_cache->GPC;
+	//Updation of Offset Field in path_cache	
+	printk("PKT offset when assigning is :%llu",path_cache->pkt_offset);
 	path_cache->off_table[flowhash].start=path_cache->off_table[flowhash].end=get_offset_node(path_cache->pkt_offset);
+	path_cache->pkt_offset+=(sizeof(struct pfring_pkthdr) + pkf->caplen);
 	path_cache->GPC++;		
 	make_bitmap_entry(fr,path_cache->bit_map,flowhash);
 	count++;
@@ -769,7 +768,7 @@ void update_flow_rec(maprecord *path_cache,struct pfring_pkthdr *pkthdr)
 				      path_cache->off_table[flowhash].end->next=get_offset_node(path_cache->pkt_offset);
 				      path_cache->off_table[flowhash].end=path_cache->off_table[flowhash].end->next;
 				      path_cache->GPC++;	
-				      path_cache->pkt_offset+=sizeof(hs_pkt_hdr);
+				      path_cache->pkt_offset+=(sizeof(struct pfring_pkthdr) + pkthdr->caplen);
 				      break;			  
 				  }
 				  else
@@ -794,9 +793,9 @@ void update_flow_rec(maprecord *path_cache,struct pfring_pkthdr *pkthdr)
 							  else
 							  {
 								      //flush the flow records to disk
-								      write_flow_rec(path_cache);
 								      write_offset_table(path_cache);
 								      free_offset_nodes(path_cache);
+								      write_flow_rec(path_cache);
 								      write_bit_map(path_cache);
 								      memset(path_cache->flow_start,0,(MAX_FLOW_REC*sizeof(flow_record)));
 								      path_cache->GFL+=MAX_FLOW_REC;
@@ -967,7 +966,7 @@ int capture_thread(void *arg)
 	//set_filtering_rule(capture_sockfd,5,6);
 	//set_filtering_rule(capture_sockfd,6,17);
 	while(1) {
-		//for(i=0;i<3000;i++){
+		//for(i=0;i<100;i++){
 		if (kthread_should_stop())
 			break;
 		ret = recv_pack(&actual_buffer, 0, &hdr,slots,slots_info);
@@ -975,8 +974,8 @@ int capture_thread(void *arg)
 			break;
 		else if(ret != 0)
 		{	
-			//looper(&hdr, actual_buffer);
-			//print_ethernet_header(&hdr); 
+			looper(&hdr, actual_buffer);
+			print_ethernet_header(&hdr); 
 			handle_storage_pkt(&hdr,actual_buffer,path_cache);		
 		}	
 		else {
@@ -1001,10 +1000,12 @@ int create_capture_thread(void *arg)
 	map_list=kmalloc(256*sizeof(maprecord *),GFP_KERNEL);	
 	vm_id *vmid=kmalloc(sizeof(vm_id),GFP_KERNEL);
 	vmid->v_id[0]=1234;vmid->v_id[1]=2345;vmid->v_id[2]=3456;vmid->v_id[3]=4567;
-	
 	map_list[map_count]=kmalloc(sizeof(maprecord),GFP_KERNEL); 
+
+	memset(map_list[map_count],0,sizeof(maprecord));
+	printk("Offset is at start:%llu",map_list[map_count]->pkt_offset);
 	strcpy(map_list[map_count]->path,"storage/hs1234/");
-	strcpy(map_list[map_count]->interface_name,"wlan0");
+	strcpy(map_list[map_count]->interface_name,"eth0");
 	map_list[map_count]->cust_id=1234;
 	memcpy(&map_list[map_count]->vmid,vmid,sizeof(vm_id));
 	lookupcreate();

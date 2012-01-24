@@ -17,7 +17,7 @@ __attribute__((section(".gnu.linkonce.this_module"))) = {
 static const char __module_depends[]
 __used
 __attribute__((section(".modinfo"))) =
-"depends=pf_ring";
+"depends=";
 
 
-MODULE_INFO(srcversion, "37ED3AA4C4D1CA826CD3A69");
+MODULE_INFO(srcversion, "46229E0943CD417952EFD4F");

@@ -72,17 +72,18 @@ typedef struct vm_id
 }vm_id;
 
 typedef struct maprecord{
-  u_int32_t  cust_id;
-  vm_id vmid;
-  char path[50];
-  u_int16_t  link;
-  u_int16_t GFL;//global flow location
-  u_int32_t GPC;//global packet count	
-  loff_t pkt_offset;
-  char interface_name[15];
-  offset_table *off_table;
-  flow_record *flow_start;
-  bitmap *bit_map;
+	u_int32_t  cust_id;
+	vm_id vmid;
+	char path[50];
+	u_int16_t  link;
+	u_int16_t GFL;//global flow location
+	u_int32_t GPC;//global packet count	
+	loff_t pkt_offset;
+	char interface_name[15];
+	offset_table *off_table;
+	flow_record *flow_start;
+	bitmap *bit_map;
+	struct task_struct *ts;
 }maprecord;
 
 void lookupcreate(void);
