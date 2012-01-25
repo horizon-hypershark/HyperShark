@@ -89,6 +89,7 @@ typedef struct maprecord{
 void lookupcreate(void);
 int crc32(u_int32_t reg,u_int32_t flowkey);
 int calc_hash(struct pfring_pkthdr *pfr);
+u_int32_t map_hash(u_int32_t cust_id,vm_id *vmid);
 
 #define TH_FIN_MULTIPLIER	0x01
 #define TH_SYN_MULTIPLIER	0x02

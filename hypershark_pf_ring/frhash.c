@@ -1,5 +1,3 @@
-#include<linux/kernel.h>
-#include<linux/module.h>
 #include<linux/string.h>
 #include<linux/socket.h>
 #include<linux/net.h>
@@ -8,12 +6,8 @@
 #include<asm/processor.h>
 #include<asm/uaccess.h>
 #include<linux/fs.h>
-#include<linux/ip.h>
-#include<linux/tcp.h>
-#include<linux/udp.h>
-#include<linux/icmp.h>
-#include<linux/vmalloc.h>
 #include<linux/pf_ring.h>
+#include"pf_kernel.h"
 #define SEED 0xFFFFFFFF
 
 /*This function is responsible for creating the Lookup Table used for
@@ -68,6 +62,20 @@ int calc_hash(struct pfring_pkthdr *pfr)
 	}
 	hash=crc32(hash,pfr->extended_hdr.parsed_pkt.l3_proto);
 	return hash;
+}
+
+/*Computes the hash based on the Customer and VM Id to obtain index
+into the array of cached Cust and VM id's or to lookup into the file
+I/P:-Customer Id and VM Id
+O/P:-Hash Value*/
+u_int32_t map_hash(u_int32_t cust_id,vm_id *vmid)
+{
+	u_int32_t hash=0;
+	u_int8_t i;
+	hash=cust_id;
+	for(i=0;i<4;i++)
+		hash+=vmid->v_id[i];
+       	return hash%256;
 }
 
 /*int main()

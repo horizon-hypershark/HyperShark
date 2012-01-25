@@ -21,6 +21,7 @@
 #include <linux/wait.h>
 #include <linux/kthread.h>
 #include <asm/io.h>
+#include"socket_ops.h"
 
 #define DOMAIN PF_RING
 #define TYPE SOCK_RAW
@@ -29,8 +30,10 @@
 #define HYPERSHARK_AUTHOR "horizon"
 #define HYPERSHARK_DESC "a module to capture all packets"
 #define MAX_FLOW_REC 100
+#define PORT 4444
 
 int count=0;
+u_int16_t slot_header_len;
 
 
 int add_filtering_rule(struct socket *capture_sockfd,filtering_rule* rule_to_add)
@@ -55,10 +58,29 @@ int set_filtering_rule(struct socket *capture_sockfd,u_int16_t id,u_int16_t prot
 	else
 		printk("Rule added successfully...\n");
 }
-//extern and global declarations
-struct task_struct *ts,*ts2;
-u_int16_t slot_header_len;
-//extern struct pf_ring_socket *hs_pfr;
+
+int atoi( char* pStr ) 
+{ 
+	int iRetVal = 0; 
+	int iTens = 1;
+
+	if ( pStr )
+	{
+		char* pCur = pStr; 
+		while (*pCur) 
+			pCur++;
+
+		pCur--;
+
+		while ( pCur >= pStr && *pCur <= '9' && *pCur >= '0' ) 
+		{ 
+			iRetVal += ((*pCur - '0') * iTens);
+			pCur--; 
+			iTens *= 10; 
+		}
+	} 
+	return iRetVal; 
+} 
 
 char *inet_ntoa(struct in_addr *in,char *str_ip)
 {
@@ -338,6 +360,20 @@ void free_offset_nodes(maprecord* path_cache)
 	
 }
 
+//******************************Freeing all the Memory allocated********************//
+void free_path_cache(maprecord *path_cache)
+{	
+      	vfree(path_cache->flow_start);
+      	vfree(path_cache->off_table);
+	kfree(path_cache->bit_map->src_ip);
+	kfree(path_cache->bit_map->dst_ip);
+	vfree(path_cache->bit_map->src_port);
+	vfree(path_cache->bit_map->dst_port);
+	kfree(path_cache->bit_map->protocol);
+	kfree(path_cache->bit_map);
+	kfree(path_cache);
+}
+
 /********************************************************************************************************************************/
 //BITMAP CREATION COMPRESSION AND WRITING CODE
 void set_bit_no(char *arr,u_int32_t row_no)
@@ -598,7 +634,7 @@ void write_offset_table(maprecord *path_cache)
 	strcat(off_path,"Flowrecords/");
 	sprintf(off_name,"offset_%d",path_cache->GFL);
 	strcat(off_path,off_name);
-	filp=file_open(off_path,O_WRONLY|O_APPEND|O_CREAT,0664);
+	filp=file_open(off_path,O_WRONLY|O_CREAT,0664);
 	//Fixing the Address Space Issue
 	if(filp!=NULL)
         {
@@ -739,6 +775,24 @@ void create_flow_record(flow_record *fr,struct pfring_pkthdr *pkf,u_int32_t flow
 	printk("\nFR count is :%d",count);	      
 }
 
+void write_all(maprecord *path_cache)
+{
+	write_offset_table(path_cache);
+	free_offset_nodes(path_cache);
+	write_flow_rec(path_cache);
+	write_bit_map(path_cache);
+}
+
+void set_zero_all(maprecord *path_cache)
+{
+	memset(path_cache->flow_start,0,(MAX_FLOW_REC*sizeof(flow_record)));
+	memset(path_cache->bit_map->src_ip,0,256 * sizeof(ip_bits));
+	memset(path_cache->bit_map->dst_ip,0,256 * sizeof(ip_bits));
+	memset(path_cache->bit_map->src_port,0,65536*sizeof(port_bits));
+	memset(path_cache->bit_map->dst_port,0,65536*sizeof(port_bits));	
+	memset(path_cache->bit_map->protocol,0,256*sizeof(protocol_bits));
+}
+
 /**************************FUNCTION TO UPDATE FLOW RECORD*******************************************/
 void update_flow_rec(maprecord *path_cache,struct pfring_pkthdr *pkthdr)
 {
@@ -793,11 +847,8 @@ void update_flow_rec(maprecord *path_cache,struct pfring_pkthdr *pkthdr)
 							  else
 							  {
 								      //flush the flow records to disk
-								      write_offset_table(path_cache);
-								      free_offset_nodes(path_cache);
-								      write_flow_rec(path_cache);
-								      write_bit_map(path_cache);
-								      memset(path_cache->flow_start,0,(MAX_FLOW_REC*sizeof(flow_record)));
+								      write_all(path_cache);
+								      set_zero_all(path_cache);				      
 								      path_cache->GFL+=MAX_FLOW_REC;
 								      flowhash=org_flowhash;
 							              create_flow_record(&path_cache->flow_start[flowhash],pkthdr,flowhash,path_cache);
@@ -815,7 +866,6 @@ void update_flow_rec(maprecord *path_cache,struct pfring_pkthdr *pkthdr)
 void create_flow_space(maprecord *path_cache)
 {
         path_cache->flow_start=vmalloc(MAX_FLOW_REC * sizeof(flow_record));
-	memset(path_cache->flow_start,0,(MAX_FLOW_REC*sizeof(flow_record)));
 	path_cache->off_table=vmalloc(MAX_FLOW_REC*sizeof(offset_table));
 	memset(path_cache->off_table,0,(MAX_FLOW_REC*sizeof(offset_table)));	
 	path_cache->bit_map=kmalloc(sizeof(bitmap),GFP_KERNEL);	
@@ -824,6 +874,7 @@ void create_flow_space(maprecord *path_cache)
 	path_cache->bit_map->src_port=vmalloc(65536*sizeof(port_bits));
 	path_cache->bit_map->dst_port=vmalloc(65536*sizeof(port_bits));	
 	path_cache->bit_map->protocol=kmalloc(256*sizeof(protocol_bits),GFP_KERNEL);
+	set_zero_all(path_cache);
 }
 
 /**********************FUNCTION TO HANDLE PACKET AFTER CAPTURE PROCESS******************************/
@@ -968,7 +1019,12 @@ int capture_thread(void *arg)
 	while(1) {
 		//for(i=0;i<100;i++){
 		if (kthread_should_stop())
+		{
+			printk("\nIn kthread stop......");
+			//write_all(path_cache);
+			//free_path_cache(path_cache);	
 			break;
+		}
 		ret = recv_pack(&actual_buffer, 0, &hdr,slots,slots_info);
 		if(ret < 0)
 			break;
@@ -993,29 +1049,136 @@ int capture_thread(void *arg)
 
 
 maprecord **map_list;
-u_int16_t map_count=0;
 
 int create_capture_thread(void *arg)
 {
 	map_list=kmalloc(256*sizeof(maprecord *),GFP_KERNEL);	
-	vm_id *vmid=kmalloc(sizeof(vm_id),GFP_KERNEL);
-	vmid->v_id[0]=1234;vmid->v_id[1]=2345;vmid->v_id[2]=3456;vmid->v_id[3]=4567;
-	map_list[map_count]=kmalloc(sizeof(maprecord),GFP_KERNEL); 
 
-	memset(map_list[map_count],0,sizeof(maprecord));
-	printk("Offset is at start:%llu",map_list[map_count]->pkt_offset);
-	strcpy(map_list[map_count]->path,"storage/hs1234/");
-	strcpy(map_list[map_count]->interface_name,"eth0");
-	map_list[map_count]->cust_id=1234;
-	memcpy(&map_list[map_count]->vmid,vmid,sizeof(vm_id));
+	struct socket *sockfd_srv=NULL, *sockfd_cli=NULL;
+	struct sockaddr_in addr_srv;
+	struct sockaddr_in addr_cli;
+	char buf[1024];
+	int addr_len, len;
+	int backlog = 10,tot_threads=0;	
+
+	sockfd_srv = sockfd_cli = NULL;
+	memset(&addr_cli, 0, sizeof(addr_cli));
+	memset(&addr_srv, 0, sizeof(addr_srv));
+	addr_srv.sin_family = AF_INET;
+	addr_srv.sin_port = htons(PORT);
+	addr_srv.sin_addr.s_addr = INADDR_ANY;
+	addr_len = sizeof(struct sockaddr_in);
 	lookupcreate();
-	create_flow_space(map_list[map_count]);
-	//filp1=file_open("storage/hs1234/Packets",O_WRONLY|O_APPEND|O_CREAT,0777);
-	//kernel_thread(capture_thread, NULL, 0);
-	ts=kthread_run(capture_thread,(void *)map_list[map_count++],"kthread");//incrementing
-	//strcpy(device_name,"eth0");
-	//ts2=kthread_run(capture_thread,(void *)device_name,"kthread");	
-	kfree(vmid);	
+
+	if(sock_create(AF_INET, SOCK_STREAM, 0, &sockfd_srv)<0)
+	{
+		printk("Socket creation failed");		
+		return -1;
+	}
+	else
+		printk("socket created successfully");
+	if(sockfd_srv->ops->bind(sockfd_srv, (struct sockaddr *)&addr_srv, addr_len)<0)
+	{
+		printk("\nBinding failed");
+		sock_release(sockfd_srv);
+		return -1;
+	}
+	else
+		printk("\nBinded successfully");
+	if ((unsigned)backlog > SOMAXCONN)
+		backlog = SOMAXCONN;
+	if(sockfd_srv->ops->listen(sockfd_srv, backlog)<0)
+	{
+		printk("\nListening failed");
+		sock_release(sockfd_srv);
+		return -1;
+	}
+	else
+		printk("\nListening successfully");
+	while(1)
+	{
+		int len;
+		vm_id *vmid=kmalloc(sizeof(vm_id),GFP_KERNEL);
+		sockfd_cli = sock_accept(sockfd_srv, (struct sockaddr *)&addr_cli, &addr_len);
+		if (sockfd_cli == NULL)
+		{
+			printk("\naccept failed\n");
+			return -1;
+		}
+		else
+			printk("sockfd_cli = 0x%p\n", sockfd_cli);
+		len = sock_recv(sockfd_cli, buf, sizeof(buf), 0);
+		if (len > 0)
+		{
+			printk("\ngot message : %s\n", buf);
+		}
+		if(!strcmp(buf,"START"))
+		{
+			u_int16_t map_count=0;
+			len = sock_recv(sockfd_cli, buf, sizeof(buf), 0);
+			printk("\nSelected Start");
+			if (len > 0)
+			{
+				printk("\ngot message : %s\n", buf);
+			}
+			if(!(strstr(buf,"eth") || strstr(buf,"wlan")|| strstr(buf,"vif")))
+				break;		
+			vmid->v_id[0]=1234+tot_threads;vmid->v_id[1]=2345;vmid->v_id[2]=3456;vmid->v_id[3]=4567;
+			map_count=map_hash(1234,vmid);						
+			map_list[map_count]=kmalloc(sizeof(maprecord),GFP_KERNEL); 
+			memset(map_list[map_count],0,sizeof(maprecord));
+			printk("Offset is at start:%llu",map_list[map_count]->pkt_offset);
+			strcpy(map_list[map_count]->path,"storage/hs1234/");
+			strcpy(map_list[map_count]->interface_name,buf);
+			printk("\nInterface :%s",map_list[map_count]->interface_name);
+			map_list[map_count]->cust_id=1234;
+			memcpy(&map_list[map_count]->vmid,vmid,sizeof(vm_id));
+			create_flow_space(map_list[map_count]);
+			len = sprintf(buf, "%d",map_count);
+			printk("\nSent hash value:%s",buf);
+			sock_send(sockfd_cli, buf, len+1, 0);
+			map_list[map_count]->ts=kthread_run(capture_thread,(void *)map_list[map_count],"kthread");//incrementing
+			kfree(vmid);	
+			tot_threads++;
+		}
+		else if(!strcmp(buf,"STOP"))
+		{
+			int index;
+			printk("\nYou selected STOP");
+			//msleep(0);
+			len = sock_recv(sockfd_cli, buf, sizeof(buf), 0);
+			printk("\nLength of Message : %d",len);
+			if (len > 0)
+			{
+				printk("\ngot message : %s\n", buf);
+			}
+			index=atoi(buf);
+			printk("\nIndex is :%d",index);
+			kthread_stop(map_list[index]->ts);
+			//write_all(map_list[index]);
+			if(map_list[index])
+				free_path_cache(map_list[index]);
+			map_list[index]=0;
+			
+		}
+		else if(!strcmp(buf,"EXIT"))
+		{
+			int l;
+			for(l=0;l<256;l++)
+			{
+				if(map_list[l])
+				{
+					kthread_stop(map_list[l]->ts);
+					//write_all(map_list[l]);
+					//free_path_cache(map_list[l]);					
+				}				
+			}
+			sock_close(sockfd_cli);
+			break;
+		}
+		sock_close(sockfd_cli);
+	}	
+	sock_close(sockfd_srv);	
 	return 0;
 }
 
@@ -1032,7 +1195,6 @@ static int ker_pf_ring_init(void)
 static void ker_pf_ring_exit(void)
 {
 	printk(KERN_ALERT "Exiting PF_RING kernel module");
-	kthread_stop(ts);
 	//kthread_stop(ts2);
 }
 
