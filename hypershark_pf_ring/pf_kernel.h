@@ -49,11 +49,11 @@ typedef struct bitmap
 
 typedef struct bitmap_start_offsets
 {
-	u_int16_t src_ip_octet[4];	
-	u_int16_t dst_ip_octet[4];
-	u_int16_t src_port_octet;
-	u_int16_t dst_port_octet;
-	u_int16_t protocol_octet;		
+	loff_t src_ip_octet[4];	
+	loff_t dst_ip_octet[4];
+	loff_t src_port_octet;
+	loff_t dst_port_octet;
+	loff_t protocol_octet;		
 }bitmap_start_offsets;
 
 typedef struct offset_node{

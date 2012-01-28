@@ -1,0 +1,42 @@
+loff_t compress_write_octet(u_int64_t no,port_bits *bitmap,loff_t start_offsets,struct file *filp)//start offsets refers to all except first two elements of bitmap_start_offsets
+{
+	u_int64_t i;
+	int ret;
+	mm_segment_t oldfs;
+	loff_t *col_offsets=vmalloc(no*sizeof(loff_t),GFP_KERNEL);	
+	loff_t off,curr_offset=start_offsets+(no*sizeof(loff_t));
+	//printk("\nEntered compress_write_octet");
+	col_offsets[0]=curr_offset;
+	memset(col_offsets,0,no*sizeof(loff_t));
+	printk("\nstart_offset:%llu  col_offsets[0]:%llu  no::%llu",start_offsets,col_offsets[0],no);
+	for(i=0;i<no;i++)		
+	{
+		u_int16_t bit_len,no_bytes;		
+		bit_len=compress_bit_map(bitmap[i].octet_1,MAX_FLOW_REC);		 
+		no_bytes=bit_len/8+((bit_len%8)?1:0);		
+		if(i<50)
+			printk("\ncol_offset[%d]::%llu  no_bytes::%u",i,col_offsets[i],no_bytes);
+		if(i!=no-1)
+		{
+			col_offsets[i+1]=col_offsets[i]+no_bytes;
+			//printk("\ncoll_offsets[%u](%llu)=coll_offsets[%u](%llu)+%u  in loop",i+1,col_offsets[i+1],i,col_offsets[i],no_bytes);
+		}
+		off=curr_offset;
+		oldfs=get_fs();
+		set_fs(get_ds());
+			ret=vfs_write(filp,bitmap[i].octet_1,no_bytes,&off);		
+		set_fs(oldfs);
+		curr_offset+=no_bytes;
+	}		
+	for(i=0;i<50;i++)
+		printk("\nCol_offsets[%d]::%llu",i,col_offsets[i]);
+	off=start_offsets;
+	/*oldfs=get_fs();
+	set_fs(get_ds());
+		ret=vfs_write(filp,col_offsets,no*sizeof(loff_t),&off);
+	set_fs(oldfs);*/
+	vfree(col_offsets);
+	//printk("\nExiting compress_write_octet.....returning value:%llu",curr_offset);
+	return curr_offset;
+}
+

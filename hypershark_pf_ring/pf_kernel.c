@@ -294,7 +294,7 @@ struct file* file_open(const char *path,int flags,int rights)
   struct file* filp=NULL;
   mm_segment_t oldfs;
   int err=0;
-  printk(KERN_INFO "Attempting to open File");
+  //printk(KERN_INFO "Attempting to open File");
 
   oldfs=get_fs();
   set_fs(get_ds());
@@ -307,7 +307,7 @@ struct file* file_open(const char *path,int flags,int rights)
     printk("Error COde is : %d",err);
     return NULL;
   }
-  printk(KERN_INFO "File opened Successfully");
+  //printk(KERN_INFO "File opened Successfully");
   return filp;
 }
 
@@ -402,25 +402,23 @@ void make_bitmap_entry(flow_record *fr,bitmap *bit_map,u_int32_t flowhash)
 /********************************************************************************************************************************/
 int shift_1_bit_right(unsigned char *bit_map_col,u_int32_t start_bit_no,u_int32_t bit_len)//changes required
 {
-	u_int32_t i;
-	u_int8_t valid_bits_in_last_byte=bit_len%8;//handle condition when this comes zero
-	u_int32_t start_index=(bit_len-valid_bits_in_last_byte)/8;	
-	u_int32_t last_index=start_bit_no/8;//last_index<start_index	
-	
-	//u_int32_t no_bytes_to_traverse=((bit_len-valid_bits_in_last_byte)-start_bit_no)/8;//from end
-	//no_bytes_to_traverse++;//specific to our case where start_bit_no always indicates 1st bit of any byte i.e. start_bit_no%8=1
+	int i;
+	int valid_bits_in_last_byte=bit_len%8;//handle condition when this comes zero
+	int start_index=(bit_len-valid_bits_in_last_byte)/8;	
+	int last_index=start_bit_no/8;//last_index<start_index	
+		
 	if(valid_bits_in_last_byte==0)
 	{
-		unsigned char tmp=bit_map_col[start_index-1]&0x01;
-		bit_map_col[start_index]=tmp<<7;		
+		unsigned char tmp=bit_map_col[start_index-1]&0x80;
+		bit_map_col[start_index]=tmp>>7;		
 	}
-	bit_map_col[start_index]>>=1;//check this for worst case
+	bit_map_col[start_index]<<=1;//check this for worst case
 	start_index--;
-	for(i=start_index;i<=last_index;i--)
+	for(i=start_index;i>=last_index;i--)
 	{
-		bit_map_col[i+1]|=(bit_map_col[i]&0x01)<<7;//shift last bit
-		bit_map_col[i]>>=1;
-		bit_map_col[i]&=0x7F;
+		bit_map_col[i+1]|=(bit_map_col[i]&0x80)>>7;//shift last bit
+		bit_map_col[i]<<=1;
+		bit_map_col[i]&=0xFE;
 	}
 	return 0;//Do not know why
 }
@@ -428,9 +426,9 @@ int shift_1_bit_right(unsigned char *bit_map_col,u_int32_t start_bit_no,u_int32_
 int shift_4_bytes(unsigned char *bit_map_col,u_int32_t start_index,u_int32_t bit_len)
 {
 	u_int32_t end_index=bit_len/8,i;
-	for(i=start_index;i<end_index-1;i++)
+	for(i=start_index;i<end_index-1-4;i++)
 	{
-		bit_map_col[i]=bit_map_col[i+1];
+		bit_map_col[i]=bit_map_col[i+4];
 	}
 	if((bit_len%8)!=0)
 		bit_map_col[end_index-1]=bit_map_col[end_index];
@@ -442,163 +440,177 @@ int compress_bit_map(unsigned char * bit_map_col,u_int32_t bit_len)//make everyt
 	u_int32_t no_loop=bit_len/31;
 	//u_int32_t remain_bits=bit_len%31;
 	u_int32_t j=0,was_last_zero=0,i;
+	
+	int z;						
 	for(i=0;i<no_loop;i++)
-	{		
+	{				
 		u_int8_t byte1=bit_map_col[j]&0xFF;
 		u_int8_t byte2=bit_map_col[j+1]&0xFF;
 		u_int8_t byte3=bit_map_col[j+2]&0xFF;
-		u_int8_t byte4=bit_map_col[j+3]&0xF7;
+		u_int8_t byte4=bit_map_col[j+3]&0x7F;
 		
-		shift_1_bit_right(bit_map_col,j*8,bit_len);
+		shift_1_bit_right(bit_map_col,j*8,bit_len);		
 		bit_len++;
 		if(byte1 || byte2 || byte3 ||byte4)
-		{
-			bit_map_col[j]|=0x80;				
+		{			
+			bit_map_col[j]|=0x01;	
+			was_last_zero=0;
+			j+=4;			
 		}
 		else if(!was_last_zero)
-		{
-			was_last_zero=1;
+		{			
+			was_last_zero++;
 			bit_map_col[j+3]|=0x01;
+			j+=4;
 		}
 		else
-		{
+		{			
 			if(!(++bit_map_col[j-1]))
 			{
 				++bit_map_col[j-2];//this restricts no of flow records to approx 256*256
-			}
+			}			
 			shift_4_bytes(bit_map_col,j,bit_len);
 			bit_len-=32;
-		}
-		j+=4;
-	}
+			was_last_zero++;
+		}					
+	}																		
 	return bit_len;
 }
 
 
-int compress_write_octet(u_int64_t no,port_bits *bitmap,u_int16_t start_offsets,struct file *filp)//start offsets refers to all except first two elements of bitmap_start_offsets
+loff_t compress_write_octet(u_int64_t no,port_bits *bitmap,loff_t start_offsets,struct file *filp)//start offsets refers to all except first two elements of bitmap_start_offsets
 {
 	u_int64_t i;
 	int ret;
-	mm_segment_t oldfs;
-	u_int16_t *col_offsets=vmalloc(no*sizeof(u_int16_t));	
-	loff_t curr_offset=start_offsets+sizeof(col_offsets);
-	
-	col_offsets[0]=curr_offset;
+	mm_segment_t oldfs;	
+	loff_t off_bitmap,off=start_offsets,curr_offset=start_offsets+(no*sizeof(loff_t));	
 	for(i=0;i<no;i++)		
 	{
-		u_int16_t bit_len;
-
-		bit_len=compress_bit_map(bitmap[i].octet_1,MAX_FLOW_REC);
-      
-		u_int16_t no_bytes=bit_len/8+((bit_len%8)?1:0);
-		if(i!=no-1)
-			col_offsets[i+1]=col_offsets[i]+no_bytes;
+		u_int16_t bit_len,no_bytes;				
+		bit_len=compress_bit_map(bitmap[i].octet_1,MAX_FLOW_REC);		 
+		no_bytes=bit_len/8+((bit_len%8)?1:0);							
+		off_bitmap=curr_offset;
 		oldfs=get_fs();
 		set_fs(get_ds());
-			ret=vfs_write(filp,bitmap[i].octet_1,no_bytes,&curr_offset);		
+			ret=vfs_write(filp,bitmap[i].octet_1,no_bytes,&off_bitmap);
+			ret=vfs_write(filp,&curr_offset,sizeof(loff_t),&off);		
 		set_fs(oldfs);
 		curr_offset+=no_bytes;
-	}	
-	oldfs=get_fs();
-	set_fs(get_ds());
-		ret=vfs_write(filp,col_offsets,sizeof(col_offsets),&start_offsets);
-	set_fs(oldfs);
-	vfree(col_offsets);
+	}			
+	off=start_offsets;	
 	return curr_offset;
 }
 
-
-int compress_write_src_dst_ip(ip_bits *ip_bitmap,u_int16_t *start_offsets,struct file *filp)//start offsets refers to first two elements of bitmap_start_offsets
+loff_t compress_write_src_dst_ip(ip_bits *ip_bitmap,loff_t *start_offsets,struct file *filp)//start offsets refers to first two elements of bitmap_start_offsets
 {
-	int no=256,j,i,ret;
+	int no=256,j;
 	mm_segment_t oldfs;
-	loff_t curr_offset=0;
-	u_int16_t *col_offsets=vmalloc(no*sizeof(u_int16_t));
+	loff_t curr_offset=0,off=0;
+	loff_t *col_offsets=kmalloc(no*sizeof(loff_t),GFP_KERNEL);	
 	for(j=0;j<4;j++)
 	{
-		curr_offset=start_offsets[j]+sizeof(col_offsets);
-		col_offsets[0]=curr_offset;
+		int i;
+		col_offsets[0]=curr_offset=start_offsets[j]+no*sizeof(loff_t);		
 		for(i=0;i<no;i++)		
 		{
-			u_int16_t bit_len;
+			u_int16_t bit_len;						
 			switch(j)
 			{
-				case 0:
-					bit_len=compress_bit_map(ip_bitmap[i].octet_1,MAX_FLOW_REC);
+				case 0:									
+					bit_len=compress_bit_map(ip_bitmap[i].octet_1,MAX_FLOW_REC);				
 					break;
-				case 1:
+				case 1:					
 					bit_len=compress_bit_map(ip_bitmap[i].octet_2,MAX_FLOW_REC);
 					break;
-				case 2:
+				case 2:					
 					bit_len=compress_bit_map(ip_bitmap[i].octet_3,MAX_FLOW_REC);
 					break;
-				case 3:
+				case 3:					
 					bit_len=compress_bit_map(ip_bitmap[i].octet_4,MAX_FLOW_REC);
 			}
 			u_int16_t no_bytes=bit_len/8+((bit_len%8)?1:0);
 			if(i!=no-1)
-				col_offsets[i+1]=col_offsets[i]+no_bytes;
-	
+			{
+				col_offsets[i+1]=col_offsets[i]+no_bytes;		
+			}			
 			//Switching to kernel_ds
+			off=curr_offset;
 			oldfs=get_fs();
 			set_fs(get_ds());
 			switch(j)
 			{
 				case 0:
-					ret=vfs_write(filp,ip_bitmap[i].octet_1,no_bytes,&curr_offset);
+					vfs_write(filp,ip_bitmap[i].octet_1,no_bytes,&off);
 					break;
 				case 1:
-					ret=vfs_write(filp,ip_bitmap[i].octet_2,no_bytes,&curr_offset);
+					vfs_write(filp,ip_bitmap[i].octet_2,no_bytes,&off);
 					break;
 				case 2:
-					ret=vfs_write(filp,ip_bitmap[i].octet_3,no_bytes,&curr_offset);
+					vfs_write(filp,ip_bitmap[i].octet_3,no_bytes,&off);
 					break;
 				case 3:
-					ret=vfs_write(filp,ip_bitmap[i].octet_4,no_bytes,&curr_offset);
+					vfs_write(filp,ip_bitmap[i].octet_4,no_bytes,&off);
 			}			
-			set_fs(oldfs);		
-			curr_offset+=no_bytes;
-		}	
-
+			set_fs(oldfs);			
+			curr_offset+=no_bytes;	
+		}		
+		off=start_offsets[j];
 		oldfs=get_fs();
 		set_fs(get_ds());
-			ret=vfs_write(filp,col_offsets,sizeof(col_offsets),&start_offsets[j]);
+			vfs_write(filp,col_offsets,no*sizeof(loff_t),&off);
 		set_fs(oldfs);		
 		if(j!=3)
-			start_offsets[j+1]=curr_offset;
+		{
+			start_offsets[j+1]=curr_offset;	
+		}
 	}
-	vfree(col_offsets);
+	kfree(col_offsets);	
 	return curr_offset;
 }
 
+
 /*******************************************************************************************************************************/
-int compress_write_bitmap(maprecord *path_cache,struct file *filp)
+int compress_write_bitmap(maprecord *path_cache)
 {
+
         int ret=0;
 	u_int64_t max_ports=65536;
 	loff_t offset=0;
 	mm_segment_t oldfs;//Shifting Segment get and setfs remaining
 	bitmap_start_offsets start_off;
-
-	start_off.src_ip_octet[0]=sizeof(bitmap_start_offsets);
+	char *bmpath=kmalloc(60,GFP_KERNEL);
+	char *bmname=kmalloc(20,GFP_KERNEL);
+	struct file *filp;
+	
+	strcpy(bmpath,path_cache->path);
+	strcat(bmpath,"BitMaps/");
+	sprintf(bmname,"bitmap_%d",path_cache->GFL);
+	strcat(bmpath,bmname);	
+	filp=file_open(bmpath,O_WRONLY|O_CREAT,0777);
+	start_off.src_ip_octet[0]=sizeof(bitmap_start_offsets);	
 	start_off.dst_ip_octet[0]=compress_write_src_dst_ip(path_cache->bit_map->src_ip,start_off.src_ip_octet,filp);
 	start_off.src_port_octet=compress_write_src_dst_ip(path_cache->bit_map->dst_ip,start_off.dst_ip_octet,filp);
-	start_off.dst_port_octet=compress_write_octet(max_ports,path_cache->bit_map->src_port,start_off.src_port_octet,filp);
-	start_off.protocol_octet=compress_write_octet(max_ports,path_cache->bit_map->dst_port,start_off.dst_port_octet,filp);
-	compress_write_octet(256,path_cache->bit_map->protocol,start_off.protocol_octet,filp);//typecasting required 
-	
+	start_off.dst_port_octet=compress_write_octet(max_ports,path_cache->bit_map->src_port,start_off.src_port_octet,filp);	
+	start_off.protocol_octet=compress_write_octet(max_ports,path_cache->bit_map->dst_port,start_off.dst_port_octet,filp);	
+	compress_write_octet(256,path_cache->bit_map->protocol,start_off.protocol_octet,filp);//typecasting required 		
+	file_close(filp);
+	filp=file_open(bmpath,O_WRONLY,0777);
 	oldfs=get_fs();
 	set_fs(get_ds());
 		ret=vfs_write(filp,&start_off,sizeof(bitmap_start_offsets),&offset);
 	set_fs(oldfs);
-	printk(KERN_ALERT "No problem in writing(compress_bitmap)");		
+	file_close(filp);
+	
+//Clean Up and Updation Tasks	
+	kfree(bmname);
+	kfree(bmpath);
 	return 0;
 }
 
 /*******************************************************************************************************************************/
 int write_bit_map(maprecord *path_cache)
 {
-	char *bmpath=kmalloc(60,GFP_KERNEL);
+/*	char *bmpath=kmalloc(60,GFP_KERNEL);
 	char *bmname=kmalloc(20,GFP_KERNEL);
 	struct file *filp;
 	
@@ -607,13 +619,12 @@ int write_bit_map(maprecord *path_cache)
 	sprintf(bmname,"bitmap_%d",path_cache->GFL);
 	strcat(bmpath,bmname);
 
-	filp=file_open(bmpath,O_WRONLY|O_APPEND|O_CREAT,0777);
-		compress_write_bitmap(path_cache,filp);	
-	file_close(filp);
+	filp=file_open(bmpath,O_CREAT,0777);	file_close(filp);*/
+		compress_write_bitmap(path_cache);	
 
 	//Clean Up and Updation Tasks	
-	kfree(bmname);
-	kfree(bmpath);
+/*	kfree(bmname);
+	kfree(bmpath);*/
 	printk("Completed Bitmap Code");
 	return 0;	
 }
@@ -730,13 +741,13 @@ int write_packet(struct pfring_pkthdr *pkthdr,unsigned char *buf,maprecord *path
 	if(filp!=NULL)
 	{
 	//Fixing the Address Space Issue
-		printk("\nNo problem in Opening File");
+		//printk("\nNo problem in Opening File");
 		oldfs=get_fs();
 		set_fs(get_ds());
 		ret=filp->f_op->write(filp,pkthdr,sizeof(struct pfring_pkthdr),&offset);//Replace vfs_write with file operations write function
 		ret=filp->f_op->write(filp,buf,pkthdr->caplen,&offset);
 		set_fs(oldfs);
-		printk("\nNo Problem in Writing");
+		//printk("\nNo Problem in Writing");
 	}
 	else
 	{
@@ -762,11 +773,12 @@ void create_flow_record(flow_record *fr,struct pfring_pkthdr *pkf,u_int32_t flow
 	fr->ip_src=pkf->extended_hdr.parsed_pkt.ip_src;
 	fr->ip_dst=pkf->extended_hdr.parsed_pkt.ip_dst;
 	fr->protocol=pkf->extended_hdr.parsed_pkt.l3_proto;
-	//fr->timestamp_ns=
+	fr->timestamp_ns=pkf->extended_hdr.timestamp_ns;	//Subject to change can be struct timeval ts
+	fr->bytes_transfer=pkf->caplen;
 	fr->nxtfr=0;
 	//fr->start_pkt_no=path_cache->GPC;
 	//Updation of Offset Field in path_cache	
-	printk("PKT offset when assigning is :%llu",path_cache->pkt_offset);
+	//printk("PKT offset when assigning is :%llu",path_cache->pkt_offset);
 	path_cache->off_table[flowhash].start=path_cache->off_table[flowhash].end=get_offset_node(path_cache->pkt_offset);
 	path_cache->pkt_offset+=(sizeof(struct pfring_pkthdr) + pkf->caplen);
 	path_cache->GPC++;		
@@ -802,7 +814,7 @@ void update_flow_rec(maprecord *path_cache,struct pfring_pkthdr *pkthdr)
     	flowhash%=MAX_FLOW_REC;
 	org_flowhash%=MAX_FLOW_REC;
 
-	printk("\nFlow hash is :%u",flowhash);
+	//printk("\nFlow hash is :%u",flowhash);
 
 		if(path_cache->flow_start[flowhash].nop==0)
 	    	{
@@ -817,8 +829,9 @@ void update_flow_rec(maprecord *path_cache,struct pfring_pkthdr *pkthdr)
 		  		  if(*((u_int32_t*)&tempfr->ip_src)==*((u_int32_t*)&pkt_data->ip_src) && *((u_int32_t*)&tempfr->ip_dst)==*((u_int32_t*)&pkt_data->ip_dst)  && tempfr->src_port==pkt_data->l4_src_port && tempfr->dst_port==pkt_data->l4_dst_port && tempfr->protocol==pkt_data->l3_proto)
 		    		{
 				      //Packet belong to existing flow, update the flow record i.e.No. of Packets and Offset Table
-				      printk(KERN_INFO "\nAll Five Fields are Equal ");
+				      //printk(KERN_INFO "\nAll Five Fields are Equal ");
 				      path_cache->flow_start[flowhash].nop+=1;
+				      path_cache->flow_start[flowhash].bytes_transfer+=pkthdr->caplen;	//Adding Bytes Transferred
 				      path_cache->off_table[flowhash].end->next=get_offset_node(path_cache->pkt_offset);
 				      path_cache->off_table[flowhash].end=path_cache->off_table[flowhash].end->next;
 				      path_cache->GPC++;	
@@ -1030,8 +1043,8 @@ int capture_thread(void *arg)
 			break;
 		else if(ret != 0)
 		{	
-			looper(&hdr, actual_buffer);
-			print_ethernet_header(&hdr); 
+			//looper(&hdr, actual_buffer);
+			//print_ethernet_header(&hdr); 
 			handle_storage_pkt(&hdr,actual_buffer,path_cache);		
 		}	
 		else {
@@ -1062,6 +1075,7 @@ int create_capture_thread(void *arg)
 	int backlog = 10,tot_threads=0;	
 
 	sockfd_srv = sockfd_cli = NULL;
+	memset(map_list, 0, 256*sizeof(maprecord *));
 	memset(&addr_cli, 0, sizeof(addr_cli));
 	memset(&addr_srv, 0, sizeof(addr_srv));
 	addr_srv.sin_family = AF_INET;
