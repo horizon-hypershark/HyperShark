@@ -156,7 +156,7 @@ if(userData!=null)
       out.write("       </form>\n");
       out.write("      </legend>\n");
       out.write("    </fieldset>\n");
-      out.write("</div>  \n");
+      out.write("</div> \n");
       out.write("\n");
       out.write("</div><br/><br/>\t\t\t\n");
       out.write("\t<div class=\"footer\">\n");

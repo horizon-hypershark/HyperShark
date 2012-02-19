@@ -21,8 +21,44 @@
     <head>
         <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
         <title>HyperShark- Packets</title>
+        <link href="style.css" rel="stylesheet" type="text/css" />
+
+        <style type="text/css">
+        body
+            {
+             background-image:url('articleback.JPG');
+            }
+        </style>
+    
+
+        
+        
+        <script type="text/javascript">
+        function show_packets(index)
+        {
+                window.location.href="packets.jsp?index="+index;
+        }
+</script>
+
+        
             </head>
     <body>
+        <div class="section" id="page">
+
+	<div class="header">
+		<h1><font color="#FFFFFF">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;HyperShark</font></h1>
+		<h2><font color="#FFFFFF">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;See what you Pay for
+                &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+                &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+                &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+                &nbsp;&nbsp;&nbsp;&nbsp;
+                <a href="logout.jsp"><font color="#FFFFFF" size="4px">Logout</font></a>
+                    
+                    
+                    </font></h2>
+	</div>
+	
+        <br/><br/>
         
 
     <%  DisplayPktRule dispRule=new DisplayPktRule();
@@ -71,23 +107,30 @@
             session.removeAttribute("flows");
         session.setAttribute("flows",f.flow);
 %> 
+        <div class="articleBody clear" id="articles">
         <table border="0">
             <tr>
             <td>
             <h><b>FLOWRECORDS</b></h>
+            
             </td>    
             </tr>
-            
             <tr>
-            <td width="10%"> <b> FLOWRECORD NO.</b></td>   
-            <td width="10%"> <b> SOURCE PORT</b></td>
-            <td width="10%"> <b> DESTINATION PORT</b></td>
-            <td width="10%"> <b> IP SRC </b></td>
-            <td width="10%"> <b> IP DEST </b></td>
-            <td width="10%"> <b> PROTOCOL</b></td>    
-            <td width="10%"> <b> NO OF PACKETS</b></td>
+                <td>
+                     <hr/>
+                </td>     
+            </tr>
+            <tr align="center">
+            <td width="10%"> <font size="2px"><b>Flowrecord No.</b></font></td>   
+            <td width="10%"> <font size="2px"><b>Source Port</b></font></td>
+            <td width="10%"> <font size="2px"><b>Dest Port</b></font></td>
+            <td width="10%"> <font size="2px"><b>Source IP</b></font></td>
+            <td width="10%"> <font size="2px"><b>Destination IP</b></font></td>
+            <td width="10%"> <font size="2px"><b>Protocol</b></font></td>    
+            <td width="10%"> <font size="2px"><b>No Of Packets</b></font></td>
                
             </tr>
+            
         <%int k=0,m=1; 
         j=0;
         System.out.println("no of flowrecords is::"+f.flow.size());
@@ -95,9 +138,9 @@
         for(FlowRecord flowRec:f.flow)
         { %>
         
-        <tr>   
+        <tr onclick="show_packets(<%=j%>)" bgcolor="white"  align="center" onmouseout="this.style.background='white';" onmouseover="this.style.background='#EEEEEE';this.style.cursor='pointer';">   
             <td width="10%">
-                <a href="packets.jsp?index=<%=j%>"><%out.println(m);
+                <%out.println(m);
                 m++;
                 %></a>
             </td>    
@@ -127,6 +170,17 @@
         </tr>
          <% j++; } %>
         </table>
+        </div>
+        
+        <br/><br/>			
+	<div class="footer">
+	   <p>&copy HyperShark.com</p> <!-- Change the copyright notice -->
+	   <a href="#" class="up">Go UP</a>
+	</div>
+        </div>  
+
+        
+        
         <div id="Div">
         </div>    
         <br/>

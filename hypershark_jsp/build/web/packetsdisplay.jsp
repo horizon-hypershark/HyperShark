@@ -12,9 +12,7 @@
     <head>
         <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
         <title>HyperShark- Packets</title>
-        <link rel="stylesheet" href="accordion/style.css" type="text/css" />
-        <script type="text/javascript" src="accordion/script.js"></script>
-
+        
          <script type="text/javascript">
             function getdata(index)
                                     {
@@ -56,10 +54,13 @@
         session.setAttribute("packets",f.packets);
 
         %> 
+           
         <table border="0">
             <tr>
             <td>
+              	
             <h><b>PFRING HEADER</b></h>
+                
             </td>    
             </tr>
             
@@ -83,6 +84,7 @@
            
             
             <td width="10%">
+           
                 <a href="javascript:getdata(<%=j%>)"><%out.println(k);
                 k++;
                 %></a>

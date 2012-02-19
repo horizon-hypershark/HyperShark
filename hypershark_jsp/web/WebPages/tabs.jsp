@@ -3,11 +3,23 @@
     Created on : 19 Jan, 2012, 3:01:45 PM
     Author     : varun
 --%>
+<%@page import="Beans.UserDataBean"%>
 <%@page import="FileAccess.ReadFlow"%>
 <%@page import="Utils.*"%>
 <%@page contentType="text/html" pageEncoding="UTF-8"%>
 
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<%UserDataBean userData=(UserDataBean)session.getAttribute("userData");
+if(userData==null){
+    response.sendRedirect("homepage.jsp");    
+//    return;
+}    
+else
+{
+    int index=0;
+    if(request.getParameter("index")!=null)
+        index=Integer.parseInt(request.getParameter("index"));
+%>
 
 <html xmlns="http://www.w3.org/1999/xhtml">
     <head>
@@ -213,8 +225,20 @@
 
             <div class="header">
                 <h1><font color="#FFFFFF">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;HyperShark</font></h1>
-                <h2><font color="#FFFFFF">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;See what you Pay for</font></h2>
-            </div>
+                <h2><font color="#FFFFFF">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;See what you Pay for</font>
+                &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+                &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+                &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+                &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+                &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+               <a href="../logout.jsp"><font color="#FFFFFF" size="4px">Logout</font></a>
+                
+                
+                
+                </h2>
+
+                
+                </div>
 
             <br/><br/>  
 
@@ -228,44 +252,16 @@
                             <img border="0" src="screen.png" alt="screen.png" width="100px" height="80px"/>
                             <!--dynamic table displaying filters-->
                             <table height="100%" width="100%">
-                                <tr>
-                                    <td>
-                                        <p> Filters for this VM</p>
-                                    </td>
-                                </tr> 
                                 <!--next row contains a table for displaying filters which contains 2 columns (1 for attribute name and 2nd for attribute value)-->
 
                                 <tr>
                                     <td>
-                                        <table>
-                                            <%int i = 0;
-                                                int num_filters = 7;
-                                                String filters[] = new String[20];//String which will evantually contain the filters
-                                                filters[0] = "TCP PACKET";
-                                                filters[1] = "UDP PACKET";
-                                                filters[2] = "IP RANGE";
-                                                filters[3] = "PORT RANGE";
-                                                filters[4] = "PORT RANGE";
-                                                filters[5] = "PORT RANGE";
-                                                filters[6] = "PORT RANGE";
-                                                filters[7] = "PORT RANGE";
-                                                while (i < num_filters) {
-                                            %>
-                                            <tr>  
-                                                <td>
-                                                    <% out.println(filters[i]);%>    
-                                                </td>
-                                                <td>
-                                                    <%out.println("10");%>
-                                                </td>    
-                                            </tr>
-                                            <%i++;
-                                                }
-                                            %>   
-                                        </table>
+                                        VM Name : <%=userData.getUserDetails().getVirMachineList().get(index).getVmName()%>
                                     </td>    
                                 </tr>  
-
+                                    <tr>
+                                        <td></td>
+                                    </tr>
                                 <tr>
                                     <td>
                                   
@@ -285,7 +281,7 @@
 
                             <ul id="menu" class="menu">
                                 <li class="active"><a href="#displayflows" onclick="displayFlows()">View Sessions</a></li>
-                                <li><a href="#displaypackets" onclick="displayPackets()">View Packets</a></li>
+                                <!--<li><a href="#displaypackets" onclick="displayPackets()">View Packets</a></li>--><!--raviraj 1st comment next comment line 379-->
                                 <li><a href="#querypackets"  onclick="queryPackets()">Query Packets</a></li>
                                 <li><a href="#viewgraph"  onclick="displayGraph()">Display Graph</a></li>
                             </ul>
@@ -380,7 +376,7 @@
 
 
                             <script type="text/javascript">
-                            function displayPackets()
+                            /*function displayPackets()
                             {
                                 //alert("packets called");
                                 
@@ -406,7 +402,7 @@
                                 xmlhttp.send();
 
                                         
-                            }
+                            }*/
                             </script>
                             <script type="text/javascript">
                             function queryPackets()
@@ -468,3 +464,4 @@
     </body>
 
 </html>
+<%}%>

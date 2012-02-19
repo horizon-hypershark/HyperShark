@@ -75,17 +75,17 @@ public class GetPacket {
         int i, j = 0, k = 0;
         //for rules
 
-        f.cpt.setDay(31);
-        f.cpt.setEnd_hr(9);
-        f.cpt.setEnd_min(29);
-        f.cpt.setMonth(0);
-        f.cpt.setStart_hr(9);
-        f.cpt.setStart_min(20);
+        f.cpt.setDay(18);
+        f.cpt.setEnd_hr(7);
+        f.cpt.setEnd_min(47);
+        f.cpt.setMonth(1);
+        f.cpt.setStart_hr(7);
+        f.cpt.setStart_min(45);
 
         f.rules.setProtocol((short) -1);
         f.rules.setDstHost(dstHost);
         f.rules.setHighPort(-1);
-        f.rules.setLowPort(-1);
+        f.rules.setLowPort(80);
         f.rules.setSrcHost(srcHost);
 
         
@@ -139,8 +139,8 @@ public class GetPacket {
         for(FlowRecord flowRec:f.flow) 
         //while(f.flow[l]!=null)
         {
-            System.out.println(Conversions.shortToUnsigned(flowRec.src_port));
-            System.out.println(Conversions.shortToUnsigned(flowRec.dst_port));
+            System.out.println("src_port is"+Conversions.shortToUnsigned(flowRec.src_port));
+            System.out.println("destination port is"+Conversions.shortToUnsigned(flowRec.dst_port));
           //  System.out.println(((f.flow[l].ip_src) & 0xFF) + "." + ((f.flow[l].ip_src >> 8) & 0xFF) + "." + ((f.flow[l].ip_src >> 16) & 0xFF) + "." + ((f.flow[l].ip_src >> 24) & 0xFF));
             /*System.out.println(((flowRec.ip_dst) & 0xFF) + "." + ((flowRec.ip_dst >> 8) & 0xFF) + "." + ((flowRec.ip_dst >> 16) & 0xFF) + "." + ((flowRec.ip_dst >> 24) & 0xFF));
             System.out.println(flowRec.protocol);
@@ -156,7 +156,7 @@ public class GetPacket {
             System.out.println(f.rules.dstOctet1);
             }
 
-            j=0;
+            j=0;*/
             System.out.println("Size of packets is:"+flowRec.packets.size());
             for(CompletePacket pkts:flowRec.packets)
             {
@@ -251,8 +251,8 @@ public class GetPacket {
             System.out.println(f.packets[j].pfpacket.buffer);
             // System.out.println(f.packets[j].pfpacket.buffer_len);
             
-            j++;
-            }*/
+            j++;*/
+            }
             //l++;
         }
     }

@@ -17,9 +17,16 @@
 /*not included earlier*/
 #page{
 	width:960px;
-	/*height:600px;*/
 	margin:0 auto;
 	position:relative;
+}
+
+
+hr
+{
+	height:3px;
+	background-color: #000000;
+
 }
 
 root { 
@@ -106,7 +113,7 @@ div.nav, div.article, div.nav ul li a,div.figure, div.header, div.footer,div.log
 	border-radius:10px;
 }
 div.header{
-    	background-color:#529214;
+    background-color:#529214;
 	border-bottom:#000000;
 	border-bottom:10px solid;	 
 }
@@ -147,7 +154,12 @@ div.figure img{
 	margin-left:-60px;
 }
 
+div.logout
+{
+	float:right;
+	color:#FFFFFF;
 
+}
 div.tabimage{
 	
 	float:left;

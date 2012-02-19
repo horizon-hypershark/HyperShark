@@ -220,6 +220,7 @@ void traverse_flow_list(flow_rec_nos *flow_list,char *path)
 	        //To Link to Packets to corresponding Flow Record
 		flow_list->pkt_list=packet_start;
 		flow_list=flow_list->next;
+		packet_start=0;
 	}
 
 	close(file_fr);

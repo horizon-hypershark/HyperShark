@@ -47,11 +47,13 @@ public class FlowController {
         VirtualMachine vm=userData.getUserDetails().getVirMachineList().get(index);
         if(vm.isMonitoringStatus())
         {  //monnitoring going on
+            //System.out.println("In change status Flowcontrollor Stop");
             changStat.stop(vm);            
             vmDet.updateGFL(vm.getGlobalFlowCount(), vm.getVmId());
         }    
         else 
         {    
+            //System.out.println("In change status Flowcontrollor Start");
             changStat.start(userData.getUserDetails().getUserId(), vm);
             vmDet.updateHash(vm.getHashVal(), vm.getVmId());
         }    

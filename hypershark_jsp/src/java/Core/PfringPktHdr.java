@@ -4,6 +4,8 @@
  */
 package Core;
 
+import Utils.BuildString;
+
 /**
  *
  * @author nitish
@@ -49,4 +51,13 @@ public class PfringPktHdr
     public int num_bytes;
     
     //struct timeval 2 members;
+    public String getPacket()
+    {
+        String pfring_pkt_str=new String();
+        //pfring_pkt_str="&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"+BuildString.mac_string(smac)+"&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"+BuildString.mac_string(dmac)+"&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"+(ip_src & 0xFF) + "." + ((ip_src>> 8) & 0xFF) + "." + ((ip_src>> 16) & 0xFF) +"."+ ((ip_src>> 24) & 0xFF)+"&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"+(ip_dst & 0xFF) + "." + ((ip_dst>> 8) & 0xFF) + "." + ((ip_dst>> 16) & 0xFF) +"."+ ((ip_dst>> 24) & 0xFF)+"&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"+l3_proto+"&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"+caplen;
+        pfring_pkt_str="<table width=100%><tr width=100% align=\"center\"><td width=22%>"+BuildString.mac_string(smac)+"</td><td width=22%>"+BuildString.mac_string(dmac)+"</td><td width=22%>"+((ip_src>>24) & 0xFF) + "." + ((ip_src>> 16) & 0xFF) + "." + ((ip_src>> 8) & 0xFF) +"."+ ((ip_src) & 0xFF)+"</td><td width=22%>"+
+                ((ip_dst>>24) & 0xFF) + "." + ((ip_dst>> 16) & 0xFF) + "." + ((ip_dst>> 8) & 0xFF) +"."+ ((ip_dst) & 0xFF)+"</td><td width=6%>"+l3_proto+"</td><td width=6%>"+caplen+"</td></tr></table>";
+        //eth_pkt_str=eth_pkt_str+;
+        return(pfring_pkt_str);
+    }
 }

@@ -230,8 +230,8 @@
                                 </select>
                                 <br/> 
                                 <br/>
-                                &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Port:&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;From&nbsp;&nbsp;:&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<input type="text" name="lowPort" id="ChoiceFromPort" title="Any positive integer between 0-65535"/>
-                                &nbsp;&nbsp;&nbsp;&nbsp;To&nbsp;&nbsp;:&nbsp;&nbsp;<input type="text" id="ChoiceToPort" name="highPort" Title="Any positive integer between 0-65535" />
+                                &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Port:&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Source:&nbsp;&nbsp;:&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<input type="text" name="lowPort" id="ChoiceFromPort" title="Any positive integer between 0-65535"/>
+                                &nbsp;&nbsp;&nbsp;&nbsp;Destination:&nbsp;&nbsp;:&nbsp;&nbsp;<input type="text" id="ChoiceToPort" name="highPort" Title="Any positive integer between 0-65535" />
                                 <br/>
                                 <br/>
                                 &nbsp;&nbsp;&nbsp;&nbsp;Protocol&nbsp;&nbsp;:&nbsp;&nbsp;&nbsp;&nbsp;<select name="protocol">

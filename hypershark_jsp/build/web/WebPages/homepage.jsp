@@ -109,7 +109,7 @@ width: 100%;
        </form>
       </legend>
     </fieldset>
-</div>  
+</div> 
 
 </div><br/><br/>			
 	<div class="footer">

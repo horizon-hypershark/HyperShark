@@ -15,6 +15,7 @@ if(userData==null){
 else
 {
     FlowController flowControl=new FlowController();
+    //System.out.println("In toogle_status.jsp");
     flowControl.changeMonitoringStatus(userData, Integer.parseInt(request.getParameter("index")));
     response.sendRedirect("WebPages/vmList.jsp");
 }%>

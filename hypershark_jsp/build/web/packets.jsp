@@ -9,114 +9,140 @@
 <%@page import="Core.FlowRecord"%>
 <%@page contentType="text/html" pageEncoding="UTF-8"%>
 <!DOCTYPE html>
-<html>
+<html xmlns="http://www.w3.org/1999/xhtml">
     <head>
-        <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
-        <title>JSP Page</title>
+        <meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/>
+        <title>HyperShark-Packets</title>
+        <link rel="stylesheet" href="accordion/style.css" type="text/css" />
+        <link href="style.css" rel="stylesheet" type="text/css" />
+
+        <style type="text/css">
+            body
+            {
+                background-image:url('articleback.JPG');
+            }
+        </style>
+
+
+        <script type="text/javascript" src="accordion/script.js"></script>
+
     </head>
     <body>
         <script type="text/javascript">
             function getdata(index)
-                                    {
-                                        //alert("getdata called");
-                                        var xmlhttp;
-                                        if (window.XMLHttpRequest)
-                                        {// code for IE7+, Firefox, Chrome, Opera, Safari
-                                            xmlhttp=new XMLHttpRequest();
-                                        }
-                                        else
-                                        {// code for IE6, IE5
-                                            xmlhttp=new ActiveXObject("Microsoft.XMLHTTP");
-                                        }
-                                        xmlhttp.onreadystatechange=function()
-                                        {
-                                            if (xmlhttp.readyState==4 && xmlhttp.status==200)
-                                            {
-                                                document.getElementById("Div").innerHTML=xmlhttp.responseText;
-                                            }
-                                        }
-                                        xmlhttp.open("GET","flowpacketsdisplay.jsp?index="+index,true);
-                                        xmlhttp.send();
+            {
+                //alert("getdata called");
+                var xmlhttp;
+                if (window.XMLHttpRequest)
+                {// code for IE7+, Firefox, Chrome, Opera, Safari
+                    xmlhttp=new XMLHttpRequest();
+                }
+                else
+                {// code for IE6, IE5
+                    xmlhttp=new ActiveXObject("Microsoft.XMLHTTP");
+                }
+                xmlhttp.onreadystatechange=function()
+                {
+                    if (xmlhttp.readyState==4 && xmlhttp.status==200)
+                    {
+                        document.getElementById("Div").innerHTML=xmlhttp.responseText;
+                    }
+                }
+                xmlhttp.open("GET","flowpacketsdisplay.jsp?index="+index,true);
+                xmlhttp.send();
 
                                     
-           } 
+            } 
         </script>
 
+
         <%
-        String str=request.getParameter("index");
-         int index=Integer.parseInt(str);
-         
-        ArrayList<FlowRecord> flowList= (ArrayList<FlowRecord>)session.getAttribute("flows");
-        if(session.getAttribute("flowpackets")!=null)
-            session.removeAttribute("flowpackets");
-        session.setAttribute("flowpackets",flowList.get(index).getPackets());
-        int i=0,j=0,k=1;%>
-        <table border="0">
-            <tr>
-            <td>
-            <h><b>PFRING HEADER</b></h>
-            </td>    
-            </tr>
-            
-            <tr>
-            <td width="10%"> <b> PKT NO.</b></td>   
-            <td width="10%"> <b> SOURCE MAC</b></td>
-            <td width="10%"> <b> DESTINATION MAC</b></td>
-            <td width="10%"> <b> IP SRC </b></td>
-            <td width="10%"> <b> IP DEST </b></td>
-            <td width="10%"> <b> PROTOCOL</b></td>    
-            <td width="10%"> <b> CAPLEN</b></td>
-               
-            </tr>
-      
-            <%for(CompletePacket pkts : flowList.get(index).getPackets())
-              {%>
+            String str = request.getParameter("index");
+            int index = Integer.parseInt(str);
+
+            ArrayList<FlowRecord> flowList = (ArrayList<FlowRecord>) session.getAttribute("flows");
+            if (session.getAttribute("flowpackets") != null) {
+                session.removeAttribute("flowpackets");
+            }
+            session.setAttribute("flowpackets", flowList.get(index).getPackets());
+            int i = 0, j = 0, k = 1;%>
+
+        <div class="section" id="page">
+
+            <div class="header">
+               <h1><font color="#FFFFFF">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;HyperShark</font></h1>
+                <h2><font color="#FFFFFF">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;See what you Pay for</font>
+                &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+                &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+                &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+               <a href="logout.jsp"><font color="#FFFFFF" size="4px">Logout</font></a>
                 
-              <tr>   
-                        
-            <td width="10%">
-                <a href="javascript:getdata(<%=j%>)"><%out.println(k);
-                k++;
-                %></a>
-            </td>    
+                
+                
+                </h2>
+ 
+                
+                
+                 </div>
+
+            <br/><br/>
+            <div class="articleBody clear" id="articles">
+                
+             
+                <table border="0">
+                    
+                    <tr align="center" width="100%">
+                        <td width="22%"><font size="2px"> <b>Source Mac</b></font></td>
+                        <td width="22%"><font size="2px"> <b> Destination Mac</b></font></td>
+                        <td width="22%"><font size="2px"><b> Source IP </b></font></td>
+                        <td width="22%"><font size="2px"><b> Dest IP </b></font></td>
+                        <td width="6%"><font size="2px"><b> Protocol</b></font></td>    
+                        <td width="6%"> <font size="2px"><b> Caplen</b></font></td>
+
+                    </tr>
+                </table>
+                   
+                <div id="accordion">
+                    <dl class="accordion" id="slider">
+
+
+                         
+                        <%for (CompletePacket pkts : flowList.get(index).getPackets()) {%>
+
+                        <dt><%out.print(pkts.pfpacket.getPacket());%></dt>
+                        <dd>
+                            <span>
+                                <%out.print(pkts.l2Packet.getPacket());%>
+                                <br/>
+                                <%out.print(pkts.l3Packet.getPacket());%>
+                                <br/>
+                                <%out.print(pkts.l4Packet.getPacket());%>
+                                <br/>
+                            </span>
+                        </dd>
+
+
+
+                        <%}%>
+                    </dl>
+                </div>
+            </div>
+            <script type="text/javascript">
+
+                var slider1=new accordion.slider("slider1");
+                slider1.init("slider");
+            </script>
+            <br/><br/>			
+	<div class="footer">
+	   <p>&copy HyperShark.com</p> <!-- Change the copyright notice -->
+	   <a href="#" class="up">Go UP</a>
+	</div>
+        </div>
+
             
-        <td width="10%">   
-        <%for (i=0;i<pkts.pfpacket.smac.length; i++)
-            { 
-                out.print(Integer.toString((pkts.pfpacket.smac[i] & 0xff) + 0x100, 16).substring(1));
-                if(i!=pkts.pfpacket.smac.length-1)
-                out.print("-");
-            }%>
-        </td>
-        <td width="10%">
-            <%for (i=0;i<pkts.pfpacket.dmac.length; i++)
-            { 
-                out.print(Integer.toString((pkts.pfpacket.dmac[i] & 0xff) + 0x100, 16).substring(1));
-                if(i!=pkts.pfpacket.dmac.length-1)
-                out.print("-");
-            }%>
-        </td> 
-        <td width="10%">
-                <%out.println(((pkts.pfpacket.ip_src>>24) & 0xFF) + "." + ((pkts.pfpacket.ip_src >> 16) & 0xFF) + "." + ((pkts.pfpacket.ip_src >> 8) &0xFF)+"."+((pkts.pfpacket.ip_src) & 0xFF));%></a>
-        </td>  
-        <td width="10%">
-                <%out.println(((pkts.pfpacket.ip_dst>>24) & 0xFF) + "." + ((pkts.pfpacket.ip_dst >> 16) & 0xFF) + "." + ((pkts.pfpacket.ip_dst >> 8) &0xFF)+"."+ ((pkts.pfpacket.ip_dst) & 0xFF));%>
-        </td>  
-        <td width="10%">
-                <%out.println(pkts.pfpacket.caplen);%>
-        </td>  
-        <td width="10%">
-                <%out.println(pkts.pfpacket.l3_proto);%>
-        </td>
-            
-        </tr>
-         <% j++; } %>
-        </table>
-        <div id="Div">
-        </div>    
-        <br/>
-        <br/>
-        <br/>
-        
+            <br/>
+            <br/>
+            <br/>
+
     </body>
 </html>

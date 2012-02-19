@@ -45,10 +45,10 @@ public class ChangeStatus
     {
         ChangeStatus cngStat=new ChangeStatus();
         VirtualMachine vm=new VirtualMachine();
-        vm.setDirPath("storage/hs1234/");
+        vm.setDirPath("media/STORAGE/storage/hs1234/");
         vm.setVmId("000004d20000092900000d80000011d7");
         vm.setVifs(new ArrayList<String>());
-        vm.getVifs().add("eth0");
+        vm.getVifs().add("wlan0");
         vm.setGlobalFlowCount(0);
         vm.setHashVal(36);
         //cngStat.start("1234",vm);

@@ -48,8 +48,10 @@ else
                 <h2><font color="#FFFFFF">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;See what you Pay for</font>
                 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
                 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+                &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+                &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
                 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-               <a href="logout.jsp">logout</a>
+               <a href="../logout.jsp"><font color="#FFFFFF" size="4px">Logout</font></a>
                 
                 
                 
@@ -119,14 +121,14 @@ else
                                             <table height="100%" border="0" width="100%"> 
                                                 <tr>
                                                     <td  width="600px" height="100%">
-                                                        <img border="0" src="screen.png" alt="Hypershark" width="100px" height="80px"/><br/>
+                                                        <img border="0" src="<%=virMach.getVmImage()%>" alt="Hypershark" width="100px" height="80px"/><br/>
                                                         <% 
-                                                            out.println("VM ID  :    "+virMach.getVmId());
+                                                            out.println("VM Name  :    "+virMach.getVmName());
                                                         %>
                                                     </td>
                                                     <td width="30%">
                                                        
-                                                           <a href="../toggle_status.jsp?index=<%=j%>"> <button type="submit" background-color="#000000"><%=(virMach.isMonitoringStatus())?"STOP":"START"%></button></a>
+                                                           <a href="../toggle_status.jsp?index=<%=j%>"> <button background-color="#000000"><%=(virMach.isMonitoringStatus())?"STOP":"START"%></button></a>
                                                             
 
                                                                                                             </td>    
@@ -143,7 +145,7 @@ else
                                                                                                                  <!--<input type="button" name="Set Filters" value="Set Filters" onclick="dialog"/>-->
                                                             <!--<button align="center" onclick="#dialog" name="modal"> Set Filters</button>-->
                                                             
-                                                            <a href="tabs.jsp"><button type="submit" width="50px"/>Show history</button></a>
+                                                            <a href="tabs.jsp?index=<%=j%>"><button width="50px"/>Show history</button></a>
                                                                                                               </td>
 
                                                     

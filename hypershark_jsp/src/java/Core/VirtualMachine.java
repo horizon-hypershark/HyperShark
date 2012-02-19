@@ -11,6 +11,7 @@ import java.util.ArrayList;
  * @author varun
  */
 public class VirtualMachine {
+    private String vmName;
     private String vmId;
     private int globalFlowCount;
     private String dirPath;
@@ -18,8 +19,24 @@ public class VirtualMachine {
     private int memAlloc;
     private int memUsed;
     private boolean monitoringStatus;
+    private String vmImage;
     private ArrayList<CaptureRule> captureRules;
     private ArrayList<String> vifs;
+
+    public String getVmName() {
+        return vmName;
+    }
+    public void setVmName(String vmName) {
+        this.vmName = vmName;
+    }
+
+    public String getVmImage() {
+        return vmImage;
+    }
+
+    public void setVmImage(String vmImage) {
+        this.vmImage = vmImage;
+    }
     
     public String getVif(int index)
     {

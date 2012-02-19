@@ -28,18 +28,9 @@ else
     </head>
     <body>
         <%
-            int index;    
-            System.out.println("in capturefilter.jsp");    
-            String indexstr=request.getParameter("index");
-            if(indexstr!=null)
-                           {
-                index=Integer.parseInt(indexstr);
-                System.out.println("index passed is "+index);
-                               }
-            else
-               System.out.println("value passed is null");
-            //captFilter.createCaptureRule(userData,index);            
-            //captFilter.recordCaptureFilter(userData);
+            captFilter.createCaptureRule(userData,index);            
+            captFilter.recordCaptureFilter(userData,index);
+            String index=request.getParameter("index");
         %>  
         
     </body>

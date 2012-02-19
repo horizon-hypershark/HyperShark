@@ -21,6 +21,14 @@
 	position:relative;
 }
 
+
+hr
+{
+	height:3px;
+	background-color: #000000;
+
+}
+
 root { 
     display: block;
 }

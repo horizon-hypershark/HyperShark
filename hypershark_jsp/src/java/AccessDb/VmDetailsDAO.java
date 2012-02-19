@@ -55,12 +55,14 @@ public class VmDetailsDAO {
             {
                 VirtualMachine virtMach=new VirtualMachine();
                 virtMach.setVmId(vmDetails.getString("vm_id"));
+                virtMach.setVmName(vmDetails.getString("vm_name"));
                 virtMach.setDirPath(vmDetails.getString("path_dir"));
                 virtMach.setGlobalFlowCount(vmDetails.getInt("gb_flow_count"));
                 virtMach.setHashVal(vmDetails.getInt("hashval"));
                 virtMach.setMemAlloc(vmDetails.getInt("mem_alloc"));
                 virtMach.setMemUsed(vmDetails.getInt("mem_used"));
                 virtMach.setMonitoringStatus(vmDetails.getBoolean("monitoring"));
+                virtMach.setVmImage(vmDetails.getString("vm_image"));
                 vmList.add(virtMach);
             }
         } catch (SQLException ex) {
