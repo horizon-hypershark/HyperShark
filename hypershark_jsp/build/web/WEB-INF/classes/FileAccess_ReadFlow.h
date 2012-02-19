@@ -9,10 +9,10 @@ extern "C" {
 #endif
 /*
  * Class:     FileAccess_ReadFlow
- * Method:    readflow
+ * Method:    fillpackets
  * Signature: ()V
  */
-JNIEXPORT void JNICALL Java_FileAccess_ReadFlow_readflow
+JNIEXPORT void JNICALL Java_FileAccess_ReadFlow_fillpackets
   (JNIEnv *, jobject);
 
 #ifdef __cplusplus

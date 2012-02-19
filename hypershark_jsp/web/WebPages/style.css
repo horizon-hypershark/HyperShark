@@ -1,0 +1,177 @@
+
+
+/* 
+    Document   : style
+    Created on : 18 Jan, 2012, 6:11:17 PM
+    Author     : varun
+    Description:
+        Purpose of the stylesheet follows.
+*/
+
+/* 
+   TODO customize this sample style
+   Syntax recommendation http://www.w3.org/TR/REC-CSS2/
+*/
+
+
+/*not included earlier*/
+#page{
+	width:960px;
+	margin:0 auto;
+	position:relative;
+}
+
+root { 
+    display: block;
+}
+
+.line{
+	/* The dividing line: */
+    height:1px;
+	background-color:#DDDDDD;
+	border-bottom:1px solid #416371;
+	margin:1em 0;
+	overflow:hidden;
+}
+
+div.article .line{
+	/* The dividing line inside of the article is darker: */
+	background-color:#15242a;
+	border-bottom-color:#204656;
+	margin:1.3em 0;
+}
+
+div.footer{
+    background-color:#33CC66;
+	border-top:#000000;
+	border-top:10px solid;	 
+}
+
+/*not included earlier*/
+div.footer .line{
+	margin:2em 0;
+}
+
+div.nav{
+	background:url(gradient_light.jpg) repeat-x 50% 50% #f8f8f8;
+	padding:0 5px;
+	position:absolute;
+	right:0;
+	top:4em;
+	border:1px solid #FCFCFC;
+        -moz-box-shadow:0 1px 1px #333333;
+	-webkit-box-shadow:0 1px 1px #333333;
+	box-shadow:0 1px 1px #333333;
+}
+
+
+.clear:after{
+	content: ".";
+	display: block;
+	height: 0;
+	clear: both;
+	visibility: hidden;
+}
+
+div.nav ul li{
+	display:inline;
+}
+
+
+div.nav ul li a,
+div.nav ul li a:visited{
+	color:#565656;
+	display:block;
+	float:left;
+	font-size:1.25em;
+	font-weight:bold;
+	margin:5px 2px;
+	padding:7px 10px 4px;
+	text-shadow:0 1px 1px white;
+	text-transform:uppercase;
+}
+
+
+
+div.nav ul li a:hover{
+	text-decoration:none;
+	background-color:#f0f0f0;
+}
+
+div.nav, div.article, div.nav ul li a,div.figure, div.header, div.footer,div.login{
+	/* Applying CSS3 rounded corners: */
+	-moz-border-radius:10px;
+	-webkit-border-radius:10px;
+	border-radius:10px;
+}
+div.header{
+    background-color:#529214;
+	border-bottom:#000000;
+	border-bottom:10px solid;	 
+}
+
+div.article{
+        
+	margin:3em 0;
+	padding:20px;
+	text-shadow:0 0 0;	
+}
+
+div.figure{
+	border:2px solid #529214;
+	float:left;
+	height:400px;
+	margin-left:15px;
+	overflow:hidden;
+	width:350px;
+}
+
+div.login{
+	border:2px solid #529214;
+	float:right;
+	height:400px;
+	margin-left:15px;
+	overflow:hidden;
+	width:350px;
+}
+
+
+div.figure:hover{
+	-moz-box-shadow:0 0 2px #4D7788;
+	-webkit-box-shadow:0 0 2px #4D7788;
+	box-shadow:0 0 2px #4D7788;
+}
+
+div.figure img{
+	margin-left:-60px;
+}
+
+div.logout
+{
+	float:right;
+	color:#FFFFFF;
+
+}
+div.tabimage{
+	
+	float:left;
+	/*height:400px;*/
+	margin-left:15px;
+	margin-top:-140px;/* adjusts the top margin of image and the content from table border*/
+	overflow:hidden;
+	width:200px;
+}
+
+div.tabs{
+		margin-left:100px;
+		margin-top:100px;
+		position:absolute;
+		top:30px;
+		left:30px;
+		right:30px;
+}
+
+div.links
+{
+	float:right;
+}

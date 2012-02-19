@@ -1,0 +1,76 @@
+li
+{
+	display: inline;
+	padding: 0;
+	margin: 0;
+}
+
+ul
+{
+	text-align: left;
+	padding: 0;
+	margin: 0;
+}
+
+.tabs
+{
+	margin:50px;
+}
+
+.ui-tabs-nav a
+{
+	/*
+		In general, style all links in the tab navigation area.
+		In practice, this allows us to differentiate between active tabs
+		and inactive tabs
+	*/
+	font-family:Verdana, Arial, Helvetica, sans-serif;
+	color:#CCCCCC;
+	background-color: #999999;
+	border: thin solid #666666;
+	padding:5px;
+	border-bottom: 0; /* Make an unselected tab appear to float above the panel slightly */
+}
+
+.ui-tabs-nav
+{
+	/*
+		A margin at the bottom allows us to put padding at the bottom
+		of the tab headers
+	*/
+	margin-bottom: 5px;
+}
+
+.ui-tabs-selected
+{
+}
+
+.ui-tabs-unselect
+{
+}
+
+.ui-tabs-selected a
+{
+	/*
+		Style the selected tab header link (which overwrites the 'ui-tabs-nav a'
+		style)
+	*/
+	border: thin solid #333333;
+	background-color:#666666;
+	padding: 5px;
+}
+
+.ui-tabs-disabled
+{
+}
+
+.ui-tabs-panel
+{
+	padding: 20px;
+	border: thin solid #333333;
+}
+
+.ui-tabs-hide
+{
+	display: none;
+}

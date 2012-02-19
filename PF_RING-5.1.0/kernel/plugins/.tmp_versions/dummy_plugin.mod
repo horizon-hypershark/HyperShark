@@ -1,2 +1,2 @@
-/home/sagar/HyperShark/PF_RING-5.1.0/kernel/plugins/dummy_plugin.ko
-/home/sagar/HyperShark/PF_RING-5.1.0/kernel/plugins/dummy_plugin.o
+/home/Sagar/HYPERSHARK_BVP/HyperShark/PF_RING-5.1.0/kernel/plugins/dummy_plugin.ko
+/home/Sagar/HYPERSHARK_BVP/HyperShark/PF_RING-5.1.0/kernel/plugins/dummy_plugin.o

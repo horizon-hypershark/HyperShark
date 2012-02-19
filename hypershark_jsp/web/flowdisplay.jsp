@@ -10,30 +10,29 @@
 <!DOCTYPE html>
 <html>
     <head>
-        <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+        <meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/>
         <title>JSP Page</title>
     </head>
     <body>
         <% 
-        int j=0;
-         ReadFlow flow_obj=new ReadFlow(); 
+        ReadFlow flow_obj=new ReadFlow(); 
          flow_obj.readflow();
         %>
-        <table border="1">
+        <table border="0">
         <tr>
-        <td height="">    
-        <table border="1">
-        <tr>
-            <td width="15%"> <b> SOURCE PORT</b>
-            <td width="15%"> <b> DESTINATION PORT</b>
-            <td width="15%"> <b> SOURCE IP </b>
-            <td width="15%"> <b> DESTINATION IP </b>
-            <td width="15%"> <b> PROTOCOL </b>
-            <td width="15%"> <b> NUMBER OF PACKETS </b>
+            <td width="15%"> <b> SOURCE PORT</b></td>
+            <td width="15%"> <b> DESTINATION PORT</b></td>
+            <td width="15%"> <b> SOURCE IP </b></td>
+            <td width="15%"> <b> DESTINATION IP </b></td>
+            <td width="15%"> <b> PROTOCOL </b></td>
+            <td width="15%"> <b> NUMBER OF PACKETS </b></td>
         </tr>
-        <%while(j<5)
-        { %>
-        <tr>    
+         <%
+         int j=0;
+         while(j<30)
+         { %>
+        
+         <tr>    
         <td width="15%">   
         <% out.println(Conversions.shortToUnsigned(flow_obj.flow[j].src_port));%>
         </td>
@@ -53,7 +52,10 @@
         <% out.println(flow_obj.flow[j].nop);%>
         </td>
         </tr>
+        
+        
         <% j++; } %>
+       
         </table>
  
 </body>

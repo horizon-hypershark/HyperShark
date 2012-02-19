@@ -1,0 +1,14 @@
+SMAP
+queryresult_jsp.java
+JSP
+*S JSP
+*F
++ 0 queryresult.jsp
+queryresult.jsp
+*L
+5,2:45
+7:47,2
+8,10:49
+23:65,2
+24,25:67
+*E

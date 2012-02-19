@@ -51,34 +51,33 @@ public final class flowdisplay_jsp extends org.apache.jasper.runtime.HttpJspBase
       out.write("<!DOCTYPE html>\n");
       out.write("<html>\n");
       out.write("    <head>\n");
-      out.write("        <meta http-equiv=\"Content-Type\" content=\"text/html; charset=UTF-8\">\n");
+      out.write("        <meta http-equiv=\"Content-Type\" content=\"text/html; charset=UTF-8\"/>\n");
       out.write("        <title>JSP Page</title>\n");
       out.write("    </head>\n");
       out.write("    <body>\n");
       out.write("        ");
  
-        int j=0;
-         ReadFlow flow_obj=new ReadFlow(); 
+        ReadFlow flow_obj=new ReadFlow(); 
          flow_obj.readflow();
         
       out.write("\n");
-      out.write("        <table border=\"1\">\n");
+      out.write("        <table border=\"0\">\n");
       out.write("        <tr>\n");
-      out.write("        <td height=\"\">    \n");
-      out.write("        <table border=\"1\">\n");
-      out.write("        <tr>\n");
-      out.write("            <td width=\"15%\"> <b> SOURCE PORT</b>\n");
-      out.write("            <td width=\"15%\"> <b> DESTINATION PORT</b>\n");
-      out.write("            <td width=\"15%\"> <b> SOURCE IP </b>\n");
-      out.write("            <td width=\"15%\"> <b> DESTINATION IP </b>\n");
-      out.write("            <td width=\"15%\"> <b> PROTOCOL </b>\n");
-      out.write("            <td width=\"15%\"> <b> NUMBER OF PACKETS </b>\n");
+      out.write("            <td width=\"15%\"> <b> SOURCE PORT</b></td>\n");
+      out.write("            <td width=\"15%\"> <b> DESTINATION PORT</b></td>\n");
+      out.write("            <td width=\"15%\"> <b> SOURCE IP </b></td>\n");
+      out.write("            <td width=\"15%\"> <b> DESTINATION IP </b></td>\n");
+      out.write("            <td width=\"15%\"> <b> PROTOCOL </b></td>\n");
+      out.write("            <td width=\"15%\"> <b> NUMBER OF PACKETS </b></td>\n");
       out.write("        </tr>\n");
-      out.write("        ");
-while(j<5)
-        { 
+      out.write("         ");
+
+         int j=0;
+         while(j<30)
+         { 
       out.write("\n");
-      out.write("        <tr>    \n");
+      out.write("        \n");
+      out.write("         <tr>    \n");
       out.write("        <td width=\"15%\">   \n");
       out.write("        ");
  out.println(Conversions.shortToUnsigned(flow_obj.flow[j].src_port));
@@ -110,9 +109,12 @@ out.println(((flow_obj.flow[j].ip_dst) & 0xFF) + "." + ((flow_obj.flow[j].ip_dst
       out.write("\n");
       out.write("        </td>\n");
       out.write("        </tr>\n");
+      out.write("        \n");
+      out.write("        \n");
       out.write("        ");
  j++; } 
       out.write("\n");
+      out.write("       \n");
       out.write("        </table>\n");
       out.write(" \n");
       out.write("</body>\n");

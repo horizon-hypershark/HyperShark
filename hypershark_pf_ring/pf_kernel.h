@@ -1,3 +1,6 @@
+#define MAX_FLOW_REC 100
+#define MAX_FLOW_BYTE 13
+
 struct eth_hdr {
   unsigned char   h_dest[ETH_ALEN];       /* destination eth addr */
   unsigned char   h_source[ETH_ALEN];     /* source ether addr    */
@@ -7,6 +10,7 @@ struct eth_hdr {
 typedef struct hs_pkt_hdr{
 	struct pfring_pkthdr pkf;
         unsigned char *buffer;
+	struct hs_pkt_hdr *next;
 }hs_pkt_hdr;
 
 typedef struct flow_record{
@@ -14,7 +18,8 @@ typedef struct flow_record{
   u_int16_t src_port, dst_port;
   ip_addr   ip_src, ip_dst;
   u_int8_t  protocol;
-  u_int64_t timestamp_ns;
+  struct timeval start_time;
+  struct timeval end_time;
   u_int64_t bytes_transfer;
   u_int32_t nop;
   u_int32_t start_pkt_no;
@@ -23,15 +28,15 @@ typedef struct flow_record{
 
 typedef struct ip_bits
 {
-	char octet_1[13];//for 100 bits
-	char octet_2[13];
-	char octet_3[13];
-	char octet_4[13];		
+	char octet_1[MAX_FLOW_BYTE];//for 100 bits
+	char octet_2[MAX_FLOW_BYTE];
+	char octet_3[MAX_FLOW_BYTE];
+	char octet_4[MAX_FLOW_BYTE];		
 }ip_bits;
 
 typedef struct port_bits
 {
-	char octet_1[13];
+	char octet_1[MAX_FLOW_BYTE];
 }port_bits;
 
 typedef port_bits protocol_bits;

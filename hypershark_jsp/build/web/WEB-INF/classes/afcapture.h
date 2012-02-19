@@ -98,10 +98,10 @@ struct pfring_pkthdr {
 };*/
 
 typedef struct hs_pkt_hdr{
-	u_int32_t pkt_id;
+	//u_int32_t pkt_id;
 	struct pfring_pkthdr pkf;
         char buffer[1500];//Has to be changed
-	u_int16_t buffer_len;
+	//u_int16_t buffer_len;
 }hs_pkt_hdr;
 
 typedef struct flow_record{
