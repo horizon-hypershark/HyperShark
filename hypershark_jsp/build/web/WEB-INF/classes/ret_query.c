@@ -39,6 +39,21 @@ hs_pkt_hdr* get_hs_pkt(struct pfring_pkthdr *pkf,unsigned char *buf)
 	return packet;
 } 
 
+int get_file_index(char *filename)
+{
+	int i,j=0,index;
+	char flow_file_rev[20],flow_file[20];
+	for(i=strlen(filename)-1;filename[i]!='_';i--)
+	{
+		flow_file_rev[j++]=filename[i];
+	}
+	flow_file_rev[j]='\0';
+	j=0;
+	for(i=strlen(flow_file_rev)-1;i>=0;i--)
+		flow_file[j++]=flow_file_rev[i];
+	flow_file[j]='\0';
+	return atoi(flow_file);
+}
 
 unsigned char* get_final_bitmap(display_rule *dr,char *filename,char *path)
 {
@@ -159,13 +174,13 @@ unsigned char* get_final_bitmap(display_rule *dr,char *filename,char *path)
 	return bitmap2;
 }
 
-
-void traverse_flow_list(flow_rec_nos *flow_list,char *path)
+void traverse_flow_list(flow_rec_nos *flow_list,char *path,int file_index,int get_packets)
 {
-	int index,fd_fr,fd_off,fd_pkt,i;
+	int index,fd_fr,fd_off,fd_pkt,i,cnt=0;
 	unsigned char *buffer;
 	char file_fr[100],file_off[100],command[100],f_path[100];
 	loff_t offset;
+	struct pfring_pkthdr pkf;
 	hs_pkt_hdr *packet_start=0,*end=0;
 
 	if(!flow_list)
@@ -173,75 +188,76 @@ void traverse_flow_list(flow_rec_nos *flow_list,char *path)
 
 	strcpy(f_path,path);
 	strcat(f_path,"Flowrecords/");
-	fd_pkt=open("/storage/hs1234/Packets/pkttrace",O_RDONLY,0);//Path is Problem here
 
-	if(flow_list->no!=0)
-		index=(flow_list->no-1)/100;
-	else
-		index=(flow_list->no)/100;
-
-	sprintf(command,"%s%s%s%d%s","lzop -dU ",f_path,"flowrec_",index,".lzo");
-	//system(command);
-	sprintf(file_fr,"%s%s%d",f_path,"flowrec_",index);
-	sprintf(file_off,"%s%s%d",f_path,"offset_",index);
+	sprintf(command,"%s%s%s%d%s","lzop -dU ",f_path,"flowrec_",file_index,".lzo");
+	system(command);
+	sprintf(file_fr,"%s%s%d",f_path,"flowrec_",file_index);
+	sprintf(file_off,"%s%s%d",f_path,"offset_",file_index);
 	fd_fr=open(file_fr,O_RDONLY,0);
 	fd_off=open(file_off,O_RDONLY,0);
 
 	//To reach required flow record and read it
 	while(flow_list!=NULL)
 	{
-		struct pfring_pkthdr pkf;
+		char pkt_trace_file[80];
 		lseek(fd_fr,(flow_list->no-1) * sizeof(flow_record),0);
 		read(fd_fr,&flow_list->fr,sizeof(flow_record));
 
 		//Seek To Flow Record's Start Packet Number in the Offset File
-		lseek(fd_off,(flow_list->fr.start_pkt_no) * sizeof(loff_t),0);
-
-		//Read the offset NOP times and fetch corresponding Packet from Packet Trace File
-		for(i=0;i<flow_list->fr.nop;i++)
-		{
-			read(fd_off,(loff_t*)&offset,sizeof(loff_t));
-			lseek(fd_pkt,offset,0);
-			read(fd_pkt,&pkf,sizeof(struct pfring_pkthdr));
-			buffer=(unsigned char*)malloc(pkf.caplen);
-			read(fd_pkt,buffer,pkf.caplen);
-			//Creating Link List of Read Packets
-			if(packet_start==0)
+		if(get_packets){
+			lseek(fd_off,(flow_list->fr.start_pkt_no) * sizeof(loff_t),0);
+			if(cnt==0)		
 			{
-				packet_start=end=get_hs_pkt(&pkf,buffer);
+				sprintf(pkt_trace_file,"%s%s%d",path,"Packets/pkttrace_",flow_list->fr.pkt_file_no);
+				fd_pkt=open(pkt_trace_file,O_RDONLY,0);
+				cnt=1;
 			}
-			else
+			//Read the offset NOP times and fetch corresponding Packet from Packet Trace File
+			for(i=0;i<flow_list->fr.nop;i++)
 			{
-				end->next=get_hs_pkt(&pkf,buffer);
-				end=end->next;
+				read(fd_off,(loff_t*)&offset,sizeof(loff_t));
+				lseek(fd_pkt,offset,0);
+				read(fd_pkt,&pkf,sizeof(struct pfring_pkthdr));
+				buffer=(unsigned char*)malloc(pkf.caplen);
+				read(fd_pkt,buffer,pkf.caplen);
+				//Creating Link List of Read Packets
+				if(packet_start==0)
+				{
+					packet_start=end=get_hs_pkt(&pkf,buffer);
+				}
+				else
+				{
+					end->next=get_hs_pkt(&pkf,buffer);
+					end=end->next;
+				}
+				free(buffer);
 			}
-			free(buffer);
+			//To Link to Packets to corresponding Flow Record
+			flow_list->pkt_list=packet_start;
+			packet_start=0;
 		}
-	        //To Link to Packets to corresponding Flow Record
-		flow_list->pkt_list=packet_start;
 		flow_list=flow_list->next;
-		packet_start=0;
+		
 	}
 
 	close(file_fr);
 	close(file_off);
 	close(fd_pkt);		
-	sprintf(command,"%s%s%s%d","lzop -U ",f_path,"flowrec_",index);
-//	system(command);
+	sprintf(command,"%s%s%s%d","lzop -U ",f_path,"flowrec_",file_index);
+	system(command);
 }
 
-
-comp_flow_list* get_flow_packets(display_rule *dr,char *path,capture_time *time_cap)
+comp_flow_list* get_flow_packets(display_rule *dr,char *path,capture_time *time_cap,int get_packets)
 {
 	file_list* file_names;
 	comp_flow_list *start_flow=0,*end_flow=0;
 	file_names=get_filename(time_cap,path);
-	printf("\nAfter get file names::");
 	while(file_names)
 	{
-		printf("\n%s",file_names->filename );
+		printf("\nin ret query %s\n",file_names->filename);		
+		int file_index=get_file_index(file_names->filename);
 		flow_rec_nos* t=decode_bitmap(get_final_bitmap(dr,file_names->filename,path),MAX_FLOW_REC);
-		traverse_flow_list(t,path);
+		traverse_flow_list(t,path,file_index,get_packets);
 		if(start_flow==0)
 			start_flow=end_flow=get_comp_flow_list_node(t);
 		else
@@ -253,6 +269,7 @@ comp_flow_list* get_flow_packets(display_rule *dr,char *path,capture_time *time_
 	}
 	return start_flow;
 }
+
 
 //fillflowfunction
 
@@ -362,6 +379,7 @@ void fill_flow_packets(display_rule *dr,char *path,capture_time *time_cap,JNIEnv
 	jfieldID F1;
 	int i=0,index;
 	jint integ;
+	int get_packets=1;
 
 	/*void fill_eth_hdr(JNIEnv *env,hs_pkt_hdr *,jobject,jclass);
 	void fill_ip_hdr(JNIEnv *env,hs_pkt_hdr *,jobject,jclass);
@@ -380,7 +398,7 @@ void fill_flow_packets(display_rule *dr,char *path,capture_time *time_cap,JNIEnv
 	//main_obj=(*env)->AllocObject(env,cls_main);//create object	
 
 	
-	comp_flow_list* flow_list=get_flow_packets(dr,path,time_cap);
+	comp_flow_list* flow_list=get_flow_packets(dr,path,time_cap,get_packets);
 	while(flow_list)
 	{
 		flow_rec_nos *frec=flow_list->frec;
@@ -425,7 +443,7 @@ void fill_flow_packets(display_rule *dr,char *path,capture_time *time_cap,JNIEnv
 			
 			
 		flow_list=flow_list->down;
-		break;
+	
 	}
 	//jni code
 

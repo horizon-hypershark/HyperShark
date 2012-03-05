@@ -12,34 +12,65 @@
 
         <link href="style.css" rel="stylesheet" type="text/css" />
 
-
-        <script language="javascript" src="time/protoplasm.js"></script> 
-        <script type="text/javascript"> 
-            
-            function time()
-            {
-                //alert("function called");
-                Protoplasm.use('timepicker').transform('input.timepicker'); 
-            }
-        </script> 
-        <link rel="stylesheet" type="text/css" media="all" href="datepicker/jsDatePick_ltr.min.css" />
-        <script type="text/javascript" src="datepicker/jsDatePick.min.1.3.js"></script>
-        <script type="text/javascript">
-            
-            function date()
-            {
-            
-                new JsDatePick({
-                    useMode:2,
-                    target:"inputField",
-                    dateFormat:"%d-%M-%Y"
-                    
-                
-                });
-            }
-        </script>
-
         
+        <!--change for time-->
+        <link rel="stylesheet" href="timepicker/include/jquery-ui-1.8.14.custom.css" type="text/css" />
+    <link rel="stylesheet" href="timepicker/jquery.ui.timepicker.css?v=0.2.9" type="text/css" />
+
+
+    <script type="text/javascript" src="timepicker/include/jquery-1.5.1.min.js"></script>
+    <script type="text/javascript" src="timepicker/include/jquery.ui.core.min.js"></script>
+    <script type="text/javascript" src="timepicker/include/jquery.ui.widget.min.js"></script>
+    <script type="text/javascript" src="timepicker/include/jquery.ui.tabs.min.js"></script>
+    <script type="text/javascript" src="timepicker/include/jquery.ui.position.min.js"></script>
+    <script type="text/javascript" src="timepicker/jquery.ui.timepicker.js?v=0.2.9"></script>
+
+    <style type="text/css">
+        body { font-size: 10px;}
+        #content { font-size: 1.2em; 
+                   font-family: "Lucida Sans Unicode", "Lucida Grande", Verdana, Arial, Helvetica, sans-serif;
+                   width: 950px; margin: auto;
+        }
+        .box { border: 1px solid #888; padding: 15px; margin:12px; }
+        .code { margin: 6px; padding: 9px; background-color: #fdf5ce; border: 1px solid #c77405; }
+        fieldset { padding: 0.5em 2em }
+        hr { margin: 0.5em 0; clear: both }
+        a { cursor: pointer; }
+        #requirements li { line-height: 1.6em; 
+    </style>
+
+    
+        <script type="text/javascript">
+            function showstarttime(){
+		alert("time called");
+               $('#timepicker_customrange').timepicker({
+                   hours: { starts: 0, ends: 24 },
+                   minutes: { interval: 5 },
+                   rows: 4,
+                   showPeriodLabels: true,
+                   minuteText: 'Min'
+               })
+            }
+
+        </script>
+	
+	<script type="text/javascript">
+            function showendtime(){
+		alert("time called");
+               $('#timepicker_customrangeend').timepicker({
+                   hours: { starts: 0, ends: 24 },
+                   minutes: { interval: 5 },
+                   rows: 4,
+                   showPeriodLabels: true,
+                   minuteText: 'Min'
+               })
+            }
+
+        </script>
+	
+        
+        
+        <!--change for time ends-->
         <script>
         function verify_port(input)
             {
@@ -111,9 +142,9 @@
         <style>
 
             body {
-                font-family:verdana;
-                font-size:15px;
-                background-image:url('articleback.JPG');
+                /*font-family:verdana;
+                font-size:15px;*/
+                background-image:url('background.png');
             }
             div#left { float: left; width: 300px }
             div#right { float: right; width: 300px }
@@ -122,6 +153,17 @@
 
     </head>
     <body>
+        <!--change for date-->
+        <script src="datepicker/jquery.ui.datepicker.js"></script>
+	<script>
+        function showdate()
+        {
+		alert("date called");
+                $( "#datepicker" ).datepicker({ maxDate: "+0M +0D" });
+	}
+	</script>
+        <!--change for date ends-->
+        
         <!--<div class="section" id="page"> 
             <div class="header"> 
                 <h1><font color="#FFFFFF">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;HyperShark</font></h1>
@@ -142,15 +184,15 @@
                     <table border="0">
                         <tr>
                             <td width="400px" align="center">
-                                Enter date:<input type="text" size="12" align="center" name="date" id="inputField" onclick="date()" />
-
+                                <p>Enter Date: <input type="text" id="datepicker" name="date" onclick="showdate()"></p><!--change-->
+                              
                             </td>
                             <td width="300px" align="center">
-                                Start time:<input type="text" name="startTime" class="timepicker" /> 
-
+                                Start time:<input type="text" name="startTime" style="width: 70px" id="timepicker_customrange" onclick="showstarttime()"/>
+        
                             </td>
                             <td width="300px" align="center">
-                                End time:<input type="text" name="endTime" class="timepicker" />
+                                End time:<input type="text" name="endTime"  style="width: 70px" id="timepicker_customrangeend" onclick="showendtime()"/>
                             </td>   
                         </tr>    
                     </table>

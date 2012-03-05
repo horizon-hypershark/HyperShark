@@ -75,12 +75,12 @@ public class GetPacket {
         int i, j = 0, k = 0;
         //for rules
 
-        f.cpt.setDay(18);
-        f.cpt.setEnd_hr(7);
-        f.cpt.setEnd_min(47);
+        f.cpt.setDay(21);
+        f.cpt.setEnd_hr(17);
+        f.cpt.setEnd_min(29);
         f.cpt.setMonth(1);
-        f.cpt.setStart_hr(7);
-        f.cpt.setStart_min(45);
+        f.cpt.setStart_hr(17);
+        f.cpt.setStart_min(30);
 
         f.rules.setProtocol((short) -1);
         f.rules.setDstHost(dstHost);
@@ -160,12 +160,18 @@ public class GetPacket {
             System.out.println("Size of packets is:"+flowRec.packets.size());
             for(CompletePacket pkts:flowRec.packets)
             {
-            System.out.println("\nETHERNET HEADER:"+ pkts.l2Packet.getPacket());
-            //System.out.println("\nIP HEADER:"+f.flow[l].packets[j].l3Packet.getPacket());
+            //System.out.println("\nETHERNET HEADER:"+ pkts.l2Packet.getPacket());
+            //System.out.println("\nIP HEADER:"+pkts.l3Packet.getPacket());
             
             //System.out.println(f.flow[0].packets[0].l2Packet.getPacket());
             //if((f.flow[0].packets[j].l4Packet.getPacket())!=null)
-            //System.out.println("\nTCP HEADER:"+f.flow[l].packets[j].l4Packet.getPacket());
+            
+            if(pkts.l3Packet.getProtocol()==6)
+            System.out.println("\nTCP HEADER:"+pkts.l4Packet.getPacket());
+            else
+                if(pkts.l3Packet.getProtocol()==17)
+                System.out.println("\nUDP HEADER:"+pkts.l4Packet.getPacket());
+            
             //System.out.println("\nUDP HEADER:"+f.flow[l].packets[j].l4Packet.getPacket());
             /*System.out.println("\n IHL"+f.packets[j].l2_ip_packet.ihl);
             System.out.println("\n version"+f.packets[j].l2_ip_packet.version);

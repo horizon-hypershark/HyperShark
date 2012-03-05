@@ -14,11 +14,11 @@
 
 	<!--[if lte IE 8]><script language="javascript" type="text/javascript" src="../excanvas.min.js"></script><![endif]-->
 
-    <script language="javascript" type="text/javascript" src="jquery.js"></script>
+    <script language="javascript" type="text/javascript" src="piechart/jquery.js"></script>
 
-	<script language="javascript" type="text/javascript" src="jquery.flot.js"></script>
+    <script language="javascript" type="text/javascript" src="piechart/jquery.flot.js"></script>
 
-    <script language="javascript" type="text/javascript" src="jquery.flot.pie.js"></script>  
+    <script language="javascript" type="text/javascript" src="piechart/jquery.flot.pie.js"></script>  
 
 	
 
@@ -176,8 +176,8 @@ $(function () {
 
 	// data
 	var count =6;
-  //  var ip1 = [["111.111.111.111"],["182.123.221.122"],["122.122.21.11"],["11.21.33.11"],["111.21.1.1"],["122.323.122.122"]];
-//	var freq = [20,30,40,90,1,12];
+    var ip1 = [["111.111.111.111"],["182.123.221.122"],["122.122.21.11"],["11.21.33.11"],["111.21.1.1"],["122.323.122.122"]];
+	var freq = [20,30,40,90,1,12];
 	var data = [];
         <% 
            int i;
@@ -185,7 +185,7 @@ $(function () {
 
 	{ %>
 
-		data[i] = { label: <%= flow_obj.flow[i].ip_src%>, data:<%= flow_obj.flow[i].nop %> }
+		data[<%=i%>] = { label: ip1[<%=i%>], data:freq[<%=i%>] }
 
 	<% } %>
 
@@ -226,6 +226,15 @@ $(function () {
 
 </script>
 
+        <%/*for(i = 0; i<6; i++)
+
+	{
+
+            out.println("ip is"+flow_obj.flow[i].ip_src+"nop is"+flow_obj.flow[i].nop);
+                
+        }*/
+        %>
+	
 
  
     <div id="graph1" class="graph"></div>

@@ -235,7 +235,7 @@ void time_fil(JNIEnv *env,jobject obj,capture_time *filter,jclass cls_main)
 	jboolean iscopy;
  	jfieldID F1;
 	
-	FILE *fp=fopen("checkdata.txt","w");
+	//FILE *fp=fopen("checkdata.txt","w");
 
 	jclass cls_rule=(*env)->FindClass(env,"Core/CaptureTime");
 	
@@ -265,9 +265,9 @@ void time_fil(JNIEnv *env,jobject obj,capture_time *filter,jclass cls_main)
 	F1 = (*env)->GetFieldID(env,cls_rule,"end_min","I");
 	filter->end_min=(*env)->GetIntField(env,rule_obj,F1);
 
-	fprintf(fp,"%d%d%d%d%d%d",filter->day,filter->month,filter->start_hr,filter->start_min,filter->end_hr,filter->end_min);
+	//fprintf(fp,"%d%d%d%d%d%d",filter->day,filter->month,filter->start_hr,filter->start_min,filter->end_hr,filter->end_min);
 	//printf("\nmonth is =%d",filter->month);
-	fclose(fp);
+	//fclose(fp);
 
 }
 

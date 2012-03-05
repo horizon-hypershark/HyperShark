@@ -14,8 +14,8 @@
     <body>
               
                
-        <b><p><a href="newlinechart.jsp">No Of Packets Per Second</a></p><br/></b>
-        <b><p><a href="newlinechart.jsp">No Of Bytes Transferred Per Second</a></p><br/></b>
+        <b><p><a href="newlinechart.jsp">No Of Packets Per FlowRecord</a></p><br/></b>
+        <b><p><a href="topFiveIps.jsp">Most Frequent Ips</a></p><br/></b>
         <b><p><a href="newlinechart.jsp">No Of Packets per IP</a></p><br/></b> 
         <b><p><a href="newlinechart.jsp">No Of Packets against Time</a></p><br/></b>
         

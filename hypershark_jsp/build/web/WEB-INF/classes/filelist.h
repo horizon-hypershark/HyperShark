@@ -1,6 +1,6 @@
 typedef struct file_list
 {
-	char filename[20];
+	char filename[50];
 	struct file_list *next;
 }file_list;
 

@@ -24,6 +24,9 @@ typedef struct flow_record{
   u_int32_t nop;
   u_int32_t start_pkt_no;
   u_int32_t nxtfr;
+//Change Begins
+  u_int16_t pkt_file_no;
+//Change Ends
 }flow_record;
 
 typedef struct ip_bits
@@ -40,6 +43,7 @@ typedef struct port_bits
 }port_bits;
 
 typedef port_bits protocol_bits;
+
 //typedef struct protcol_bits
 //{
 //	char octet_1[13];
@@ -82,6 +86,9 @@ typedef struct maprecord{
 	char path[50];
 	u_int16_t  link;
 	u_int16_t GFL;//global flow location
+//Change
+	u_int16_t GPKT;//global packet trace file number
+//Change ends
 	u_int32_t GPC;//global packet count	
 	loff_t pkt_offset;
 	char interface_name[15];

@@ -1,4 +1,6 @@
 
+<%@page import="Core.FlowRecord"%>
+<%@page import="java.util.ArrayList"%>
 <%@page import="FileAccess.ReadFlow"%>
 <%@page import="Utils.*"%>
 <%@page contentType="text/html" pageEncoding="UTF-8"%>
@@ -19,15 +21,19 @@
     body {
                 font-family:verdana;
                 font-size:15px;
-                background-image:url('articleback.JPG');
+                background-image:url('background.png');
             }
      </style>       
     
   </head>
     <body>
-         <% 
-        ReadFlow flow_obj=new ReadFlow(); 
-         flow_obj.readflow();
+        <%ArrayList<FlowRecord> flowList = (ArrayList<FlowRecord>) session.getAttribute("flows");
+          //ReadFlow flow_obj=new ReadFlow(); 
+          //flow_obj.readflow();
+        %> 
+        <% 
+            //ReadFlow flow_obj=new ReadFlow(); 
+            //flow_obj.readflow();
         %>
     <h1></h1>
 
@@ -60,14 +66,18 @@ $(function () {
 
         };
 <% 
-   int i;
+   int i=0;
   
-	for (i = 0; i < 30; i +=1)
-	{ %>
-        <% out.print(flow_obj.flow[i].flow_id);%>
-            d1.push([<%= flow_obj.flow[i].flow_id%>,<%=flow_obj.flow[i].nop%>]);
+	for(FlowRecord flowRec:flowList)
+	{ 
+            if(i==30)
+                break;
+            %>
+        <% out.print(flowRec.flow_id);%>
+            d1.push([<%= flowRec.flow_id%>,<%=flowRec.nop%>]);
  <%
-	} %>
+            i++;
+       } %>
   
     
     $.plot($("#placeholder"),[{label : "No. of Packets per flow record",data:d1}],opt);

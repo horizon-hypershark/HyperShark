@@ -166,10 +166,11 @@ public class DisplayTimeFilterBean {
         }
         //display time object
         if (date != null) {
-            String day = date.substring(0, 2);
+            String day = date.substring(3, 5);
             timRule.setDay(Integer.parseInt(day));
-            String month = date.substring(3, 6);
-            timRule.setMonth(Conversions.stringToMonth(month));
+            String month = date.substring(0, 2);
+            timRule.setMonth(Integer.parseInt(month)-1);
+           //timRule.setMonth(Conversions.stringToMonth(month));
         } else {
             timRule.setDay(-1);
             timRule.setMonth(-1);

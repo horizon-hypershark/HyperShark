@@ -26,9 +26,9 @@ else
         <link rel="stylesheet" type="text/css" href="style.css" />
         <!--<link href="styles.css" rel="stylesheet" type="text/css" />-->
         <!-- pop up form-->  
+        <link rel="stylesheet" type="text/css" href="button_form.css" />
         <script type="text/javascript" src="http://code.jquery.com/jquery-latest.pack.js"></script>
 
-        <link rel="stylesheet" type="text/css" href="button_form.css" />
         <script type="text/javascript" src="button_form.js"></script>
         <script type="text/javascript" src="validate_form.js"></script>
         
@@ -40,26 +40,38 @@ else
             }
         
         </script>
+        <style type="text/css">
+            body
+            {
+                background-image:url('background.png');
+            }
+        </style>
+
+        
+        
     </head>
     <body>
-        <div class="section" id="page"> <!-- Defining the #page section with the section tag -->
-            <div class="header"> <!-- Defining the header section of the page with the appropriate tag -->
-                <h1><font color="#FFFFFF">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;HyperShark</font></h1>
-                <h2><font color="#FFFFFF">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;See what you Pay for</font>
+       <div class="section" id="page">
+            <div class="title">
+                <h1><font color="#52A300">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;HyperShark</font></h1>
+            </div>
+            <div class="header">
+            <h3><font color="#FFFFFF">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;See what you Pay for</font>
                 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
                 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
                 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
                 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
                 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
                <a href="../logout.jsp"><font color="#FFFFFF" size="4px">Logout</font></a>
+             </h3>       
                 
-                
-                
-                </h2>
-
             </div>
 
-            <div class="section" id="articles"> <!-- A new section with the articles -->
+            <br/><br/>
+        
+        
+        
+        <div class="section" id="articles"> <!-- A new section with the articles -->
 
                 <!-- Article 1 start -->
 
@@ -104,12 +116,11 @@ else
                             </td>  
 
                             <!-- draw a vertical line-->
-                            <td width="1" bgcolor="#CBCBCB">
+                            <td width="10" bgcolor="#DEDEDE">
                             
                             </td>
                             <td width="80%"><!-- 2nd column of main table -->
                                 <table height="100%" border="0">
-
 
                                     <%                                        
                                     int j=0; 
@@ -136,7 +147,7 @@ else
                                                      
                                                             <!--<input type="button" name="Set Filters" value="Set Filters" onclick="dialog"/>-->
                                                             <!--<button align="center" onclick="#dialog" name="modal"> Set Filters</button>-->
-                                                            <a href="#dialog" name="modal"><button value="Add Filter">Add Filter</button></a>
+                                                            <a href="#dialog" name="modal"><button value="Add Filter" onclick="setIndex(<%=j%>)">Add Filter</button></a>
                                                                                                                                                                         
                                                     </td>   
                                                    
@@ -146,7 +157,7 @@ else
                                                             <!--<button align="center" onclick="#dialog" name="modal"> Set Filters</button>-->
                                                             
                                                             <a href="tabs.jsp?index=<%=j%>"><button width="50px"/>Show history</button></a>
-                                                                                                              </td>
+                                                    </td>
 
                                                     
                                                 </tr>    
@@ -155,9 +166,9 @@ else
                                     </tr>
                                     <tr>
                                     <td>
-                                        <hr/>
-                                        </td>
-                                        </tr>
+                                        <hr class="hor_line"/>
+                                    </td>
+                                    </tr>
                                     <%
                                         j++;
                                         }%>

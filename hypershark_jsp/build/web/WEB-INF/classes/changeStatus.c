@@ -18,7 +18,7 @@
 #include "FileAccess_ChangeStatus.h"
 
 
-int start_capture(const char *path,const char *interface,u_int32_t GFL,u_int16_t hash) 
+int start_capture(const char *path,const char *interface,u_int32_t GFL,u_int16_t hash,u_int16_t gpkt) 
 { 
 	int sd,cd,no_char; 
 	char buf[1000]="",str[100]=""; 
@@ -31,9 +31,10 @@ int start_capture(const char *path,const char *interface,u_int32_t GFL,u_int16_t
 	ser.sin_port=htons(4444); 
 	inet_aton("192.168.1.6",&ser.sin_addr); 
 	connect(sd,(struct sockaddr *)&ser,sizeof(ser));	
-	no_char=sprintf(str,"%u %u %s %s",hash,GFL,interface,path);
+	no_char=sprintf(str,"%s %u %u %s %s %u","START",hash,GFL,interface,path,gpkt);
+	//printf("\nSending Buffer :%s",str);
 		//send start signal
-	write(sd,"START",6); 		
+	//write(sd,"START",6); 		
 		//send hash+GFL+interface+path value
 	write(sd,str,no_char+1);		
 		//receive recomputed hash in case of collision
@@ -43,7 +44,7 @@ int start_capture(const char *path,const char *interface,u_int32_t GFL,u_int16_t
 	return atoi(buf); 
 } 
 
-u_int32_t stop_capture(u_int16_t hash) 
+u_int32_t stop_capture(u_int16_t hash,u_int32_t *gfl,u_int16_t *gpkt) 
 { 
 	int sd,cd,no_char; 
 	char buf[1000]="",str[100]=""; 
@@ -56,15 +57,15 @@ u_int32_t stop_capture(u_int16_t hash)
 	ser.sin_port=htons(4444); 
 	inet_aton("192.168.1.6",&ser.sin_addr); 
 	connect(sd,(struct sockaddr *)&ser,sizeof(ser));	
-	printf("\nIn stop C connection established......");
-	write(sd,"STOP",5); 
-	sleep(1);
-	no_char=sprintf(buf,"%d",hash);
+	//write(sd,"STOP",5); 
+	//sleep(1);
+	no_char=sprintf(buf,"%s %d","STOP",hash);
 	printf("\nIn stop Hash value is:%s",buf);
 	write(sd,buf,no_char+1);
 	read(sd,buf,1000);
 	close(sd); 
-	return atoi(buf);
+	sscanf(buf,"%u%u",&gfl,&gpkt);
+	return 0;
 } 
 
 
@@ -110,7 +111,9 @@ JNIEXPORT void JNICALL Java_FileAccess_ChangeStatus_startCapture
 	cstr=NULL;	
 	else	
 	cstr = (*env)->GetStringUTFChars(env,str,NULL);
-	//printf("\n in c PATH  is =%s\n",cstr);
+		
+	printf("\n IN C CODE\n");	
+	printf("\n in c PATH  is =%s\n",cstr);
 	
 	//accessing arraylist	
 	//F1 = (*env)->GetFieldID(env,cls_vm,"vifs","Ljava/util/ArrayList;");
@@ -135,13 +138,16 @@ JNIEXPORT void JNICALL Java_FileAccess_ChangeStatus_startCapture
 		
 
 	//printing thevalues
-	/*printf("\n in c vm id =%s\n",vmstr);
+	printf("\n in c vm id =%s\n",vmstr);
 	printf("\n in c PATH  is =%s\n",cstr);
 	printf(" in c vif   is =%s\n",elementstr);
-	printf("\n in c hashval is is =%d\n",hashval);*/
+	printf("\n in c hashval is is =%d\n",hashval);
 
-	start_capture(cstr,elementstr,GFL,hashval);
+	start_capture(cstr,elementstr,GFL,hashval,0);
+	//change 
+	//daemon_compress("/storage/hs1234/");//for daemon	
 	
+
 	//release strings
 	(*env)->ReleaseStringUTFChars(env,str,cstr);
 	(*env)->ReleaseStringUTFChars(env,vm_id,vmstr);
@@ -156,7 +162,7 @@ JNIEXPORT void JNICALL Java_FileAccess_ChangeStatus_stopCapture(JNIEnv * env,job
 {
 	jclass cls_vm=(*env)->FindClass(env,"Core/VirtualMachine");	
 	jclass cls_main=(*env)->GetObjectClass(env,obj);
-	int hashval,GFL;	
+	unsigned int hashval,GFL,GPKT;	
 
 	jobject vm_obj=(*env)->AllocObject(env,cls_vm);
 	jobject main_obj=(*env)->AllocObject(env,cls_main);
@@ -172,7 +178,7 @@ JNIEXPORT void JNICALL Java_FileAccess_ChangeStatus_stopCapture(JNIEnv * env,job
 	printf("\n in c code hashaval is =%d",hashval);
 
 
-	GFL=stop_capture(hashval);	
+	stop_capture(hashval,&GFL,&GPKT);	
 	F1 = (*env)->GetFieldID(env,cls_vm,"globalFlowCount","I");
 	(*env)->SetIntField(env,vm_obj,F1,GFL);
 

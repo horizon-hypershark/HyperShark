@@ -10,5 +10,6 @@ package Core.Protocols.l3Proto;
  */
 public abstract class L3proto 
 {
-    public abstract String getPacket();    
+    public abstract String getPacket();
+    public abstract byte getProtocol();
 }

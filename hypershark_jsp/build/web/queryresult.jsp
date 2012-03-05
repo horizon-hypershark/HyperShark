@@ -26,7 +26,7 @@
         <style type="text/css">
         body
             {
-             background-image:url('articleback.JPG');
+             background-image:url('background.png');
             }
         </style>
     
@@ -117,7 +117,7 @@
             </tr>
             <tr>
                 <td>
-                     <hr/>
+                     <hr class="hor_line"/>
                 </td>     
             </tr>
             <tr align="center">

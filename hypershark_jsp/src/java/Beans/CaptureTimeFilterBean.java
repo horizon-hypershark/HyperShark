@@ -23,10 +23,10 @@ public class CaptureTimeFilterBean {
     private String lowDestPort,highDestPort;
     private String protocol;
 
-    public void recordCaptureFilter(UserDataBean userData)
+    public void recordCaptureFilter(UserDataBean userData,int index)
     {
         FlowController controller=new FlowController();
-        controller.recordCaptureFilter(userData, userData.getUserDetails().getVirMachineList().size()-1);
+        controller.recordCaptureFilter(userData, index);
     }
     public void createCaptureRule(UserDataBean userData,int index)
     {

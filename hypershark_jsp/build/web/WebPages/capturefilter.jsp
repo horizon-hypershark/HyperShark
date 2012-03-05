@@ -19,6 +19,7 @@ if(userData==null){
 }    
 else
 {
+    int index=Integer.parseInt(request.getParameter("index"));
 %>
 <!DOCTYPE html>
 <html>
@@ -30,7 +31,6 @@ else
         <%
             captFilter.createCaptureRule(userData,index);            
             captFilter.recordCaptureFilter(userData,index);
-            String index=request.getParameter("index");
         %>  
         
     </body>

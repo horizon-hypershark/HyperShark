@@ -37,6 +37,13 @@ else
             .menu li.active a { background:#D6D6D6; }
             .content { float: left; clear: both; border: 1px solid #ccf; border-top: none; border-left: none; background: #EEEEEE; padding: 10px 20px 20px; width: 850px; height:450px; overflow-y:scroll; overflow-x: scroll;}
         </style>
+        
+        <style type="text/css">
+            body
+            {
+                background-image:url('background.png');
+            }
+        </style>
 
 
         <script type="text/javascript">
@@ -102,48 +109,77 @@ else
         </script>
 
 
-
-        <script type="text/javascript"> 
-            
-        function time()
-        {
-                
-            Protoplasm.use('timepicker').transform('input.timepicker'); 
-        }
-        </script>
-
-        <script type="text/javascript">
-            
-        function date()
-        {
-            
-            new JsDatePick({
-                useMode:2,
-                target:"inputField",
-                dateFormat:"%d-%M-%Y"
-                    
-                
-            });
-        }
-        </script>
-        <script language="javascript" src="time/protoplasm.js"></script> 
-        <script language="javascript"> Protoplasm.use('timepicker').transform('input.timepicker'); </script> 
-        <link rel="stylesheet" type="text/css" media="all" href="datepicker/jsDatePick_ltr.min.css" />
-        <script type="text/javascript" src="datepicker/jsDatePick.min.1.3.js"></script>
-        <script type="text/javascript">
-        window.onload = function(){
-            new JsDatePick({
-                useMode:2,
-                target:"inputField",
-                dateFormat:"%d-%M-%Y"
-                    
-            });
-        };
-        </script>
         <!--pop up form-->
         <script type="text/javascript" src="http://code.jquery.com/jquery-latest.pack.js"></script>
         <script type="text/javascript" src="button_form.js"></script>
 
+        
+            
+            
+        <!--change for date ends here-->
+        
+       <!--change for time-->
+        <link rel="stylesheet" href="timepicker/include/jquery-ui-1.8.14.custom.css" type="text/css" />
+    <link rel="stylesheet" href="timepicker/jquery.ui.timepicker.css?v=0.2.9" type="text/css" />
+
+
+    <script type="text/javascript" src="timepicker/include/jquery-1.5.1.min.js"></script>
+    <script type="text/javascript" src="timepicker/include/jquery.ui.core.min.js"></script>
+    <script type="text/javascript" src="timepicker/include/jquery.ui.widget.min.js"></script>
+    <script type="text/javascript" src="timepicker/include/jquery.ui.tabs.min.js"></script>
+    <script type="text/javascript" src="timepicker/include/jquery.ui.position.min.js"></script>
+    <script type="text/javascript" src="timepicker/jquery.ui.timepicker.js?v=0.2.9"></script>
+
+    <style type="text/css">
+        body { font-size: 10px;}
+        #content { font-size: 1.2em; 
+                   font-family: "Lucida Sans Unicode", "Lucida Grande", Verdana, Arial, Helvetica, sans-serif;
+                   width: 950px; margin: auto;
+        }
+        .box { border: 1px solid #888; padding: 15px; margin:12px; }
+        .code { margin: 6px; padding: 9px; background-color: #fdf5ce; border: 1px solid #c77405; }
+        fieldset { padding: 0.5em 2em }
+        hr { margin: 0.5em 0; clear: both }
+        a { cursor: pointer; }
+        #requirements li { line-height: 1.6em; 
+    </style>
+
+    <script type="text/javascript">
+            function showstarttime(){
+		alert("time called");
+               $('#timepicker_customrange').timepicker({
+                   hours: { starts: 0, ends: 24 },
+                   minutes: { interval: 5 },
+                   rows: 4,
+                   showPeriodLabels: true,
+                   minuteText: 'Min'
+               })
+            }
+
+        </script>
+	
+	<script type="text/javascript">
+            function showendtime(){
+		alert("time called");
+               $('#timepicker_customrangeend').timepicker({
+                   hours: { starts: 0, ends: 24 },
+                   minutes: { interval: 5 },
+                   rows: 4,
+                   showPeriodLabels: true,
+                   minuteText: 'Min'
+               })
+            }
+
+        </script>
+	
+        
+ 	
+	
+        
+        <!--change for time ends-->
+       
+        
+        
 
          <script type="text/javascript">
                                                                              
@@ -213,7 +249,7 @@ else
         <style type="text/css">
             body
             {
-                background-image:url('articleback.JPG');
+                background-image:url('background.png');
             }
             
         </style>
@@ -221,26 +257,33 @@ else
 
     </head>
     <body>
+        <!--change foe date-->
+        <script src="datepicker/jquery.ui.datepicker.js"></script>
+	<script>
+        function showdate()
+        {
+		alert("date called");
+                $( "#datepicker" ).datepicker({ maxDate: "+0M +0D" });
+	}
+	</script>
+        <!--change for date ends-->
         <div class="section" id="page">
-
+            <div class="title">
+                <h1><font color="#52A300">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;HyperShark</font></h1>
+            </div>
             <div class="header">
-                <h1><font color="#FFFFFF">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;HyperShark</font></h1>
-                <h2><font color="#FFFFFF">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;See what you Pay for</font>
+            <h3><font color="#FFFFFF">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;See what you Pay for</font>
                 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
                 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
                 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
                 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-                &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+                &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+                &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
                <a href="../logout.jsp"><font color="#FFFFFF" size="4px">Logout</font></a>
+             </h3>       
                 
-                
-                
-                </h2>
-
-                
-                </div>
-
-            <br/><br/>  
+            </div>
+   <br/><br/>  
 
 
             <!--<div class="articleBody clear" id="articles">-->
@@ -267,7 +310,8 @@ else
                                   
                                             <!--<input type="button" name="Set Filters" value="Set Filters" onclick="dialog"/>-->
                                             <!--<button align="center" onclick="#dialog" name="modal"> Set Filters</button>-->
-                                            <a href="#dialog" name="modal"><button type="submit">Edit Filters</button></a>
+                                            
+                                            <%out.println("<a href=\"filterlist.jsp?index="+index+"\">Edit Filters</a>");%> 
                                     </td>
                                 </tr>
 
@@ -428,9 +472,7 @@ else
                                 }
                                 xmlhttp.open("GET","query.jsp",true);
                                 xmlhttp.send();
-
-                                        
-                            }
+                             }
                             </script>
 
 
@@ -440,20 +482,7 @@ else
                     </td>
                 </tr> 
             </table>            
-            <!--<script src="tab/jquery.js" type="text/javascript" charset="utf-8"></script>
-            <script src="tab/jquery.tabify.js" type="text/javascript" charset="utf-8"></script>
-            <script type="text/javascript">
-                // <![CDATA[
-                                
-                $(document).ready(function () {
-                    $('#menu').tabify();
-                    $('#menu2').tabify();
-                });
-                                        
-                // ]]>
-            </script>-->
-
-
+            
             <br/><br/>			
             <div class="footer">
                 <p>&copy HyperShark.com</p> <!-- Change the copyright notice -->

@@ -20,7 +20,7 @@ public class Ethhdr extends L2proto
    public String getPacket()
     {
         String eth_pkt_str=new String();
-        eth_pkt_str="<b>ETHERNET HEADER</b>"+"<br>"+"<b>Destination mac&nbsp;&nbsp;::&nbsp;&nbsp;</b>"+BuildString.mac_string(h_dest)+"&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"+"<b>Source mac&nbsp;&nbsp::&nbsp;&nbsp;</b>"+BuildString.mac_string(h_source)+"&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"+"<b>Protocol&nbsp;&nbsp;::&nbsp;&nbsp;</b>"+h_proto+"<br/>"+"<br/>";        
+        eth_pkt_str="<b>ETHERNET HEADER</b>"+"<br>"+"<b>DESTINATION MAC&nbsp;&nbsp;::&nbsp;&nbsp;</b>"+BuildString.mac_string(h_dest)+"&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"+"<b>SOURCE MAC&nbsp;&nbsp::&nbsp;&nbsp;</b>"+BuildString.mac_string(h_source)+"&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"+"<b>PROTOCOL&nbsp;&nbsp;::&nbsp;&nbsp;</b>"+h_proto+"<br/>"+"<br/>";        
         //eth_pkt_str=eth_pkt_str+;
         return(eth_pkt_str);
     }

@@ -5,7 +5,6 @@
 package FileAccess;
 
 import Core.VirtualMachine;
-import Utils.Conversions;
 import Utils.Hash;
 import java.util.ArrayList;
 
@@ -45,13 +44,13 @@ public class ChangeStatus
     {
         ChangeStatus cngStat=new ChangeStatus();
         VirtualMachine vm=new VirtualMachine();
-        vm.setDirPath("media/STORAGE/storage/hs1234/");
+        vm.setDirPath("/storage/hs1234/");
         vm.setVmId("000004d20000092900000d80000011d7");
         vm.setVifs(new ArrayList<String>());
         vm.getVifs().add("wlan0");
         vm.setGlobalFlowCount(0);
         vm.setHashVal(36);
-        //cngStat.start("1234",vm);
+        cngStat.start("1234",vm);
         cngStat.stop(vm);
        // System.out.println("in main flowcount is "+vm.getGlobalFlowCount());
     }

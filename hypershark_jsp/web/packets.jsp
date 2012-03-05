@@ -19,7 +19,7 @@
         <style type="text/css">
             body
             {
-                background-image:url('articleback.JPG');
+                background-image:url('background.png');
             }
         </style>
 
