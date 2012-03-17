@@ -6,6 +6,8 @@ typedef struct start_data
 	u_int32_t GFL;
 	u_int16_t hash;
 	u_int16_t gpkt;
+	u_int8_t store_pkt;
+	filtering_rule filter;
 }start_data;
 
 typedef struct stop_data

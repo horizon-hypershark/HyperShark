@@ -60,7 +60,6 @@ More detail and specific examples can be found in the included HTML file.
 
 (function ($) 
 {
-	
 	function init(plot) // this is the "body" of the plugin
 	{
 		var canvas = null;
@@ -275,7 +274,6 @@ More detail and specific examples can be found in the included HTML file.
 			if (!target) return; // if no series were passed
 			ctx = newCtx;
 		
-
 			setupPie();
 			var slices = plot.getData();
 		
@@ -750,3 +748,5 @@ More detail and specific examples can be found in the included HTML file.
 		version: "1.0"
 	});
 })(jQuery);
+
+

@@ -37,17 +37,34 @@ else
             function setIndex(temp)
             {
                 index=temp;
+                
             }
         
         </script>
+        <!--change -->
+        <script><%int count=userData.getUserDetails().getVirMachineList().size();%>
+        var store_packets=new Array(<%=count%>);
+        <%
+            for(int i=0;i<count;i++){                   
+        %>
+                store_packets[<%=i%>]=0;
+        <%}%>
+            function markcheck(index)
+            {                
+                if(document.getElementById("packets"+index).checked==true)
+                   store_packets[index]=1;//return(1);
+                else
+                  store_packets[index]=0;//return(0);
+                //alert("store packets is"+store_packets[index]);
+            }
+        </script>
+        <!--change ends-->
         <style type="text/css">
             body
             {
                 background-image:url('background.png');
             }
         </style>
-
-        
         
     </head>
     <body>
@@ -139,10 +156,15 @@ else
                                                     </td>
                                                     <td width="30%">
                                                        
-                                                           <a href="../toggle_status.jsp?index=<%=j%>"> <button background-color="#000000"><%=(virMach.isMonitoringStatus())?"STOP":"START"%></button></a>
-                                                            
+                                                           <%int packet=0;
+                                                           
+                                                             %>
+                                                          <a href="../toggle_status.jsp?index=<%=j%>" onclick="location.href=this.href+'&packets='+store_packets[<%=j%>];return false;"> <button background-color="#000000"><%=(virMach.isMonitoringStatus())?"STOP":"START"%></button></a>
+                                                           &nbsp;&nbsp;&nbsp;
+                                                           <input type="checkbox" id="packets<%=j%>" name="packets<%=j%>" value="<%=j%>" onchange="markcheck(<%=j%>)"/> Keep Packets<br />
+ 
 
-                                                                                                            </td>    
+                                                    </td>    
                                                     <td width="20%">
                                                      
                                                             <!--<input type="button" name="Set Filters" value="Set Filters" onclick="dialog"/>-->
@@ -196,7 +218,8 @@ else
                                                                     <br/>
                                                                     <br/>
                                                                     <!-- for ip address-->                                                                    
-                                                                    &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Source IP:&nbsp;&nbsp;&nbsp;
+                                                                    &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;IP Address:&nbsp;&nbsp;&nbsp;<br/>
+                                                                    &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Low:
                                                                     <%for(int i=1;i<=4;i++)
                                                                     {%>
                                                                     <select name="srcOctet<%=i%>" id="srcOctet<%=i%>">
@@ -209,7 +232,7 @@ else
                                                                     </select>
                                                                             <%if(i!=4)out.print(":");}%>                                                                                                                                       <br/>
 
-                                                                    &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Destination IP :&nbsp;&nbsp;&nbsp;
+                                                                    &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;High :&nbsp;&nbsp;&nbsp;
                                                                     <%for(int i=1;i<=4;i++)
                                                                     {%>
                                                                     <select name="dstOctet<%=i%>" id="dstOctet<%=i%>">
@@ -224,58 +247,24 @@ else
                                                                     
                                                                     <br/>
                                                                     <br/>
-                                                                    <!-- for source and destination mask-->
+                                                                    
+                                                                    &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; Port:&nbsp;&nbsp;&nbsp;&nbsp;
 
-                                                                    &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Source Mask:&nbsp;&nbsp;&nbsp;
-                                                                    <%for(int i=1;i<=4;i++)
-                                                                    {%>
-                                                                    <select name="srcMaskOctet<%=i%>" id="srcMaskOctet<%=i%>">
-                                                                        <option>Select</option>
-                                                                        <% int m = 0;
-                                                                            while (m < 255) {%>
-                                                                        <option><%out.print(m);%></option>
-                                                                        <% m++;
-                                                                            }%>
-                                                                    </select>
-                                                                    <%if(i!=4)out.print(":");}%>                                                                    
+                                                                    Low<input type="text" name="lowSrcPort" id="lowSrcPort" onblur="verify_port('ChoiceFrom')"/>
+                                                                    High<input type="text" id="highSrcPort" name="highSrcPort" onblur="verify_port('ChoiceTo')"/>
                                                                     <br/>
-
-                                                                    &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Destination Mask:&nbsp;&nbsp;&nbsp;
-                                                                    <%for(int i=1;i<=4;i++)
-                                                                    {%>
-                                                                    <select name="dstMaskOctet<%=i%>" id="dstMaskOctet<%=i%>">
-                                                                        <option>Select</option>
-                                                                        <%int m = 0;
-                                                                            while (m < 255) {%>
-                                                                        <option><%out.print(m);%></option>
-                                                                        <% m++;
-                                                                            }%>
-                                                                    </select>
-                                                                    <%if(i!=4)out.print(":");}%>                                                                    
-                                                                    <br/>
-                                                                    <br/>
-
-                                                                    &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Source Port:&nbsp;&nbsp;&nbsp;&nbsp;
-
-                                                                    From<input type="text" name="lowSrcPort" id="lowSrcPort" onblur="verify_port('ChoiceFrom')"/>
-                                                                    To<input type="text" id="highSrcPort" name="highSrcPort" onblur="verify_port('ChoiceTo')"/>
-                                                                    <br/>
-                                                                    &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Destination Port:&nbsp;&nbsp;
-                                                                    From<input type="text" id="lowDestPort" name="lowDestPort" onblur="verify_port('ChoiceFromDest')"/>
-                                                                    To<input type="text" id="highDestPort" name="highDestPort" onblur="verify_port('ChoiceToDest')"/>
-
                                                                     <br/>
 
                                                                     <br/>
                                                                     &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Protocol:&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
                                                                     <select name="protocol">
                                                                         <option value="Select">Select</option>
-                                                                        <option value=" TCP">TCP</option>
-                                                                        <option value=" UDP">UDP</option>
-                                                                        <option value=" ICMP">ICMP</option>
-                                                                        <option value=" IGMP">IGMP</option>
-                                                                        <option value=" GRE">GRE</option>
-                                                                        <option value=" SCTP">SCTP</option>
+                                                                        <option value="TCP">TCP</option>
+                                                                        <option value="UDP">UDP</option>
+                                                                        <option value="ICMP">ICMP</option>
+                                                                        <option value="IGMP">IGMP</option>
+                                                                        <option value="GRE">GRE</option>
+                                                                        <option value="SCTP">SCTP</option>
 
                                                                     </select>
                                                                     <br/>

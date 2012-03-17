@@ -74,12 +74,12 @@
         f.setCpt(timRule);
         f.setRules(dispRule);
         
-        System.out.println("day is"+f.getCpt().day);
+        /*System.out.println("day is"+f.getCpt().day);
         System.out.println("port is"+f.getRules().lowPort);
         System.out.println("dest port is"+f.getRules().highPort);
         System.out.println("ip is"+f.getRules().getSrcHost()[0]);
         System.out.println("ip is"+f.getRules().getDstHost()[0]);
-        
+        */
         
         /*f.cpt.day=31;
         f.cpt.month=0;
@@ -108,7 +108,22 @@
         session.setAttribute("flows",f.flow);
 %> 
         <div class="articleBody clear" id="articles">
-        <table border="0">
+        <%
+            if(f.flow.size()==0)
+        {
+            out.println("Oops! sorry no data for the given query found");
+        
+        }
+        else
+                 {
+            
+        
+        System.out.println("no of flowrecords is::"+f.flow.size());
+        
+        
+        %>
+            
+            <table border="0">
             <tr>
             <td>
             <h><b>FLOWRECORDS</b></h>
@@ -133,8 +148,12 @@
             
         <%int k=0,m=1; 
         j=0;
-        System.out.println("no of flowrecords is::"+f.flow.size());
-        
+        FlowRecord recArray[]=new FlowRecord[f.flow.size()];
+        for(FlowRecord flowRec:f.flow)
+        {
+            recArray[j++]=flowRec;
+        }    
+        j=0;
         for(FlowRecord flowRec:f.flow)
         { %>
         
@@ -168,7 +187,8 @@
         </td>
         
         </tr>
-         <% j++; } %>
+         <% j++; } 
+               }%>
         </table>
         </div>
         

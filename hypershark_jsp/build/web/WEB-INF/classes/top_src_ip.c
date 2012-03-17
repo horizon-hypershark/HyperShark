@@ -60,14 +60,25 @@ JNIEXPORT void JNICALL Java_FileAccess_graph_fillips
 
 	system("ls | grep flow.* > temp.txt");
 	fp1=fopen("temp.txt","r");
+	if(fp1==NULL)
+	printf("\nerror in opening file");
 
 	while(fscanf(fp1,"%s",fname1)!=EOF)
 	{
 		fp=fopen(fname1,"rb");
-		//printf("\nReading File %s\n",fname1);
+		if(fp==NULL)
+		printf("\n error in opening file");
+		printf("\nReading File %s\n",fname1);
 
 		while((fread(&flow_struct,sizeof(flow_record),1,fp))==1)
 		{
+			//change 
+			/*printf("\n without sorting in jni c ip is %u.%u.%u.%u",(flow_struct.ip_src.v4 >> 24) & 0xFF,(flow_struct.ip_src.v4 >> 16) & 0xFF,(flow_struct.ip_src.v4 >> 8) & 0xFF,(flow_struct.ip_src.v4) & 0xFF);
+			
+				
+			printf("and nop is %u",flow_struct.nop); */
+
+			//change ends			
 			if(s_ip==0)
 			{
 				s_ip=temp=get_node(flow_struct);
@@ -82,7 +93,8 @@ JNIEXPORT void JNICALL Java_FileAccess_graph_fillips
 					//count++;
 					temp=temp->next;
 				}  
-			}    
+			}
+					    
 		} // end of while
 		fclose(fp);
 	} // end of while
@@ -128,7 +140,7 @@ JNIEXPORT void JNICALL Java_FileAccess_graph_fillips
 	while(i<5)
 	{
 	   
-	   printf("\nSRC_IP=%u.%u.%u.%u",(top[i].ip_src.v4 >> 24) & 0xFF,(top[i].ip_src.v4 >> 16) & 0xFF,(top[i].ip_src.v4 >> 8) & 0xFF,(top[i].ip_src.v4) & 0xFF);   
+	   printf("\nIn c code SRC_IP=%u.%u.%u.%u",(top[i].ip_src.v4 >> 24) & 0xFF,(top[i].ip_src.v4 >> 16) & 0xFF,(top[i].ip_src.v4 >> 8) & 0xFF,(top[i].ip_src.v4) & 0xFF);   
 	   printf(" nop = %d",top[i].nop);
 	   i++;
 	}
@@ -158,6 +170,7 @@ JNIEXPORT void JNICALL Java_FileAccess_graph_fillips
 		(*env)->SetIntArrayRegion(env,jint,0,5,iparr);
 		(*env)->SetObjectField(env,obj,F1,jint);//similar to setintfield but as array is a reference type it is setobjectfield
 		F1 = (*env)->GetFieldID(env,cls_main,"frequency","[I");
+		jint=(*env)->NewIntArray(env,5);	
 		(*env)->SetIntArrayRegion(env,jint,0,5,freqarr);
 		(*env)->SetObjectField(env,obj,F1,jint);//similar to setintfield but as array is a reference type it is setobjectfield
 				

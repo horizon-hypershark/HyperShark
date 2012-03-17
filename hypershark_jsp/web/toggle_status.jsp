@@ -13,9 +13,11 @@ if(userData==null){
 //    return;
 }    
 else
-{
+{   
+    //System.out.println("Packets is::"+request.getParameter("packets"));
     FlowController flowControl=new FlowController();
     //System.out.println("In toogle_status.jsp");
-    flowControl.changeMonitoringStatus(userData, Integer.parseInt(request.getParameter("index")));
+    flowControl.changeMonitoringStatus(userData, Integer.parseInt(request.getParameter("index")),Integer.parseInt(request.getParameter("packets")));
+   
     response.sendRedirect("WebPages/vmList.jsp");
 }%>

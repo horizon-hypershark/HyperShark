@@ -20,9 +20,18 @@ public class VirtualMachine {
     private int memUsed;
     private boolean monitoringStatus;
     private String vmImage;
+    private int packets;
     private ArrayList<CaptureRule> captureRules;
     private ArrayList<String> vifs;
 
+    public int getPackets() {
+        return packets;
+    }
+
+    public void setPackets(int packets) {
+        this.packets = packets;
+    }
+    
     public String getVmName() {
         return vmName;
     }

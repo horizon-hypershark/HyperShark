@@ -146,10 +146,10 @@ else
 
     <script type="text/javascript">
             function showstarttime(){
-		alert("time called");
+		//alert("time called");
                $('#timepicker_customrange').timepicker({
                    hours: { starts: 0, ends: 24 },
-                   minutes: { interval: 5 },
+                   minutes: { interval: 3 },
                    rows: 4,
                    showPeriodLabels: true,
                    minuteText: 'Min'
@@ -160,10 +160,10 @@ else
 	
 	<script type="text/javascript">
             function showendtime(){
-		alert("time called");
+		//alert("time called");
                $('#timepicker_customrangeend').timepicker({
                    hours: { starts: 0, ends: 24 },
-                   minutes: { interval: 5 },
+                   minutes: { interval: 3 },
                    rows: 4,
                    showPeriodLabels: true,
                    minuteText: 'Min'
@@ -262,7 +262,7 @@ else
 	<script>
         function showdate()
         {
-		alert("date called");
+		//alert("date called");
                 $( "#datepicker" ).datepicker({ maxDate: "+0M +0D" });
 	}
 	</script>

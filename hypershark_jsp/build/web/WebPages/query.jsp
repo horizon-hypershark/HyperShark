@@ -42,7 +42,7 @@
     
         <script type="text/javascript">
             function showstarttime(){
-		alert("time called");
+		//alert("time called");
                $('#timepicker_customrange').timepicker({
                    hours: { starts: 0, ends: 24 },
                    minutes: { interval: 5 },
@@ -56,7 +56,7 @@
 	
 	<script type="text/javascript">
             function showendtime(){
-		alert("time called");
+		//alert("time called");
                $('#timepicker_customrangeend').timepicker({
                    hours: { starts: 0, ends: 24 },
                    minutes: { interval: 5 },
@@ -132,7 +132,7 @@
         <script type="text/javascript">
                       function retdate()
                       {
-                      alert("date called");
+                      //alert("date called");
                       var date=document.getElementById("inputField").value;
                       return(date);
                       }

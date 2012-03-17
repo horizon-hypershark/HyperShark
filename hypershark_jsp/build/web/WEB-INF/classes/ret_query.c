@@ -204,38 +204,43 @@ void traverse_flow_list(flow_rec_nos *flow_list,char *path,int file_index,int ge
 		read(fd_fr,&flow_list->fr,sizeof(flow_record));
 
 		//Seek To Flow Record's Start Packet Number in the Offset File
-		if(get_packets){
-			lseek(fd_off,(flow_list->fr.start_pkt_no) * sizeof(loff_t),0);
-			if(cnt==0)		
-			{
-				sprintf(pkt_trace_file,"%s%s%d",path,"Packets/pkttrace_",flow_list->fr.pkt_file_no);
-				fd_pkt=open(pkt_trace_file,O_RDONLY,0);
-				cnt=1;
-			}
-			//Read the offset NOP times and fetch corresponding Packet from Packet Trace File
-			for(i=0;i<flow_list->fr.nop;i++)
-			{
-				read(fd_off,(loff_t*)&offset,sizeof(loff_t));
-				lseek(fd_pkt,offset,0);
-				read(fd_pkt,&pkf,sizeof(struct pfring_pkthdr));
-				buffer=(unsigned char*)malloc(pkf.caplen);
-				read(fd_pkt,buffer,pkf.caplen);
-				//Creating Link List of Read Packets
-				if(packet_start==0)
+		if(flow_list->fr.pkt_file_no!=-1)
+		{
+			if(get_packets){
+				lseek(fd_off,(flow_list->fr.start_pkt_no) * sizeof(loff_t),0);
+				if(cnt==0)		
 				{
-					packet_start=end=get_hs_pkt(&pkf,buffer);
+					sprintf(pkt_trace_file,"%s%s%d",path,"Packets/pkttrace_",flow_list->fr.pkt_file_no);
+					fd_pkt=open(pkt_trace_file,O_RDONLY,0);
+					cnt=1;
 				}
-				else
+				//Read the offset NOP times and fetch corresponding Packet from Packet Trace File
+				for(i=0;i<flow_list->fr.nop;i++)
 				{
-					end->next=get_hs_pkt(&pkf,buffer);
-					end=end->next;
+					read(fd_off,(loff_t*)&offset,sizeof(loff_t));
+					lseek(fd_pkt,offset,0);
+					read(fd_pkt,&pkf,sizeof(struct pfring_pkthdr));
+					buffer=(unsigned char*)malloc(pkf.caplen);
+					read(fd_pkt,buffer,pkf.caplen);
+					//Creating Link List of Read Packets
+					if(packet_start==0)
+					{
+						packet_start=end=get_hs_pkt(&pkf,buffer);
+					}
+					else
+					{
+						end->next=get_hs_pkt(&pkf,buffer);
+						end=end->next;
+					}
+					free(buffer);
 				}
-				free(buffer);
-			}
 			//To Link to Packets to corresponding Flow Record
-			flow_list->pkt_list=packet_start;
-			packet_start=0;
+				flow_list->pkt_list=packet_start;
+				packet_start=0;
+			}
 		}
+		else
+			flow_list->pkt_list=0;
 		flow_list=flow_list->next;
 		
 	}

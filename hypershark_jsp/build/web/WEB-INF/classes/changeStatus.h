@@ -1,3 +1,4 @@
+
 typedef struct start_data
 {
 	char option[20];
@@ -6,6 +7,8 @@ typedef struct start_data
 	u_int32_t GFL;
 	u_int16_t hash;
 	u_int16_t gpkt;
+	u_int8_t store_pkt;
+	filtering_rule filter;
 }start_data;
 
 typedef struct stop_data
@@ -13,3 +16,14 @@ typedef struct stop_data
 	char option[20];
 	u_int16_t hash;
 }stop_data;
+
+typedef struct start_recv
+{
+	u_int16_t hash;
+}start_recv;
+
+typedef struct stop_recv
+{
+	u_int32_t GFL;
+	u_int16_t gpkt;
+}stop_recv;

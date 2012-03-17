@@ -13,10 +13,10 @@ import java.util.ArrayList;
  * @author varun
  */
 public class CaptureFilter {
-    public void recordCaptureFilter(CaptureRule captRule,String vmId)
+    public int recordCaptureFilter(CaptureRule captRule,String vmId)
     {
         CaptureFilterDAO captDao=new CaptureFilterDAO();
-        captDao.insertCaptureFilter(captRule, vmId);
+        return captDao.insertCaptureFilter(captRule, vmId);
     }
     public ArrayList<CaptureRule> retrieveCaptureFilter(String vmId)
     {

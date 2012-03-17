@@ -8,15 +8,17 @@
 #include<stdlib.h>
 #include"changeStatus.h"
  
-start_data * fill_start_data(const char *path,const char *interface,u_int32_t GFL,u_int16_t hash,u_int16_t gpkt)
+start_data * fill_start_data(const char *path,const char *interface,u_int32_t GFL,u_int16_t hash,u_int16_t gpkt,u_int8_t store_pkt)
 {
 	start_data *to_send = (start_data*)malloc(sizeof(start_data));
+	memset(to_send,0,sizeof(start_data));
 	strcpy(to_send->option,"START");
 	strcpy(to_send->path,path);
 	strcpy(to_send->interface,interface);
 	to_send->GFL=GFL;
 	to_send->hash=hash;
 	to_send->gpkt=gpkt;
+	to_send->store_pkt=store_pkt;
 	return to_send;
 }
 
@@ -47,6 +49,6 @@ start_recv* start_capture(start_data *to_send)
 
 int main()
 {
-	start_recv *to_recv=start_capture(fill_start_data("media/STORAGE/storage/hs1234/","wlan0",0,36,0));
+	start_recv *to_recv=start_capture(fill_start_data("media/STORAGE/storage/hs1234/","wlan0",100,36,0,1));
 	printf("\nNew hash is:%d",to_recv->hash);
 }

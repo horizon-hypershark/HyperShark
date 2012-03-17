@@ -63,7 +63,7 @@ public class VmDetailsDAO {
                 virtMach.setMemUsed(vmDetails.getInt("mem_used"));
                 virtMach.setMonitoringStatus(vmDetails.getBoolean("monitoring"));
                 virtMach.setVmImage(vmDetails.getString("vm_image"));
-                vmList.add(virtMach);
+                vmList.add(virtMach);             
             }
         } catch (SQLException ex) {
             Logger.getLogger(UserDetailsDAO.class.getName()).log(Level.SEVERE, null, ex);
@@ -72,7 +72,7 @@ public class VmDetailsDAO {
             conn.closeConnection();
         } catch (SQLException ex) {
             Logger.getLogger(VmDetailsDAO.class.getName()).log(Level.SEVERE, null, ex);
-        }
+        }        
         return vmList;
     }        
     public ArrayList<String> getVifs(String vmId)

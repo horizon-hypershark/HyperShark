@@ -33,7 +33,6 @@
 // the actual Flot code
 (function($) {
     function Plot(placeholder, data_, options_, plugins) {
-
         // data is on the form:
         //   [ series1, series2 ... ]
         // where series is either just the data as [ [x1, y1], [x2, y2], ... ]
@@ -2598,3 +2597,5 @@
     }
     
 })(jQuery);
+
+

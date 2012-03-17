@@ -9,17 +9,22 @@ package Core;
  * @author varun
  */
 public class CaptureRule {
+    private int ruleId;
     public short smac[];
     public short dmac[];
     public short srcHost[];//src ip address
     public short dstHost[];//dest ip address
-    public short srcHostMask[];
-    public short dstHostMask[];
     public int lowSrcPort;
     public int highSrcPort;
-    public int lowDstPort;
-    public int highDstPort;
     public short protocol;
+
+    public int getRuleId() {
+        return ruleId;
+    }
+
+    public void setRuleId(int ruleId) {
+        this.ruleId = ruleId;
+    }
 
    
     public short[] getDmac() {
@@ -37,23 +42,8 @@ public class CaptureRule {
     public void setDstHost(short[] dstHost) {
         this.dstHost = dstHost;
     }
-
-    public short[] getDstHostMask() {
-        return dstHostMask;
-    }
-
-    public void setDstHostMask(short[] dstHostMask) {
-        this.dstHostMask = dstHostMask;
-    }
-
-    public int getHighDstPort() {
-        return highDstPort;
-    }
-
-    public void setHighDstPort(int highDstPort) {
-        this.highDstPort = highDstPort;
-    }
-
+ 
+    
     public int getHighSrcPort() {
         return highSrcPort;
     }
@@ -62,14 +52,7 @@ public class CaptureRule {
         this.highSrcPort = highSrcPort;
     }
 
-    public int getLowDstPort() {
-        return lowDstPort;
-    }
-
-    public void setLowDstPort(int lowDstPort) {
-        this.lowDstPort = lowDstPort;
-    }
-
+    
     public int getLowSrcPort() {
         return lowSrcPort;
     }
@@ -102,13 +85,4 @@ public class CaptureRule {
         this.srcHost = srcHost;
     }
 
-    public short[] getSrcHostMask() {
-        return srcHostMask;
-    }
-
-    public void setSrcHostMask(short[] srcHostMask) {
-        this.srcHostMask = srcHostMask;
-    }
-    
-    
 }

@@ -9,9 +9,9 @@
 #include <unistd.h>
 #include <string.h>
 #include "Core_capfilter.h"
+#include<linux/pf_ring.h>
 
-
-typedef struct capturefilter
+/*typedef struct capturefilter
 {
 	short *smac;
 	short *dmac;
@@ -25,7 +25,17 @@ typedef struct capturefilter
 	u_int16_t highDstPort;
 	u_int16_t protocol;
 
-}capturefilter;
+}capturefilter;*/
+
+u_int32_t set_ip(int shift,short src_host)
+{
+	u_int32_t temp=0;
+	temp=src_host;
+	temp<<=shift;
+	return temp;
+}
+
+
 
 JNIEXPORT void JNICALL Java_Core_capfilter_fillcapfilter
   (JNIEnv * env,jobject obj)
@@ -34,19 +44,25 @@ JNIEXPORT void JNICALL Java_Core_capfilter_fillcapfilter
 	jfieldID F1;
 	jclass cls_rule,cls_main;
 	jobject rule_obj;
-	jshortArray jsh;;
+	jshortArray jsh;
 	jsize length=100;//size of array
 	jboolean iscopy;
 
+
+	short *smac;
+	short *dmac;
+
 	short *srcHost;
 	short *dstHost;
-	short *srcHostMask;
-	short *dstHostMask;
-	int srcip;
+	u_int32_t ip=0;
+	
+	int shift;
 	
 	
-	capturefilter filter; 
+	//capturefilter filter; 
 	
+	filtering_rule_core_fields filter;
+
 	cls_main=(*env)->GetObjectClass(env,obj);
 	cls_rule=(*env)->FindClass(env,"Core/CaptureRule");//find data class	
 
@@ -61,62 +77,97 @@ JNIEXPORT void JNICALL Java_Core_capfilter_fillcapfilter
 	//get individual fields from object of rules 	
 	F1 = (*env)->GetFieldID(env,cls_rule,"smac","[S");
 	jsh=(*env)->GetObjectField(env,rule_obj,F1);
-	filter.smac=(*env)->GetShortArrayElements(env,jsh,&iscopy);	
-			
+	smac=(*env)->GetShortArrayElements(env,jsh,&iscopy);	
+	
+	for(i=0;i<6;i++)
+	{
+		filter.smac[i]=smac[i];	
+	}
+		
+
 	F1 = (*env)->GetFieldID(env,cls_rule,"dmac","[S");
 	jsh=(*env)->GetObjectField(env,rule_obj,F1);
-	filter.dmac=(*env)->GetShortArrayElements(env,jsh,&iscopy);	
+	dmac=(*env)->GetShortArrayElements(env,jsh,&iscopy);	
 	
+	for(i=0;i<6;i++)
+	{
+		filter.dmac[i]=dmac[i];	
+	}
+
 	F1 = (*env)->GetFieldID(env,cls_rule,"srcHost","[S");
 	jsh=(*env)->GetObjectField(env,rule_obj,F1);
 	srcHost=(*env)->GetShortArrayElements(env,jsh,&iscopy);	
 
+	
+
 	//fill srchost
-	srcip=srcHost[0];
-	srcip<<=8;
-	srcip=srcHost[1];
-	srcip<<=8;
-	srcip=srcHost[2];
-	srcip<<=8;
-	srcip=srcHost[3];
-	srcip<<=8;
-
-	filter.srcHost=srcip;
-
-			
+	/*temp=srcHost[0];
+	temp<<=24;
+	srcip=srcip|temp;
+	
+	temp=0;
+	temp=srcHost[1];
+	temp<<=16;
+	srcip=srcip|temp;
+	
+	temp=0;
+	temp=srcHost[2];
+	temp<<=8;
+	srcip=srcip|temp;
+	
+	temp=0;
+	temp=srcHost[3];
+	srcip=srcip|temp;*/
+	
+	
+	//FOR source IP
+	shift=24;
+	for(i=0;i<4;i++)
+	{
+		ip=ip|set_ip(shift,srcHost[i]);
+		shift-=8;
+	}
+	
+		filter.host_low.v4=ip;	
+	
+	
 	F1 = (*env)->GetFieldID(env,cls_rule,"dstHost","[S");
 	jsh=(*env)->GetObjectField(env,rule_obj,F1);
 	dstHost=(*env)->GetShortArrayElements(env,jsh,&iscopy);	
 		
-	F1 = (*env)->GetFieldID(env,cls_rule,"srcHostMask","[S");
-	jsh=(*env)->GetObjectField(env,rule_obj,F1);
-	srcHostMask=(*env)->GetShortArrayElements(env,jsh,&iscopy);	
-			
-	F1 = (*env)->GetFieldID(env,cls_rule,"dstHostMask","[S");
-	jsh=(*env)->GetObjectField(env,rule_obj,F1);
-	dstHostMask=(*env)->GetShortArrayElements(env,jsh,&iscopy);	
+	printf("%d%d%d%d",dstHost[0],dstHost[1],dstHost[2],dstHost[3]);	
+	//FOR DESTINATION IP
+	ip=0;	
+	shift=24;
+	for(i=0;i<4;i++)
+	{
+		ip=ip|set_ip(shift,dstHost[i]);
+		shift-=8;
+	}
+	
+		filter.host_high.v4=ip;	
 	
 	
 	F1 = (*env)->GetFieldID(env,cls_rule,"lowSrcPort","I");
-	filter.lowSrcPort=(*env)->GetIntField(env,rule_obj,F1);
+	filter.port_low=(*env)->GetIntField(env,rule_obj,F1);
 		
 	F1 = (*env)->GetFieldID(env,cls_rule,"highSrcPort","I");
-	filter.highSrcPort=(*env)->GetIntField(env,rule_obj,F1);
-	
-	F1 = (*env)->GetFieldID(env,cls_rule,"lowDstPort","I");
-	filter.lowDstPort=(*env)->GetIntField(env,rule_obj,F1);
-		
-	F1 = (*env)->GetFieldID(env,cls_rule,"highDstPort","I");
-	filter.highDstPort=(*env)->GetIntField(env,rule_obj,F1);
+	filter.port_high=(*env)->GetIntField(env,rule_obj,F1);
 	
 	F1 = (*env)->GetFieldID(env,cls_rule,"protocol","S");
-	filter.protocol=(*env)->GetShortField(env,rule_obj,F1);
+	filter.proto=(*env)->GetShortField(env,rule_obj,F1);
 
+	//change
+	F1 = (*env)->GetFieldID(env,cls_rule,"ruleId","I");
+	filter.rule_id=(*env)->GetIntField(env,rule_obj,F1);
+
+
+	//change ends
 	printf("\nprinting values in c code\n");
 
-	printf("smac=%d-%d-%d-%d-%d-%d\ndmac=%d-%d-%d-%d-%d-%d\nsrcip=%d.%d.%d.%d\n",filter.smac[0],filter.smac[1],filter.smac[2],filter.smac[3],filter.smac[4],filter.smac[5],filter.dmac[0],filter.dmac[1],filter.dmac[2],filter.dmac[3],filter.dmac[4],filter.dmac[5],((filter.srcHost>>24)& 0xFF),((filter.srcHost >> 16) & 0xFF),((filter.srcHost >> 8) & 0xFF),((filter.srcHost >> 0) & 0xFF));
+	printf("smac=%d-%d-%d-%d-%d-%d\ndmac=%d-%d-%d-%d-%d-%d\nsrcip=%d.%d.%d.%d",filter.smac[0],filter.smac[1],filter.smac[2],filter.smac[3],filter.smac[4],filter.smac[5],filter.dmac[0],filter.dmac[1],filter.dmac[2],filter.dmac[3],filter.dmac[4],filter.dmac[5],((filter.host_low.v4>>24)& 0xFF),((filter.host_low.v4 >> 16) & 0xFF),((filter.host_low.v4 >> 8) & 0xFF),((filter.host_low.v4 >> 0) & 0xFF));
 
-	printf("\ndestip=%d.%d.%d.%d\nsourcemask=%d.%d.%d.%d\ndestmask=%d.%d.%d.%d\nlowsrcport=%d\nlowDstport=%d,highsrcport=%d,highdstport=%d,protocol=%d",filter.dstHost[0],filter.dstHost[1],filter.dstHost[2],filter.dstHost[3],filter.srcHostMask[0],filter.srcHostMask[1],filter.srcHostMask[2],filter.srcHostMask[3],filter.dstHostMask[0],filter.dstHostMask[1],filter.dstHostMask[2],filter.dstHostMask[3],filter.lowSrcPort,filter.lowDstPort,filter.highSrcPort,filter.highDstPort,filter.protocol);
+	printf("\ndstipip=%d.%d.%d.%d\nlowsrcport=%d\nhighsrcport=%dprotocol=%d",((filter.host_high.v4>>24)& 0xFF),((filter.host_high.v4 >> 16) & 0xFF),((filter.host_high.v4 >> 8) & 0xFF),((filter.host_high.v4 >> 0) & 0xFF),filter.port_low,filter.port_high,filter.proto);
 	
 }
 

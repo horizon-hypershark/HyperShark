@@ -24,8 +24,6 @@ public class capfilter
             short[] destmac=new short[6];
             short[] sourceip=new short[4];
             short[] destip=new short[4];
-            short[] sourceipmask=new short[4];
-            short[] destipmask=new short[4];
             
             int i;
             
@@ -47,26 +45,14 @@ public class capfilter
             }
             for(i=0;i<4;i++)
             {
-                destip[i]=(short) (200+i);
+                destip[i]=(short) (120+i);
             }
             
             filter.cpt.setDstHost(destip);
             filter.cpt.setSrcHost(sourceip);
             
-            for(i=0;i<4;i++)
-            {
-                sourceipmask[i]=(short) (300+i);
-            }
-            for(i=0;i<4;i++)
-            {
-                destipmask[i]=(short) (400+i);
-            }
-            filter.cpt.setSrcHostMask(sourceipmask);
-            filter.cpt.setDstHostMask(destipmask);
             
-            filter.cpt.setHighDstPort(200);
             filter.cpt.setHighSrcPort(150);
-            filter.cpt.setLowDstPort(100);
             filter.cpt.setLowSrcPort(50);
             filter.cpt.setProtocol((short)20);
             

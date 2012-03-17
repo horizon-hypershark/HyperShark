@@ -19,7 +19,10 @@ if(userData==null){
 }    
 else
 {
-    int index=Integer.parseInt(request.getParameter("index"));
+    String in=request.getParameter("index");
+    int index=0;
+    if(in!=null)
+    index=Integer.parseInt(in);
 %>
 <!DOCTYPE html>
 <html>
@@ -31,6 +34,7 @@ else
         <%
             captFilter.createCaptureRule(userData,index);            
             captFilter.recordCaptureFilter(userData,index);
+            response.sendRedirect("vmList.jsp");
         %>  
         
     </body>

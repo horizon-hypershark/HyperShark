@@ -38,13 +38,16 @@ public class FlowController {
     {
         CaptureFilter captFilter=new CaptureFilter();
         VirtualMachine vm=userData.getUserDetails().getVirMachineList().get(index);
-        captFilter.recordCaptureFilter(vm.getCaptureRules().get(vm.getCaptureRules().size()-1), vm.getVmId());
+        int vmNo=vm.getCaptureRules().size()-1;
+        vm.getCaptureRules().get(vmNo).setRuleId(captFilter.recordCaptureFilter(vm.getCaptureRules().get(vmNo), vm.getVmId()));
+         //System.out.println("RuleId is ::"+vm.getCaptureRules().get(vmNo).getRuleId());
     }
-    public void changeMonitoringStatus(UserDataBean userData,int index)
+    public void changeMonitoringStatus(UserDataBean userData,int index,int packets)
     {
         ChangeVmStatus changStat=new ChangeVmStatus();
         VmDetails vmDet=new VmDetails();
         VirtualMachine vm=userData.getUserDetails().getVirMachineList().get(index);
+        vm.setPackets(packets);        
         if(vm.isMonitoringStatus())
         {  //monnitoring going on
             //System.out.println("In change status Flowcontrollor Stop");

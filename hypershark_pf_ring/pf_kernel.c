@@ -39,10 +39,14 @@ u_int16_t slot_header_len;
 int add_filtering_rule(struct socket *capture_sockfd,filtering_rule* rule_to_add)
 {
 	int ret=capture_sockfd->ops->setsockopt(capture_sockfd, 0, SO_ADD_FILTERING_RULE, rule_to_add, sizeof(filtering_rule));
+	if(ret < 0)
+		printk("pfring_add_hash_filtering_rule(2) failed\n");
+	else
+		printk("Rule added successfully...\n");
 	return ret;
 }
 
-/*int set_filtering_rule(struct socket *capture_sockfd,u_int16_t id,u_int16_t proto)
+int set_filtering_rule(struct socket *capture_sockfd,u_int16_t id,u_int16_t proto)
 {
 	filtering_rule rule;
 
@@ -51,14 +55,14 @@ int add_filtering_rule(struct socket *capture_sockfd,filtering_rule* rule_to_add
 	//rule.rule_action = forward_packet_and_stop_rule_evaluation;
 	rule.rule_action = dont_forward_packet_and_stop_rule_evaluation;
 	//rule.core_fields.port_low = 80, rule.core_fields.port_high = 80;
-	//rule.core_fields.proto = proto;//6 /* tcp */;
-/*	rule.core_fields.port_low=440;
-	rule.core_fields.port_high=444;
+	rule.core_fields.proto = proto;//6 /* tcp */;
+	/*rule.core_fields.port_low=440;
+	rule.core_fields.port_high=444;*/
 	if(add_filtering_rule(capture_sockfd, &rule) < 0)
 		printk("pfring_add_hash_filtering_rule(2) failed\n");
 	else
 		printk("Rule added successfully...\n");
-}*/
+}
 
 /*int set_filtering_rule(struct socket *capture_sockfd,char *buf)
 {
@@ -313,7 +317,7 @@ struct file* file_open(const char *path,int flags,int rights)
   /*If Error in file open catch the catch and return else return the File Descriptor*/
   if(IS_ERR(filp)){
     err=PTR_ERR(filp);
-    printk("Error COde is : %d",err);
+    printk("Error Code is : %d",err);
     return NULL;
   }
   //printk(KERN_INFO "File opened Successfully");
@@ -594,8 +598,8 @@ int compress_write_bitmap(maprecord *path_cache)
 	struct file *filp;
 	
 	struct tm start,end;
-	time_to_tm(path_cache->flow_start[0].start_time.tv_sec,0,&start);
-	time_to_tm(path_cache->flow_start[99].end_time.tv_sec,0,&end);
+	time_to_tm(path_cache->flow_start[0].start_time.tv_sec,19800,&start);
+	time_to_tm(path_cache->flow_start[99].end_time.tv_sec,19800,&end);
 	
 	strcpy(bmpath,path_cache->path);
 	strcat(bmpath,"BitMaps/");
@@ -708,7 +712,7 @@ void write_offset_table(maprecord *path_cache)
 	  }
 	 else
 	 {
-	    printk("Problem in opening filw for writing offsets");
+	    printk("Problem in opening file for writing offsets");
 	 }
 	
 	//Clean Up and Updation Tasks	
@@ -810,20 +814,19 @@ void create_flow_record(flow_record *fr,struct pfring_pkthdr *pkf,u_int32_t flow
 	fr->protocol=pkf->extended_hdr.parsed_pkt.l3_proto;
 	fr->start_time=fr->end_time=pkf->ts;			//Subject to change can be struct timeval ts //Changed
 
-	time_to_tm(fr->start_time.tv_sec,19800,&start);
-        //start=localtime(&fr->start_time.tv_sec);
-	sprintf(bmname,"bit%d_%d_%d_%d",start.tm_mon,start.tm_mday,start.tm_hour,start.tm_min);
-	printk("\n%s",bmname);
-
 	fr->bytes_transfer=pkf->caplen;
 	//Change begins
 	fr->pkt_file_no=path_cache->GPKT;
 	//Change ends
 	fr->nxtfr=0;
 	//Updation of Offset Field in path_cache	
-	path_cache->off_table[flowhash].start=path_cache->off_table[flowhash].end=get_offset_node(path_cache->pkt_offset);
-	path_cache->pkt_offset+=(sizeof(struct pfring_pkthdr) + pkf->caplen);
-	path_cache->GPC++;		
+	if(path_cache->store_pkt){
+		path_cache->off_table[flowhash].start=path_cache->off_table[flowhash].end=get_offset_node(path_cache->pkt_offset);
+		path_cache->pkt_offset+=(sizeof(struct pfring_pkthdr) + pkf->caplen);
+		path_cache->GPC++;
+	}			
+	else
+		fr->pkt_file_no=-1;
 	make_bitmap_entry(fr,path_cache->bit_map,flowhash);
 	count++;
 	printk("\nFR count is :%d",count);	      
@@ -834,14 +837,13 @@ kfree(bmname);
 loff_t get_file_offset(maprecord *path_cache)
 {
 	loff_t offset=0,ret_offset=0;
-	char *pktfile=kmalloc(80,GFP_KERNEL);
+	char *pktfile=kmalloc(150,GFP_KERNEL);
 	struct file *filp;
 	mm_segment_t oldfs;
 
-	sprintf(pktfile,"%s%s%s%d",path_cache->path,"Packets/","pkttrace_",path_cache->GPKT);
-	printk("Filename for reading offset is is %s",pktfile);
+	sprintf(pktfile,"%s%s%d",path_cache->path,"Packets/pkttrace_",path_cache->GPKT);
+	printk("Filename for reading offset is is %s\n",pktfile);
 	filp=file_open(pktfile,O_RDONLY,0777);
-
 
 	if(filp!=NULL)
 	{
@@ -866,14 +868,15 @@ loff_t get_file_offset(maprecord *path_cache)
 
 void write_all(maprecord *path_cache)
 {
-
 	loff_t length;
-	write_offset_table(path_cache);
-	free_offset_nodes(path_cache);
+	if(path_cache->store_pkt){
+		write_offset_table(path_cache);
+		free_offset_nodes(path_cache);
+	}	
 	write_bit_map(path_cache);
 	write_flow_rec(path_cache);  //Flow record writing order changed as bitmap file needs to use them to create filename 
 
-//Change Starts
+	//Change Starts
 	length=get_file_offset(path_cache);
 	if(length >= 996147200L)//950 MB
 	{
@@ -919,50 +922,52 @@ void update_flow_rec(maprecord *path_cache,struct pfring_pkthdr *pkthdr)
 	      		struct pkt_parsing_info *pkt_data=&pkthdr->extended_hdr.parsed_pkt;
 	      		while(1)
 			{
-				  flow_record *tempfr=&path_cache->flow_start[flowhash];
-		  		  if(*((u_int32_t*)&tempfr->ip_src)==*((u_int32_t*)&pkt_data->ip_src) && *((u_int32_t*)&tempfr->ip_dst)==*((u_int32_t*)&pkt_data->ip_dst)  && tempfr->src_port==pkt_data->l4_src_port && tempfr->dst_port==pkt_data->l4_dst_port && tempfr->protocol==pkt_data->l3_proto)
-		    		{
-				      //Packet belong to existing flow, update the flow record i.e.No. of Packets and Offset Table
-				      //printk(KERN_INFO "\nAll Five Fields are Equal ");
-				      path_cache->flow_start[flowhash].nop+=1;
-				      path_cache->flow_start[flowhash].bytes_transfer+=pkthdr->caplen;	//Adding Bytes Transferred
-				      path_cache->flow_start[flowhash].end_time=pkthdr->ts;
-				      path_cache->off_table[flowhash].end->next=get_offset_node(path_cache->pkt_offset);
-				      path_cache->off_table[flowhash].end=path_cache->off_table[flowhash].end->next;
-				      path_cache->GPC++;	
-				      path_cache->pkt_offset+=(sizeof(struct pfring_pkthdr) + pkthdr->caplen);
-				      break;			  
-				  }
-				  else
-				  {
-					      if((chklink=path_cache->flow_start[flowhash].nxtfr))//
-					      {
-							   flowhash=chklink;
-					      } 
-					      else
-					      {		
-							  int i;		
-							  for(i=(flowhash+1)%MAX_FLOW_REC;i!=flowhash;i=(i+1)%MAX_FLOW_REC)
-							  {
-								      if(path_cache->flow_start[i].nop==0)
-									      break;
-							  }
-							  if(i!=flowhash)
-							  {
-								      create_flow_record(&path_cache->flow_start[i],pkthdr,i,path_cache);
-								      path_cache->flow_start[flowhash].nxtfr=i;					 
-							  }
-							  else
-							  {
-								      //flush the flow records to disk
-								      write_all(path_cache);
-								      set_zero_all(path_cache);				      
-								      path_cache->GFL+=MAX_FLOW_REC;
-								      flowhash=org_flowhash;
-							              create_flow_record(&path_cache->flow_start[flowhash],pkthdr,flowhash,path_cache);
-							    }	
-							  break;
-						}
+				flow_record *tempfr=&path_cache->flow_start[flowhash];
+				if(*((u_int32_t*)&tempfr->ip_src)==*((u_int32_t*)&pkt_data->ip_src) && *((u_int32_t*)&tempfr->ip_dst)==*((u_int32_t*)&pkt_data->ip_dst)  && tempfr->src_port==pkt_data->l4_src_port && tempfr->dst_port==pkt_data->l4_dst_port && tempfr->protocol==pkt_data->l3_proto)
+				{
+					//Packet belong to existing flow, update the flow record i.e.No. of Packets and Offset Table
+					//printk(KERN_INFO "\nAll Five Fields are Equal ");
+					path_cache->flow_start[flowhash].nop+=1;
+					path_cache->flow_start[flowhash].bytes_transfer+=pkthdr->caplen;	//Adding Bytes Transferred
+					path_cache->flow_start[flowhash].end_time=pkthdr->ts;
+					if(path_cache->store_pkt){
+						path_cache->off_table[flowhash].end->next=get_offset_node(path_cache->pkt_offset);
+						path_cache->off_table[flowhash].end=path_cache->off_table[flowhash].end->next;
+						path_cache->GPC++;	
+						path_cache->pkt_offset+=(sizeof(struct pfring_pkthdr) + pkthdr->caplen);
+					}
+					break;			  
+				}
+				else
+				{
+					if((chklink=path_cache->flow_start[flowhash].nxtfr))//
+					{
+						   flowhash=chklink;
+					} 
+					else
+					{		
+						  int i;		
+						  for(i=(flowhash+1)%MAX_FLOW_REC;i!=flowhash;i=(i+1)%MAX_FLOW_REC)
+						  {
+							      if(path_cache->flow_start[i].nop==0)
+								      break;
+						  }
+						  if(i!=flowhash)
+						  {
+							      create_flow_record(&path_cache->flow_start[i],pkthdr,i,path_cache);
+							      path_cache->flow_start[flowhash].nxtfr=i;					 
+						  }
+						  else
+						  {
+							      //flush the flow records to disk
+							      write_all(path_cache);
+							      set_zero_all(path_cache);				      
+							      path_cache->GFL+=MAX_FLOW_REC;
+							      flowhash=org_flowhash;
+							      create_flow_record(&path_cache->flow_start[flowhash],pkthdr,flowhash,path_cache);
+						    }	
+						  break;
+					}
 				    }		
 			}
 	     }
@@ -974,8 +979,10 @@ void update_flow_rec(maprecord *path_cache,struct pfring_pkthdr *pkthdr)
 void create_flow_space(maprecord *path_cache)
 {
         path_cache->flow_start=vmalloc(MAX_FLOW_REC * sizeof(flow_record));
-	path_cache->off_table=vmalloc(MAX_FLOW_REC*sizeof(offset_table));
-	memset(path_cache->off_table,0,(MAX_FLOW_REC*sizeof(offset_table)));	
+	if(path_cache->store_pkt){
+		path_cache->off_table=vmalloc(MAX_FLOW_REC*sizeof(offset_table));
+		memset(path_cache->off_table,0,(MAX_FLOW_REC*sizeof(offset_table)));	
+	}
 	path_cache->bit_map=kmalloc(sizeof(bitmap),GFP_KERNEL);	
 	path_cache->bit_map->src_ip=kmalloc(256 * sizeof(ip_bits),GFP_KERNEL);
 	path_cache->bit_map->dst_ip=kmalloc(256 * sizeof(ip_bits),GFP_KERNEL);
@@ -988,8 +995,9 @@ void create_flow_space(maprecord *path_cache)
 /**********************FUNCTION TO HANDLE PACKET AFTER CAPTURE PROCESS******************************/
 void handle_storage_pkt(struct pfring_pkthdr *pkthdr,unsigned char *buf,maprecord *path_cache)
 {		
-	update_flow_rec(path_cache,pkthdr);	
-	write_packet(pkthdr,buf,path_cache);	
+        update_flow_rec(path_cache,pkthdr);
+	if(path_cache->store_pkt)	
+		write_packet(pkthdr,buf,path_cache);	
 }
 
 int capture_thread(void *arg)
@@ -1073,7 +1081,7 @@ int capture_thread(void *arg)
 	}
 	else
 	{
-		printk("\nSlot info success");
+		printk("\nSlot info success :Slot len is %u :: total mem :%u",slots_info->slot_len,slots_info->tot_mem);
 	}	
 
 	slots = (char *)(pfr->ring_memory+sizeof(FlowSlotInfo));
@@ -1105,7 +1113,10 @@ int capture_thread(void *arg)
 	}
 
 	dummy = 0;
-  	
+	//CHANGE BEGINS
+	         path_cache->pkt_offset=get_file_offset(path_cache);
+		 printk("PKT OFFSET AT START IS %llu",path_cache->pkt_offset);
+	//CHANGE ENDS
 	//activate ring
 
 	ret=capture_sockfd->ops->setsockopt(capture_sockfd, 0, SO_ACTIVATE_RING, &dummy, sizeof(dummy));
@@ -1121,11 +1132,13 @@ int capture_thread(void *arg)
 	//set filters
 	//set_filtering_rule(capture_sockfd,5,6);
 	//set_filtering_rule(capture_sockfd,6,17);
+	//add_filtering_rule(capture_sockfd,&path_cache->filter);
 	while(1) {
 		//for(i=0;i<100;i++){
 		if (kthread_should_stop())
 		{
 			printk("\nIn kthread stop......");
+			printk("\ntotal read:%llu ::lost packets:%llu ::tot packets:%llu",slots_info->tot_read,slots_info->tot_lost,slots_info->tot_pkts);
 			//write_all(path_cache);
 			//free_path_cache(path_cache);	
 			break;
@@ -1134,10 +1147,11 @@ int capture_thread(void *arg)
 		if(ret < 0)
 			break;
 		else if(ret != 0)
-		{	
+		  {	
 			//looper(&hdr, actual_buffer);
 			//print_ethernet_header(&hdr); 
-			handle_storage_pkt(&hdr,actual_buffer,path_cache);			}	
+			handle_storage_pkt(&hdr,actual_buffer,path_cache);	
+		  }	
 		else {
 			msleep(1);
 		}
@@ -1202,7 +1216,6 @@ int create_capture_thread(void *arg)
 	while(1)
 	{
 		int len;
-		char path[50],interface[20];
 		sockfd_cli = sock_accept(sockfd_srv, (struct sockaddr *)&addr_cli, &addr_len);
 		if (sockfd_cli == NULL)
 		{
@@ -1218,18 +1231,13 @@ int create_capture_thread(void *arg)
 		}
 		if(!strcmp(buf,"START"))//start signal received
 		{
-			u_int16_t map_count=0,gpkt=0;
-			u_int32_t gfl;
+			u_int16_t map_count=0;
 			start_data data;
 			start_recv to_send;	
 			//receive hash value		
-			memcpy(&data,buf,sizeof(start_data));					
-			//sscanf(buf,"%s%u%u%s%s",option,&map_count,&gfl,interface,path);
+			memcpy(&data,buf,sizeof(start_data));
+			printk("\nRule id is:%u Protocol is:%u Filtering Port is::%u high field is :%u",data.filter.rule_id,data.filter.core_fields.proto,data.filter.core_fields.port_low,data.filter.core_fields.port_high);					
 			map_count=data.hash;
-			gfl=data.GFL;
-			gpkt=data.gpkt;
-			strcpy(interface,data.interface);
-			strcpy(path,data.path);
 			if(!map_list[map_count])//handle collision
 			{
 				int i;
@@ -1244,18 +1252,18 @@ int create_capture_thread(void *arg)
 			map_list[map_count]=kmalloc(sizeof(maprecord),GFP_KERNEL); 
 			memset(map_list[map_count],0,sizeof(maprecord));
 
-			if(!(strstr(interface,"eth") || strstr(interface,"wlan")|| strstr(interface,"vif")))
+			if(!(strstr(data.interface,"eth") || strstr(data.interface,"wlan")|| strstr(data.interface,"vif")))
 			{
 				printk("\nInvalid interface name.....exiting");
 				break;	
 			}
-			strcpy(map_list[map_count]->interface_name,interface);
-			strcpy(map_list[map_count]->path,path);
-			map_list[map_count]->GFL=gfl;			
-			//Change Starts
-			map_list[map_count]->GPKT=gpkt;
-			map_list[map_count]->pkt_offset=get_file_offset(map_list[map_count]);
-			//Change Ends
+			strcpy(map_list[map_count]->interface_name,data.interface);
+			strcpy(map_list[map_count]->path,data.path);
+			map_list[map_count]->GFL=data.GFL;	
+			map_list[map_count]->store_pkt=data.store_pkt;		
+			map_list[map_count]->GPKT=data.gpkt;
+			//map_list[map_count]->pkt_offset=get_file_offset(map_list[map_count]);
+			map_list[map_count]->filter=data.filter;
 			create_flow_space(map_list[map_count]);
 			//len = sprintf(buf, "%u",map_count);
 			to_send.hash=map_count;
@@ -1267,22 +1275,19 @@ int create_capture_thread(void *arg)
 		else if(!strcmp(buf,"STOP"))
 		{
 			int index;
-			u_int32_t gfl;u_int16_t gpkt=0;
 			stop_data data;
 			stop_recv to_send;
 			memcpy(&data,buf,sizeof(stop_data));
 			//index=atoi(buf);
 			//sscanf(buf,"%s%d",option,&index);
 			index=data.hash;
-			gfl=map_list[index]->GFL;
-			gpkt=map_list[index]->GPKT;
+			to_send.GFL=map_list[index]->GFL;
+			to_send.gpkt=map_list[index]->GPKT;
 			kthread_stop(map_list[index]->ts);
 			//write_all(map_list[index]);
 			if(map_list[index])
 				free_path_cache(map_list[index]);
 			map_list[index]=0;
-			to_send.GFL=gfl;
-			to_send.gpkt=gpkt;
 			//len = sprintf(buf, "%u %u",gfl,gpkt);
 			memcpy(buf,&to_send,sizeof(stop_recv));
 			printk("\nSent GFL value:%u gpkt is:%u",to_send.GFL,to_send.gpkt);
