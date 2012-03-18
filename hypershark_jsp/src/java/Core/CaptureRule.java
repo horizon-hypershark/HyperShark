@@ -17,7 +17,7 @@ public class CaptureRule {
     public int lowSrcPort;
     public int highSrcPort;
     public short protocol;
-
+    
     public int getRuleId() {
         return ruleId;
     }

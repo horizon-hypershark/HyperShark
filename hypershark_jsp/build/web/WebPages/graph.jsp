@@ -15,7 +15,8 @@
               
                
         <b><p><a href="newlinechart.jsp">No Of Packets Per FlowRecord</a></p><br/></b>
-        <b><p><a href="piechart/piechart.jsp">Most Frequent Ips</a></p><br/></b>
+        <b><p><a href="piechart/piechart.jsp?param=srcIp">Most Frequent Ips</a></p><br/></b>
+        <b><p><a href="piechart/piechart.jsp?param=srcPort">Most Frequent Ports</a></p><br/></b>
         <b><p><a href="newlinechart.jsp">No Of Packets per IP</a></p><br/></b> 
         <b><p><a href="newlinechart.jsp">No Of Packets against Time</a></p><br/></b>
         

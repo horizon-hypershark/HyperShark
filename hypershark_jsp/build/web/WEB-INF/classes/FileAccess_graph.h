@@ -15,6 +15,14 @@ extern "C" {
 JNIEXPORT void JNICALL Java_FileAccess_graph_fillips
   (JNIEnv *, jobject);
 
+/*
+ * Class:     FileAccess_graph
+ * Method:    fillSrcPorts
+ * Signature: ()V
+ */
+JNIEXPORT void JNICALL Java_FileAccess_graph_fillSrcPorts
+  (JNIEnv *, jobject);
+
 #ifdef __cplusplus
 }
 #endif

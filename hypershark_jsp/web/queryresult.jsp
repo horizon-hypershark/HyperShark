@@ -4,6 +4,8 @@
     Author     : varun
 --%>
 
+<%@page import="Beans.UserDataBean"%>
+<%@page import="java.util.ArrayList"%>
 <%@page import="Core.FlowRecord"%>
 <%@page import="FileAccess.GetPacket"%>
 <%@page import="Core.DisplayPktRule"%>
@@ -15,6 +17,13 @@
 <jsp:useBean id="dispFilter" class="Beans.DisplayTimeFilterBean" scope="page">
     <jsp:setProperty name="dispFilter" property="*"/>
 </jsp:useBean>
+<%UserDataBean userData=(UserDataBean)session.getAttribute("userData");
+if(userData==null){
+    response.sendRedirect("WebPages/homepage.jsp");    
+}    
+else 
+{    
+%>
 
 <!DOCTYPE html>
 <html>
@@ -23,6 +32,15 @@
         <title>HyperShark- Packets</title>
         <link href="style.css" rel="stylesheet" type="text/css" />
 
+        <script type="text/javascript">
+        function sortResult(param)
+        {
+           //alert("script working"+param); 
+           window.location.href="queryresult.jsp?sortingField="+param;
+        }
+        
+        </script>
+        
         <style type="text/css">
         body
             {
@@ -44,82 +62,55 @@
             </head>
     <body>
         <div class="section" id="page">
-
-	<div class="header">
-		<h1><font color="#FFFFFF">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;HyperShark</font></h1>
-		<h2><font color="#FFFFFF">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;See what you Pay for
-                &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-                &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-                &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-                &nbsp;&nbsp;&nbsp;&nbsp;
-                <a href="logout.jsp"><font color="#FFFFFF" size="4px">Logout</font></a>
-                    
-                    
-                    </font></h2>
-	</div>
-	
-        <br/><br/>
-        
-
-    <%  DisplayPktRule dispRule=new DisplayPktRule();
-        CaptureTime timRule=new CaptureTime();
-        dispFilter.createDisplayRule(dispRule,timRule);
-    %>
-    <% 
-        int j=0;
-        int i=0;
-        //data d[]=new data[10];
-        GetPacket f=new GetPacket(); 
-        
-        f.setCpt(timRule);
-        f.setRules(dispRule);
-        
-        /*System.out.println("day is"+f.getCpt().day);
-        System.out.println("port is"+f.getRules().lowPort);
-        System.out.println("dest port is"+f.getRules().highPort);
-        System.out.println("ip is"+f.getRules().getSrcHost()[0]);
-        System.out.println("ip is"+f.getRules().getDstHost()[0]);
-        */
-        
-        /*f.cpt.day=31;
-        f.cpt.month=0;
-        f.cpt.end_hr=9;
-        f.cpt.end_min=29;
-        f.cpt.start_hr=9;
-        f.cpt.start_min=20;
-        
-        f.rules.sip_oct[0]=74;
-        f.rules.sip_oct[1]=-1;
-        f.rules.sip_oct[2]=-1;
-        f.rules.sip_oct[3]=-1;
-        
-        f.rules.dip_oct[0]=-1;
-        f.rules.dip_oct[1]=-1;
-        f.rules.dip_oct[2]=-1;
-        f.rules.dip_oct[3]=-1;
-        
-        f.rules.src_port=80;
-        f.rules.dst_port=-1;
-        f.rules.protocol=-1;*/
+            <div class="title">
+                <h1><font color="#52A300">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;HyperShark</font></h1>
+            </div>
+            <div class="header">
+            <h3><font color="#FFFFFF">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;See what you Pay for</font>
+                &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+                &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+                &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+                &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+                &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+               <a href="../logout.jsp"><font color="#FFFFFF" size="4px">Logout</font></a>
+             </h3>       
                 
-        f.fillpackets();//call native method
+            </div>
+
+	<br/><br/>
+        
+
+        <%ArrayList<FlowRecord> flowRec=(ArrayList<FlowRecord>)session.getAttribute("flows");  
+        int j=0,i=0;
+        if(dispFilter.getSortingField()!=null && flowRec==null){
+                response.sendRedirect("WebPages/vmList.jsp");
+        }
+        else{
+            
+        if(dispFilter.getSortingField()==null)
+        {            
+        DisplayPktRule dispRule=new DisplayPktRule();
+        CaptureTime timRule=new CaptureTime();
+        dispFilter.createDisplayRule(dispRule,timRule);        
+        flowRec=dispFilter.queryPackets(dispRule, timRule);        
         if(session.getAttribute("flows")!=null)
             session.removeAttribute("flows");
-        session.setAttribute("flows",f.flow);
+        session.setAttribute("flows",flowRec);
+        }    
 %> 
         <div class="articleBody clear" id="articles">
         <%
-            if(f.flow.size()==0)
+        if(flowRec.size()==0)
         {
             out.println("Oops! sorry no data for the given query found");
         
         }
         else
-                 {
+        {
             
         
-        System.out.println("no of flowrecords is::"+f.flow.size());
-        
+        System.out.println("no of flowrecords is::"+flowRec.size());
+               
         
         %>
             
@@ -136,25 +127,29 @@
                 </td>     
             </tr>
             <tr align="center">
-            <td width="10%"> <font size="2px"><b>Flowrecord No.</b></font></td>   
-            <td width="10%"> <font size="2px"><b>Source Port</b></font></td>
-            <td width="10%"> <font size="2px"><b>Dest Port</b></font></td>
-            <td width="10%"> <font size="2px"><b>Source IP</b></font></td>
-            <td width="10%"> <font size="2px"><b>Destination IP</b></font></td>
-            <td width="10%"> <font size="2px"><b>Protocol</b></font></td>    
-            <td width="10%"> <font size="2px"><b>No Of Packets</b></font></td>
+            <td width="10%"><button style="width:175px;height:25px" onclick="sortResult('recNo')">Flowrecord No.</button></td>    
+            <!--<td width="10%" onmouseover="this.style.cursor='pointer';" onclick="sortResult('recNo')"> <font size="2px"><b>Flowrecord No.</b></font></td>-->   
+            <td width="10%"><button style="width:120px;height:25px" onclick="sortResult('sourcePort')">Source Port</button></td>
+            <td width="10%"><button style="width:120px;height:25px" onclick="sortResult('destPort')">Dest Port</button></td>
+            <td width="10%"><button style="width:140px;height:25px" onclick="sortResult('sourceIp')">Source IP</button></td>
+            <td width="10%"><button style="width:145px;height:25px" onclick="sortResult('destIp')">Destination IP</button></td>
+            <td width="10%"><button style="width:130px;height:25px" onclick="sortResult('protocol')">Protocol</button></td>    
+            <td width="10%"><button style="width:140px;height:25px" onclick="sortResult('numPackets')">No Of Packets</button></td>
                
             </tr>
             
         <%int k=0,m=1; 
         j=0;
-        FlowRecord recArray[]=new FlowRecord[f.flow.size()];
-        for(FlowRecord flowRec:f.flow)
+        FlowRecord recArray[]=new FlowRecord[flowRec.size()];
+        for(FlowRecord flowRecord:flowRec)
         {
-            recArray[j++]=flowRec;
-        }    
-        j=0;
-        for(FlowRecord flowRec:f.flow)
+            recArray[j++]=flowRecord;
+        }
+        if(dispFilter.getSortingField()!=null && (!dispFilter.getSortingField().equals("recNo")))
+        {
+            dispFilter.sortFlowRecord(recArray);
+        }
+        for(j=0;j<recArray.length;j++)
         { %>
         
         <tr onclick="show_packets(<%=j%>)" bgcolor="white"  align="center" onmouseout="this.style.background='white';" onmouseover="this.style.background='#EEEEEE';this.style.cursor='pointer';">   
@@ -165,30 +160,31 @@
             </td>    
             
         <td width="10%">   
-        <%out.println(Conversions.shortToUnsigned(flowRec.src_port));%>
+        <%out.println(Conversions.shortToUnsigned(recArray[j].src_port));%>
         </td>
         <td width="10%">
-            <%out.println(Conversions.shortToUnsigned(flowRec.dst_port));%>
+            <%out.println(Conversions.shortToUnsigned(recArray[j].dst_port));%>
         </td> 
         <td width="10%">
-                <%out.println(((flowRec.ip_src>>24) & 0xFF) + "." + ((flowRec.ip_src >> 16) & 0xFF) + "." + ((flowRec.ip_src>> 8) & 0xFF) +"."+ ((flowRec.ip_src) & 0xFF));%>
+                <%out.println(((recArray[j].ip_src>>24) & 0xFF) + "." + ((recArray[j].ip_src >> 16) & 0xFF) + "." + ((recArray[j].ip_src>> 8) & 0xFF) +"."+ ((recArray[j].ip_src) & 0xFF));%>
         </td>  
         
         <td width="10%">
-                <%out.println(((flowRec.ip_dst >> 24) & 0xFF) + "." + ((flowRec.ip_dst >> 16) & 0xFF) + "." + ((flowRec.ip_dst>> 8) & 0xFF) +"."+ ((flowRec.ip_dst) & 0xFF));
+                <%out.println(((recArray[j].ip_dst >> 24) & 0xFF) + "." + ((recArray[j].ip_dst >> 16) & 0xFF) + "." + ((recArray[j].ip_dst>> 8) & 0xFF) +"."+ ((recArray[j].ip_dst) & 0xFF));
             %>
         </td>  
         <td width="10%">
-                <%out.println(flowRec.protocol);%>
+                <%out.println(recArray[j].protocol);%>
         </td>
         
         <td width="10%">
-                <%out.println(flowRec.nop);%>  
+                <%out.println(recArray[j].nop);%>  
         </td>
         
         </tr>
-         <% j++; } 
-               }%>
+         <%  } 
+               }
+        %>
         </table>
         </div>
         
@@ -210,3 +206,5 @@
         
     </body>
 </html>
+<%}
+}%>

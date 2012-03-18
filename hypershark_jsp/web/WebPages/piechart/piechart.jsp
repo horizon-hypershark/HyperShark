@@ -1,10 +1,13 @@
 
-<%@page import="FileAccess.graph"%>
-<%@page import="FileAccess.ReadFlow"%>
+
+<%@page import="Core.Graph.Statistics"%>
+<%@page import="java.util.ArrayList"%>
 <%@page import="Utils.*"%>
 <%@page contentType="text/html" pageEncoding="UTF-8"%>
 <!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
-
+<jsp:useBean id="graphData" class="Beans.GraphBean" scope="page">
+    <jsp:setProperty name="graphData" property="*"/>
+</jsp:useBean>
 <html>
 
  <head>
@@ -180,9 +183,7 @@
 
     <body>
         <% 
-            graph graphobj=new graph();
-            graphobj.fillips();//call native method
-       
+        ArrayList<Statistics> statList=graphData.getDataToPlot(5);
         %>
         <!--change-->
         <div class="section" id="page">
@@ -211,18 +212,14 @@ $(function () {
         //var ip1 = [["111.111.111.111"],["182.123.221.122"],["122.122.21.11"],["11.21.33.11"],["111.21.1.1"],["122.323.122.122"]];
 	//var freq = [20,30,40,90,1,12];
 	var data = [];
-        <% 
-           int i;
-	for(i = 0; i<5; i++)
-
-	{ %>
-
-		data[<%=i%>] = { label: "<%=((graphobj.getIps()[i] >> 24) & 0xFF)+"."+((graphobj.getIps()[i] >> 16) & 0xFF)+"."+((graphobj.getIps()[i] >> 8) & 0xFF)+"."+((graphobj.getIps()[i] & 0xFF))%>", data: <%=graphobj.getFrequency()[i]%> }
-
-	<% } %>
-
-
-	// GRAPH 1
+        <%
+            int i=0;            
+            for(Statistics stat :statList)
+            {%>    
+               data[<%=i++%>] = { label: "<%=stat.getAbscissa()%>", data: <%=stat.getOrdinate()%> }
+            <%}           
+         %>       
+        	// GRAPH 1
 
 	$.plot($("#interactive"), data,
 {
@@ -247,6 +244,7 @@ function pieHover(event, pos, obj)
                 return;
 	percent = parseFloat(obj.series.percent).toFixed(2);
 	$("#hover").html('<span style="font-weight: bold; color: '+obj.series.color+'">'+obj.series.label+' ('+percent+'%)</span>');
+        
 }
 
 function pieClick(event, pos, obj) 
@@ -261,10 +259,20 @@ function pieClick(event, pos, obj)
 
 </script>
 
-        
-
- 
-    
+        <body>
+            
+            <div id="hover"></div>
+            <div class="info">
+                <h4>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Details</h4>
+                <%for(Statistics stat :statList)
+                    {    
+                        
+                        out.println(stat.getInfo());%>
+                        <br/>
+                    <%}%>
+                </font>
+            </div>    
+        </body>    
   </div>
     <br/><br/>
             <div class="footer">

@@ -16,19 +16,18 @@
 
 /*not included earlier*/
 #page{
-	width:960px;
+	width:1080px;
 	margin:0 auto;
 	position:relative;
 }
 
 
-hr
+.hor_line
 {
 	height:3px;
-	background-color: #D4D4D4;
+	background-color:#DEDEDE;
 
 }
-
 
 root { 
     display: block;
@@ -51,10 +50,32 @@ div.article .line{
 }
 
 div.footer{
-    background-color:#33CC66;
+    	background-color:#33CC66;
 	border-top:#000000;
-	border-top:10px solid;	 
+	border-top:3px solid;	
+	padding-right:10px;
+	padding-top:10px;
+	padding-bottom:10px;
+	padding-left:450px; 
 }
+
+div.signup{
+    	background-color:#DEDEDE;
+	padding-right:10px;
+	padding-top:10px;
+	padding-bottom:10px;
+	padding-left:200px; 
+}
+
+div.registerform{
+    	background-color:#E1E1E1;
+	padding-right:10px;
+	padding-top:10px;
+	padding-bottom:10px;
+	padding-left:200px; 
+}
+
+
 
 /*not included earlier*/
 div.footer .line{
@@ -107,41 +128,52 @@ div.nav ul li a:hover{
 	background-color:#f0f0f0;
 }
 
-div.nav, div.article, div.nav ul li a,div.figure, div.header, div.footer,div.login{
+div.nav, div.article, div.nav ul li a,div.figure, div.header, div.footer,div.login,div.registerform{
 	/* Applying CSS3 rounded corners: */
 	-moz-border-radius:10px;
 	-webkit-border-radius:10px;
 	border-radius:10px;
 }
 div.header{
-    background-color:#529214;
+    	background-color:#529214;
 	border-bottom:#000000;
-	border-bottom:10px solid;	 
+	border-bottom:3px solid;
+	padding-top:1px;
+	margin-top:-20px;	 
+}
+
+div.title
+{
+	margin-left:-25px;
+
+
 }
 
 div.article{
         
 	margin:3em 0;
 	padding:20px;
-	text-shadow:0 0 0 black;	
+	text-shadow:0 0 0;	
 }
 
 div.figure{
 	border:2px solid #529214;
 	float:left;
-	height:400px;
-	margin-left:15px;
+	height:300px;
+	margin-left:90px;
 	overflow:hidden;
 	width:350px;
+	
 }
 
 div.login{
 	border:2px solid #529214;
 	float:right;
-	height:400px;
-	margin-left:15px;
+	height:300px;
+	margin-right:90px;
 	overflow:hidden;
 	width:350px;
+	padding-left:20px;
 }
 
 
@@ -154,12 +186,33 @@ div.figure:hover{
 div.figure img{
 	margin-left:-60px;
 }
+
+div.logout
+{
+	float:right;
+	color:#FFFFFF;
+
+}
 div.tabimage{
 	
 	float:left;
 	/*height:400px;*/
 	margin-left:15px;
+	margin-top:-140px;/* adjusts the top margin of image and the content from table border*/
 	overflow:hidden;
 	width:200px;
 }
 
+div.tabs{
+		margin-left:100px;
+		margin-top:100px;
+		position:absolute;
+		top:30px;
+		left:30px;
+		right:30px;
+}
+
+div.links
+{
+	float:right;
+}

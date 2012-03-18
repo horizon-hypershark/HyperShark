@@ -15,6 +15,8 @@
         <title>HyperShark-Packets</title>
         <link rel="stylesheet" href="accordion/style.css" type="text/css" />
         <link href="style.css" rel="stylesheet" type="text/css" />
+        <link rel="stylesheet" href="menu.css" type="text/css" media="screen" /><!--for dropdown filters-->
+        
 
         <style type="text/css">
             body
@@ -69,27 +71,99 @@
 
         <div class="section" id="page">
 
+            <div class="title">
+                <h1><font color="#52A300">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;HyperShark</font></h1>
+                <br/>
+            </div>
             <div class="header">
-               <h1><font color="#FFFFFF">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;HyperShark</font></h1>
-                <h2><font color="#FFFFFF">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;See what you Pay for</font>
+            <h3><font color="#FFFFFF">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;See what you Pay for</font>
                 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
                 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-                &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+                &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+                &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+                &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
                <a href="logout.jsp"><font color="#FFFFFF" size="4px">Logout</font></a>
+             </h3>       
                 
-                
-                
-                </h2>
- 
-                
-                
-                 </div>
-
+            </div>
+            <br/><br/>
+             <!--change-->
+             <div class="filters">
+             <ul id="menu">
+            <li class="menu_right"><a href="#" class="drop">Filter More</a><!-- Begin 3 columns Item -->
+                <div class="dropdown_3columns align_right"><!-- Begin 3 columns container -->
+                    <div class="col_3">
+                        <h2>Specify Filters</h2>
+                    </div>
+                    <div class="col_1">
+                        <ul>			
+                            <li>				
+                                <form name="filter" action="capturefilter.jsp" method="get">
+                                                                
+                                Source Mac:<input type="text"/>
+                                    <br/>
+                                    Dest Mac:&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<input type="text"/>
+                                    <br/>
+                                    Source Ip:&nbsp;&nbsp;&nbsp;&nbsp;	
+                                    <%for (int f = 1; f <= 4; f++) {%>
+                                    <select name="srcOctet<%=f%>" id="srcOctet<%=f%>">
+                                        <option>Select</option>
+                                        <% int m = 0;
+                                        while (m < 5) 
+                                        {%>
+                                        <option><%out.print(m);%></option>
+                                        <% m++;
+                                        }%>
+                                    </select>
+                                    <%if (f != 4)
+                                    {
+                                        out.print(":");
+                                    }
+                                  }%>                                                                                                                                       <br/>
+                                  
+                                  Dest Ip:&nbsp;&nbsp;&nbsp;&nbsp;	
+                                    <%for (int f = 5; f <= 8; f++) {%>
+                                    <select name="srcOctet<%=f%>" id="srcOctet<%=f%>">
+                                        <option>Select</option>
+                                        <% int m = 0;
+                                        while (m < 255) 
+                                        {%>
+                                        <option><%out.print(m);%></option>
+                                        <% m++;
+                                        }%>
+                                    </select>
+                                    <%if (f != 8)
+                                    {
+                                        out.print(":");
+                                    }
+                                  }%>                                                                                                                                       <br/>
+                                    Protocol:&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<input type="text"/>
+                                  <br/>
+                                    Size:&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<input type="text"/>
+                                  <br/>
+                                  <br/>
+                                  &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+                                  &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+                                  &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+                                  <input type="submit" value="Filter Results" align="right"/>
+                                                                    
+                                  
+                                </form>
+                            </li>		
+                        </ul>                
+                           
+                    </div>
+                </div><!-- End 3 columns container -->
+            </li><!-- End 3 columns Item -->
+        </ul>
+        </div>     
+             <!--change ends-->
+            
+            
             <br/><br/>
             <div class="articleBody clear" id="articles">
                 
-             
-                <table border="0">
+                    <table border="0">
                     
                     <tr align="center" width="100%">
                         <td width="22%"><font size="2px"> <b>Source Mac</b></font></td>
@@ -97,7 +171,7 @@
                         <td width="22%"><font size="2px"><b> Source IP </b></font></td>
                         <td width="22%"><font size="2px"><b> Dest IP </b></font></td>
                         <td width="6%"><font size="2px"><b> Protocol</b></font></td>    
-                        <td width="6%"> <font size="2px"><b> Caplen</b></font></td>
+                        <td width="6%"> <font size="2px"><b> Size</b></font></td>
 
                     </tr>
                 </table>

@@ -8,7 +8,6 @@ import Core.CaptureRule;
 import Core.VirtualMachine;
 import Utils.Hash;
 import java.util.ArrayList;
-
 /**
  *
  * @author varun

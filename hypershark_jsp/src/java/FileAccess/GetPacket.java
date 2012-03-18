@@ -49,7 +49,13 @@ public class GetPacket {
     static {
         System.loadLibrary("packetlib");
     }
-
+    public ArrayList<FlowRecord> getPackets(DisplayPktRule dispRule,CaptureTime timRule)
+    {
+        cpt=timRule;      
+        rules=dispRule;
+        fillpackets();
+        return flow;
+    }        
     public static void main(String args[]) {
         
         
@@ -77,15 +83,15 @@ public class GetPacket {
 
         f.cpt.setDay(21);
         f.cpt.setEnd_hr(17);
-        f.cpt.setEnd_min(29);
+        f.cpt.setEnd_min(27);
         f.cpt.setMonth(1);
         f.cpt.setStart_hr(17);
-        f.cpt.setStart_min(30);
+        f.cpt.setStart_min(24);
 
         f.rules.setProtocol((short) -1);
         f.rules.setDstHost(dstHost);
         f.rules.setHighPort(-1);
-        f.rules.setLowPort(80);
+        f.rules.setLowPort(-1);
         f.rules.setSrcHost(srcHost);
 
         
@@ -136,11 +142,11 @@ public class GetPacket {
         int ctr = 0;
         int l = 0;
         System.out.println("Size is::"+f.flow.size());
-        for(FlowRecord flowRec:f.flow) 
+        /*for(FlowRecord flowRec:f.flow) 
         //while(f.flow[l]!=null)
         {
             System.out.println("src_port is"+Conversions.shortToUnsigned(flowRec.src_port));
-            System.out.println("destination port is"+Conversions.shortToUnsigned(flowRec.dst_port));
+            System.out.println("destination port is"+Conversions.shortToUnsigned(flowRec.dst_port));*/
           //  System.out.println(((f.flow[l].ip_src) & 0xFF) + "." + ((f.flow[l].ip_src >> 8) & 0xFF) + "." + ((f.flow[l].ip_src >> 16) & 0xFF) + "." + ((f.flow[l].ip_src >> 24) & 0xFF));
             /*System.out.println(((flowRec.ip_dst) & 0xFF) + "." + ((flowRec.ip_dst >> 8) & 0xFF) + "." + ((flowRec.ip_dst >> 16) & 0xFF) + "." + ((flowRec.ip_dst >> 24) & 0xFF));
             System.out.println(flowRec.protocol);
@@ -157,21 +163,21 @@ public class GetPacket {
             }
 
             j=0;*/
-            System.out.println("Size of packets is:"+flowRec.packets.size());
+            /*System.out.println("Size of packets is:"+flowRec.packets.size());
             for(CompletePacket pkts:flowRec.packets)
-            {
+            {*/
             //System.out.println("\nETHERNET HEADER:"+ pkts.l2Packet.getPacket());
             //System.out.println("\nIP HEADER:"+pkts.l3Packet.getPacket());
             
             //System.out.println(f.flow[0].packets[0].l2Packet.getPacket());
             //if((f.flow[0].packets[j].l4Packet.getPacket())!=null)
             
-            if(pkts.l3Packet.getProtocol()==6)
+            /*if(pkts.l3Packet.getProtocol()==6)
             System.out.println("\nTCP HEADER:"+pkts.l4Packet.getPacket());
             else
                 if(pkts.l3Packet.getProtocol()==17)
                 System.out.println("\nUDP HEADER:"+pkts.l4Packet.getPacket());
-            
+            */
             //System.out.println("\nUDP HEADER:"+f.flow[l].packets[j].l4Packet.getPacket());
             /*System.out.println("\n IHL"+f.packets[j].l2_ip_packet.ihl);
             System.out.println("\n version"+f.packets[j].l2_ip_packet.version);
@@ -258,8 +264,11 @@ public class GetPacket {
             // System.out.println(f.packets[j].pfpacket.buffer_len);
             
             j++;*/
-            }
+            
+            //}
             //l++;
+         /*   ctr++;
         }
+        System.out.println("total flowrecords"+ctr);*/
     }
 }

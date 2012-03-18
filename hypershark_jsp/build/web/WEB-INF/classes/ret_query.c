@@ -678,6 +678,12 @@ void fill_tcp_hdr(JNIEnv *env,hs_pkt_hdr *hs_pkt,jobject pkt_obj,jclass cls_pkt)
 	tcp_obj=get_tcp_hdr(env,hs_pkt);
 	jfieldID F1 = (*env)->GetFieldID(env,cls_pkt,"l4Packet","LCore/Protocols/l4Proto/L4proto;");
 	(*env)->SetObjectField(env,pkt_obj,F1,tcp_obj);
+	//change
+	struct tcphdr *tcp = (struct tcphdr*)(hs_pkt->buffer+hs_pkt->pkf.extended_hdr.parsed_pkt.offset.l4_offset);
+	char *app=(char *)(tcp+sizeof(struct tcphdr));	
+	printf("\n in c code %s ends here",app);			
+	
+	//change ends
 }
 
 

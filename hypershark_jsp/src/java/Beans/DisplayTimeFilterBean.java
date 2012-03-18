@@ -4,20 +4,45 @@
  */
 package Beans;
 
+import Controller.FlowController;
 import Core.CaptureTime;
 import Core.DisplayPktRule;
+import Core.FlowRecord;
 import Utils.Conversions;
+import java.util.ArrayList;
+import java.util.Arrays;
 
 /**
  *
  * @author varun
  */
+        
 public class DisplayTimeFilterBean {
+
+    public enum fieldToSort 
+        {
+            recNo,sourcePort,destPort,sourceIp,destIp,protocol,numPackets;
+        }
 
     private String date;
     private String startTime, endTime;
     private String srcOctet1, srcOctet2, srcOctet3, srcOctet4;
+    private String sortingField;  
+    
+    public ArrayList<FlowRecord> queryPackets(DisplayPktRule dispRule,CaptureTime timRule)
+    {
+        FlowController contr=new FlowController();
+        return contr.queryPackets(dispRule, timRule);
+    }
 
+    public String getSortingField() {
+        return sortingField;
+    }
+
+    public void setSortingField(String sortingField) {
+        this.sortingField = sortingField;
+    }
+    
     public String getDate() {
         return date;
     }
@@ -133,6 +158,43 @@ public class DisplayTimeFilterBean {
     private String lowPort, highPort;
     private String protocol;
 
+    public void swap(FlowRecord recArr[],int i,int j)
+    {
+        FlowRecord temp;
+        temp=recArr[i];
+        recArr[i]=recArr[j];
+        recArr[j]=temp;
+        
+    }
+    
+    public void sortFlowRecord(FlowRecord recArr[])
+    {
+        
+        for(int i=0;i<(recArr.length-1);i++)
+        {
+                for(int j=i+1;j<recArr.length;j++)
+                {
+             
+                    if(sortingField.equals("sourcePort"))
+                    {
+                        if(Conversions.shortToUnsigned(recArr[i].src_port)>Conversions.shortToUnsigned(recArr[j].src_port))
+                            swap(recArr,i,j);
+                    }
+                   else
+                        if(sortingField.equals("destPort"))
+                    {
+                        if(Conversions.shortToUnsigned(recArr[i].dst_port)>Conversions.shortToUnsigned(recArr[j].dst_port))
+                            swap(recArr,i,j);
+                    }
+                }
+        }        
+    }
+
+    public ArrayList<FlowRecord> getFlowRec(DisplayPktRule dispRule,CaptureTime timRule)
+    {
+        
+        return null;
+    }        
     public void createDisplayRule(DisplayPktRule dispRule,CaptureTime timRule) { 
         String octet[]=new String[4];
         octet[0]=srcOctet1;
