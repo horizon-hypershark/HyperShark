@@ -53,6 +53,7 @@ JNIEXPORT void JNICALL Java_FileAccess_GetPacket_fillpackets
 	jbyteArray jsh,jsh2;
 	jfieldID F1;
 	struct iphdr *ip;	
+	const char *path;
 	jstring str;
 	int length=100;
 	void fill_eth_hdr(JNIEnv *env,hs_pkt_hdr *,jobject,jclass);
@@ -66,14 +67,27 @@ JNIEXPORT void JNICALL Java_FileAccess_GetPacket_fillpackets
 	//void fill_rules(JNIEnv *,jobject ,Rule,jclass);
 	//fill_rules(env,obj,rule,cls_main);//call fill_rules and pass main class reference	
 
-
+	printf("\n in jni");
 	jclass cls_main=(*env)->GetObjectClass(env,obj);//get main class
 
 	disp_fil(env,obj,&filter,cls_main);
 	
 	time_fil(env,obj,&tim_fil,cls_main);
 	
-	fill_flow_packets(&filter,"/storage/hs1234/",&tim_fil,env,obj,cls_main);	
+	printf("\n in c before cal path");
+	
+	F1 = (*env)->GetFieldID(env,cls_main,"path","Ljava/lang/String;");
+	str = (*env)->GetObjectField(env,obj,F1);
+	if(str==NULL)
+	printf("\n error in geting string");
+	else
+	printf("\n no error in string java");
+
+	path = (*env)->GetStringUTFChars(env,str,NULL);
+	
+	printf("\n in c path is %s",path);
+	//call ret query function
+	fill_flow_packets(&filter,path,&tim_fil,env,obj,cls_main);	
 
 	//readflows(env,obj,cls_main);
 

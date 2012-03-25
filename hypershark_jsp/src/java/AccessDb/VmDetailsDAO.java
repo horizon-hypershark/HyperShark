@@ -63,6 +63,7 @@ public class VmDetailsDAO {
                 virtMach.setMemUsed(vmDetails.getInt("mem_used"));
                 virtMach.setMonitoringStatus(vmDetails.getBoolean("monitoring"));
                 virtMach.setVmImage(vmDetails.getString("vm_image"));
+                virtMach.setState(vmDetails.getString("vm_state"));                
                 vmList.add(virtMach);             
             }
         } catch (SQLException ex) {
@@ -144,6 +145,67 @@ public class VmDetailsDAO {
             Logger.getLogger(VmDetailsDAO.class.getName()).log(Level.SEVERE, null, ex);
         }
         return false;
-    }        
+    }
+    public boolean updateVmState(String state,String vmId)
+    {
+        ConnectionDb conn = new ConnectionDb();
+        String updateState ="update vm_details set vm_state=? where vm_id=?";
+        PreparedStatement ps = null;
+        //System.out.println("in updateVmState query string ::"+"update vm_details set vm_state="+state+" where vm_id="+vmId);
+        conn.getConnection();
+       try{    
+            ps =conn.getConn().prepareStatement(updateState);
+            ps.setString(1, state);
+            ps.setString(2, vmId);
+            if(ps.executeUpdate()>0)
+                return true;
+        } catch (SQLException ex) {
+            Logger.getLogger(UserDetailsDAO.class.getName()).log(Level.SEVERE, null, ex);
+        }
+        try {
+            conn.closeConnection();
+        } catch (SQLException ex) {
+            Logger.getLogger(VmDetailsDAO.class.getName()).log(Level.SEVERE, null, ex);
+        }
+        return false;
+    }
+    public boolean updateVmVifs(VirtualMachine virtMach)
+    {
+        ConnectionDb conn = new ConnectionDb();
+        String updateState ="delete from vm_vif where vm_id=?";
+        PreparedStatement ps = null;               
+        conn.getConnection();
+       try{    
+            ps =conn.getConn().prepareStatement(updateState);
+            ps.setString(1, virtMach.getVmId());            
+            if(ps.executeUpdate()<0)
+                return false;
+        } catch (SQLException ex) {
+            Logger.getLogger(UserDetailsDAO.class.getName()).log(Level.SEVERE, null, ex);
+        }
+        
+        String insertVif="insert into vm_vif("
+                    +"vm_id,"
+                    +"vif_no)"
+                    +"values(?,?)";        
+        try{    
+            ps =conn.getConn().prepareStatement(insertVif);
+            for(String vif : virtMach.getVifs())
+            {    
+                ps.setString(1, virtMach.getVmId());            
+                ps.setString(2, vif);
+                if(ps.executeUpdate()<0)
+                    return false;
+            }    
+        } catch (SQLException ex) {
+            Logger.getLogger(UserDetailsDAO.class.getName()).log(Level.SEVERE, null, ex);
+        }
+        try {
+            conn.closeConnection();
+        } catch (SQLException ex) {
+            Logger.getLogger(VmDetailsDAO.class.getName()).log(Level.SEVERE, null, ex);
+        }
+        return true;
+    }
             
 }

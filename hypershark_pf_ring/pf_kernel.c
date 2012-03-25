@@ -1002,7 +1002,7 @@ void handle_storage_pkt(struct pfring_pkthdr *pkthdr,unsigned char *buf,maprecor
 
 int capture_thread(void *arg)
 {
-	int ret,caplen=128;
+	int ret,caplen=1500;
 	struct sockaddr sa;
 	packet_direction direction=0;
 	u_char *actual_buffer = NULL;

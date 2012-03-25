@@ -59,11 +59,9 @@ public class ChangeStatus
         System.out.println("in getcapture smac is"+vm.getCaptureRules().get(0).getSmac());
         System.out.println("in getcapture src host add is"+vm.getCaptureRules().get(0).getSrcHost()[0]+"."+vm.getCaptureRules().get(0).getSrcHost()[1]+"."+vm.getCaptureRules().get(0).getSrcHost()[2]+"."+vm.getCaptureRules().get(0).getSrcHost()[3]);
         System.out.println("in getcapture low protocol is"+vm.getCaptureRules().get(0).getProtocol());
-        */
-        
-        
-        
-        
+        */                        
+        if(vm.getCaptureRules().isEmpty() || vm.getCaptureRules().size()<index)
+            return null;
         return vm.getCaptureRules().get(index);
     }
 

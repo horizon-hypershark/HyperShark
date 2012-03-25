@@ -21,16 +21,50 @@ public class VirtualMachine {
     private boolean monitoringStatus;
     private String vmImage;
     private int packets;
+    private String state;
+    private String vmType;
     private ArrayList<CaptureRule> captureRules;
     private ArrayList<String> vifs;
 
+    public VirtualMachine() 
+    {
+      
+        vifs=new ArrayList<String>();
+    }
+    
+    
+    public void addVif(String vif)
+    {
+        System.out.println("vifs is"+vifs);
+        System.out.println("vif is"+vif);
+        vifs.add(vif);      
+    }
+    
+    
     public int getPackets() {
         return packets;
+    }
+
+    public String getState() {
+        return state;
+    }
+
+    public void setState(String state) {
+        this.state = state;
+    }
+
+    public String getVmType() {
+        return vmType;
+    }
+
+    public void setVmType(String vmType) {
+        this.vmType = vmType;
     }
 
     public void setPackets(int packets) {
         this.packets = packets;
     }
+    
     
     public String getVmName() {
         return vmName;

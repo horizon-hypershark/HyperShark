@@ -2,12 +2,87 @@
 #include<stdlib.h>
 #include<string.h>
 #include<fcntl.h>
+#include<time.h>
 #include "ret_query.h"
 #include <jni.h>
 #include "FileAccess_GetPacket.h"
 #include<linux/ip.h>
 #include<linux/udp.h>
 #include<linux/tcp.h>
+#include<linux/icmp.h>
+#include<linux/if_arp.h>
+#include "FileAccess_datatransfer.h"
+
+
+mapstr icmp_type_map[] = 
+{
+  { ICMP_ECHOREPLY,	"echo reply"},
+  { ICMP_DEST_UNREACH, 	"destination unreachable" },
+  { ICMP_SOURCE_QUENCH,    "source quench" },
+  { ICMP_REDIRECT,        "redirect" },
+  { ICMP_ECHO,	     "echo request" },
+  { ICMP_TIME_EXCEEDED,    "time exceeded" },
+  { ICMP_PARAMETERPROB,    "parameter problem" },
+  { ICMP_TIMESTAMP,       "timestamp" },
+  { ICMP_TIMESTAMPREPLY,  "timestamp reply" },
+  { ICMP_INFO_REQUEST,     "information request" },
+  { ICMP_INFO_REPLY,       "information reply" },
+  { ICMP_ADDRESS,     "mask request" },
+  { ICMP_ADDRESSREPLY,       "mask reply" },
+  { 0, "" }
+};
+
+
+mapstr icmp_du_map[] = 
+{
+  { ICMP_NET_UNREACH,               "network unreachable" },
+  { ICMP_HOST_UNREACH,              "host unreachable" },
+  { ICMP_PROT_UNREACH,          "protocol unreachable" },
+  { ICMP_PORT_UNREACH,              "port unreachable"},
+  { ICMP_FRAG_NEEDED,              "fragmentation needed"},
+  { ICMP_SR_FAILED,        "source route failed"},
+  { ICMP_NET_UNKNOWN,        "network unknown"},
+  { ICMP_HOST_UNKNOWN,       "host unknown"},
+  { ICMP_HOST_ISOLATED,       "source isolated"},
+  { ICMP_NET_ANO,          "network admin prohibited"},
+  { ICMP_HOST_ANO,         "host admin prohibited"},
+  { ICMP_NET_UNR_TOS,            "network unreachable for TOS"},
+  { ICMP_HOST_UNR_TOS,           "host unreachable for TOS"},
+  { ICMP_PREC_VIOLATION,      "host precedence violation"},
+  { ICMP_PREC_CUTOFF,        "precendence cutoff"},
+  { ICMP_PKT_FILTERED,	     "packet filtered"},		
+  { 0, "" }
+};
+
+mapstr icmp_timeexceeded_map[] = 
+{
+  { ICMP_EXC_TTL,               "TTL equals 0" },
+  { ICMP_EXC_FRAGTIME,        "TTL expired in reassembly"}
+};
+
+mapstr icmp_rd_map[] =
+{
+	{ ICMP_REDIR_NET,	"Redirect Net"},
+	{ ICMP_REDIR_HOST,	"Redirect Host"},
+   	{ ICMP_REDIR_NETTOS,	"Redirect Net for TOS"},
+	{ ICMP_REDIR_HOSTTOS,	"Redirect Host for TOS"},
+};
+
+char *map2str(int type,mapstr *mapping,int num)
+{
+	int i;
+	char * type_string;
+	for(i=0;i<num;i++)
+	{
+		if(type==mapping[i].type)
+		{	
+			return(mapping[i].typestr);
+		}
+	}
+	type_string=malloc(10);
+	strcpy(type_string,"INVALID");	
+	return(type_string);
+}
 
 
 flow_rec_nos* get_flow_nos_node(int no)
@@ -176,7 +251,7 @@ unsigned char* get_final_bitmap(display_rule *dr,char *filename,char *path)
 
 void traverse_flow_list(flow_rec_nos *flow_list,char *path,int file_index,int get_packets)
 {
-	int index,fd_fr,fd_off,fd_pkt,i,cnt=0;
+	int index,fd_fr,fd_off=-1,fd_pkt=-1,i,cnt=0;
 	unsigned char *buffer;
 	char file_fr[100],file_off[100],command[100],f_path[100];
 	loff_t offset;
@@ -245,9 +320,13 @@ void traverse_flow_list(flow_rec_nos *flow_list,char *path,int file_index,int ge
 		
 	}
 
-	close(file_fr);
-	close(file_off);
-	close(fd_pkt);		
+	close(fd_fr);
+	if(fd_off > 0)
+	{
+		close(file_off);
+	}
+	if(fd_pkt > 0)
+		close(fd_pkt);		
 	sprintf(command,"%s%s%s%d","lzop -U ",f_path,"flowrec_",file_index);
 	system(command);
 }
@@ -259,7 +338,6 @@ comp_flow_list* get_flow_packets(display_rule *dr,char *path,capture_time *time_
 	file_names=get_filename(time_cap,path);
 	while(file_names)
 	{
-		printf("\nin ret query %s\n",file_names->filename);		
 		int file_index=get_file_index(file_names->filename);
 		flow_rec_nos* t=decode_bitmap(get_final_bitmap(dr,file_names->filename,path),MAX_FLOW_REC);
 		traverse_flow_list(t,path,file_index,get_packets);
@@ -323,9 +401,6 @@ void fillFlowRecord(JNIEnv *env,jobject flow_obj,jclass cls_flow,flow_record fr)
 
 	F1 = (*env)->GetFieldID(env,cls_flow,"end_tv_usec","J");
 	(*env)->SetLongField(env,flow_obj,F1,fr.end_time.tv_usec);
-	
-
-
 }
 
 
@@ -337,12 +412,13 @@ void fillpackets(JNIEnv *env,jobject pkt_obj,jclass cls_pkt,hs_pkt_hdr *hs_hdr)
 	void fill_ip_hdr(JNIEnv *env,hs_pkt_hdr *,jobject,jclass);
 	void fill_tcp_hdr(JNIEnv *env,hs_pkt_hdr *,jobject,jclass);
 	void fill_udp_hdr(JNIEnv *env,hs_pkt_hdr *,jobject,jclass);
-	void fill_pfring_hdr(JNIEnv *env,hs_pkt_hdr *,jobject,jclass);	
+	void fill_pfring_hdr(JNIEnv *env,hs_pkt_hdr *,jobject,jclass);
+	void fill_icmp_hdr(JNIEnv *env,hs_pkt_hdr *,jobject,jclass);
+	void fill_arp_hdr(JNIEnv *env,hs_pkt_hdr *,jobject,jclass);
 	
 	fill_eth_hdr(env,hs_hdr,pkt_obj,cls_pkt);
-				
 	//check for l3 protocol
-				
+	printf("\n in c ethernet type is %x",hs_hdr->pkf.extended_hdr.parsed_pkt.eth_type);
 	switch(hs_hdr->pkf.extended_hdr.parsed_pkt.eth_type)
 	{
 		case 0x8100:
@@ -350,7 +426,12 @@ void fillpackets(JNIEnv *env,jobject pkt_obj,jclass cls_pkt,hs_pkt_hdr *hs_hdr)
 			    break;
 		case 0x0800:
 			    fill_ip_hdr(env,hs_hdr,pkt_obj,cls_pkt);
-			    break;	
+			    break;
+		case 0x0806:
+			    printf("\n IN C FOR ARP PKT");
+			    fill_arp_hdr(env,hs_hdr,pkt_obj,cls_pkt);
+			    printf("\n after call to fill_arp_hdr");
+			    break;		
 		default:	
 			    break;
 	}	
@@ -363,6 +444,8 @@ void fillpackets(JNIEnv *env,jobject pkt_obj,jclass cls_pkt,hs_pkt_hdr *hs_hdr)
 		case IPPROTO_UDP:
 				fill_udp_hdr(env,hs_hdr,pkt_obj,cls_pkt);
 				break;
+		case IPPROTO_ICMP:
+				fill_icmp_hdr(env,hs_hdr,pkt_obj,cls_pkt);
 		default:
 				break;
 	}
@@ -370,6 +453,88 @@ void fillpackets(JNIEnv *env,jobject pkt_obj,jclass cls_pkt,hs_pkt_hdr *hs_hdr)
 
 	fill_pfring_hdr(env,hs_hdr,pkt_obj,cls_pkt);
 }
+
+
+jobject get_arp_hdr(JNIEnv *env,hs_pkt_hdr *hs_pkt)
+{
+	struct arphdr *arp = (struct arphdr*)(hs_pkt->buffer+hs_pkt->pkf.extended_hdr.parsed_pkt.offset.l3_offset);
+	jfieldID F1;
+	jbyteArray jsh;	
+	short int temp;	
+
+	//get class which contains members of ethernet structure
+	jclass cls_arp=(*env)->FindClass(env,"Core/Protocols/l3Proto/ArpHdr");
+	//create object of this class
+	jobject arp_obj=(*env)->AllocObject(env,cls_arp);
+	
+	F1 = (*env)->GetFieldID(env,cls_arp,"ar_hdr","S");
+	printf("\n in c ar_hdr is %d",arp->ar_hrd);
+	(*env)->SetShortField(env,arp_obj,F1,arp->ar_hrd);
+
+	F1 = (*env)->GetFieldID(env,cls_arp,"ar_pro","S");
+	printf("\n in c ar_pro is %d",arp->ar_pro);
+	(*env)->SetShortField(env,arp_obj,F1,arp->ar_pro);
+	
+	F1 = (*env)->GetFieldID(env,cls_arp,"ar_hln","S");
+	temp=(short int)arp->ar_hln;	
+	printf("\n in c ar_hln is %d",temp);	
+	(*env)->SetShortField(env,arp_obj,F1,temp);
+		
+	/*if(temp==6)
+	{
+		jsh=(*env)->NewByteArray(env,6);	
+		(*env)->SetByteArrayRegion(env,jsh,0,6,(jbyte *)arp->ar_sha);
+		F1 = (*env)->GetFieldID(env,cls_arp,"h_source","[S");
+		(*env)->SetObjectField(env,arp_obj,F1,jsh);//similar to setintfield but as array is a reference type it is setobjectfield
+		
+		jsh=(*env)->NewByteArray(env,6);	
+		(*env)->SetByteArrayRegion(env,jsh,0,6,(jbyte *)arp->ar_tha);
+		F1 = (*env)->GetFieldID(env,cls_arp,"h_dest","[S");
+		(*env)->SetObjectField(env,arp_obj,F1,jsh);//similar to setintfield but as array is a reference type it is setobjectfield
+	}*/		
+	
+	F1 = (*env)->GetFieldID(env,cls_arp,"ar_pln","S");
+	temp=(short int)arp->ar_pln;	
+	printf("\n in c ar_pln is %d",temp);
+	(*env)->SetShortField(env,arp_obj,F1,temp);
+		
+		
+	/*if(temp==4)
+	{
+		jsh=(*env)->NewByteArray(env,6);	
+		(*env)->SetByteArrayRegion(env,jsh,0,6,(jbyte *)arp->ar_sip);
+		F1 = (*env)->GetFieldID(env,cls_arp,"h_source","[S");
+		(*env)->SetObjectField(env,arp_obj,F1,jsh);//similar to setintfield but as array is a reference type it is setobjectfield
+		
+		jsh=(*env)->NewByteArray(env,6);	
+		(*env)->SetByteArrayRegion(env,jsh,0,6,(jbyte *)arp->ar_tha);
+		F1 = (*env)->GetFieldID(env,cls_arp,"h_dest","[S");
+		(*env)->SetObjectField(env,arp_obj,F1,jsh);//similar to setintfield but as array is a reference type it is setobjectfield
+	}*/
+	
+	F1 = (*env)->GetFieldID(env,cls_arp,"ar_op","S");
+	printf("\n in c ar_op is %d",arp->ar_op);
+	(*env)->SetShortField(env,arp_obj,F1,arp->ar_op);
+	
+	return(arp_obj);
+
+}
+
+void fill_arp_hdr(JNIEnv *env,hs_pkt_hdr *hs_pkt,jobject pkt_obj,jclass cls_pkt)
+{
+	printf("\n in c fill_arp_hdr");	
+	jobject get_arp_hdr(JNIEnv *,hs_pkt_hdr *);	
+	jclass cls_arp=(*env)->FindClass(env,"Core/Protocols/l3Proto/ArpHdr");
+	jobject arp_obj=(*env)->AllocObject(env,cls_arp);		
+	arp_obj=get_arp_hdr(env,hs_pkt);
+	if(arp_obj==NULL)	
+	printf("\n in c arp_obj is null");
+	else
+	printf("\n in c arp_obj is not null");
+	jfieldID F1 = (*env)->GetFieldID(env,cls_pkt,"l3Packet","LCore/Protocols/l3Proto/L3proto;");
+	(*env)->SetObjectField(env,pkt_obj,F1,arp_obj);
+}
+
 
 
 void fill_flow_packets(display_rule *dr,char *path,capture_time *time_cap,JNIEnv *env,jobject obj,jclass cls_main)
@@ -404,8 +569,10 @@ void fill_flow_packets(display_rule *dr,char *path,capture_time *time_cap,JNIEnv
 
 	
 	comp_flow_list* flow_list=get_flow_packets(dr,path,time_cap,get_packets);
+
 	while(flow_list)
 	{
+	
 		flow_rec_nos *frec=flow_list->frec;
 		while(frec)
 		{
@@ -416,7 +583,6 @@ void fill_flow_packets(display_rule *dr,char *path,capture_time *time_cap,JNIEnv
 
 			fillFlowRecord(env,flow_obj,cls_flow,frec->fr);
 		
-			
 			jclass cls_pkt=(*env)->FindClass(env,"Core/CompletePacket");
 			pkt_obj_arr=(*env)->NewObjectArray(env,length,cls_pkt,NULL);
 			
@@ -460,6 +626,89 @@ void fill_flow_packets(display_rule *dr,char *path,capture_time *time_cap,JNIEnv
 
 	//ends
 	printf("\n");
+}
+
+
+
+jobject get_icmp_hdr(JNIEnv *env,hs_pkt_hdr *hs_pkt)
+{
+	jfieldID F1;
+	
+	struct iphdr *ip = (struct iphdr*)(hs_pkt->buffer+hs_pkt->pkf.extended_hdr.parsed_pkt.offset.l3_offset);
+	struct icmphdr *icmp = (struct icmphdr*)(hs_pkt->buffer+hs_pkt->pkf.extended_hdr.parsed_pkt.offset.l3_offset+(ip->ihl*4));
+	jbyteArray jsh;
+	jstring str;
+	
+	//get class which contains members of ethernet structure
+	jclass cls_icmp=(*env)->FindClass(env,"Core/Protocols/l4Proto/Icmphdr");
+	//create object of this class
+	jobject icmp_obj=(*env)->AllocObject(env,cls_icmp);
+	
+	F1 = (*env)->GetFieldID(env,cls_icmp,"type","B");
+	printf("type in c is %d",icmp->type);	
+	(*env)->SetByteField(env,icmp_obj,F1,icmp->type);
+			
+	F1 = (*env)->GetFieldID(env,cls_icmp,"code","B");
+	printf("code in c is %d",icmp->code);
+	(*env)->SetByteField(env,icmp_obj,F1,icmp->code);
+
+	F1 = (*env)->GetFieldID(env,cls_icmp,"checksum","S");
+	printf("checksum in c is %d",icmp->checksum);	
+	(*env)->SetShortField(env,icmp_obj,F1,icmp->checksum);
+	
+	F1 = (*env)->GetFieldID(env,cls_icmp,"idOrUnused","I");
+	printf("id in c is %d",icmp->un.echo.id);	
+	(*env)->SetIntField(env,icmp_obj,F1,icmp->un.echo.id);
+		
+	F1 = (*env)->GetFieldID(env,cls_icmp,"sequenceOrMtu","I");
+	printf("sequence in c is %d",icmp->un.echo.sequence);	
+	(*env)->SetIntField(env,icmp_obj,F1,icmp->un.echo.sequence);
+	
+	F1 = (*env)->GetFieldID(env,cls_icmp,"typeStr","Ljava/lang/String;");
+	str = (*env)->NewStringUTF(env,map2str(icmp->type,icmp_type_map,14));//creating a string in format specified in jni
+	(*env)->SetObjectField(env,icmp_obj,F1,str);
+
+	switch(icmp->type)
+	{
+		case ICMP_DEST_UNREACH:	
+					F1 = (*env)->GetFieldID(env,cls_icmp,"codeStr","Ljava/lang/String;");
+					str = (*env)->NewStringUTF(env,map2str(icmp->code,icmp_du_map,17));
+					(*env)->SetObjectField(env,icmp_obj,F1,str);
+					break;
+		case ICMP_TIME_EXCEEDED:
+					F1 = (*env)->GetFieldID(env,cls_icmp,"codeStr","Ljava/lang/String;");
+					str = (*env)->NewStringUTF(env,map2str(icmp->code,icmp_timeexceeded_map,2));
+					(*env)->SetObjectField(env,icmp_obj,F1,str);
+					break;
+		case ICMP_REDIRECT:	
+					F1 = (*env)->GetFieldID(env,cls_icmp,"codeStr","Ljava/lang/String;");
+					str = (*env)->NewStringUTF(env,map2str(icmp->code,icmp_rd_map,4));
+					(*env)->SetObjectField(env,icmp_obj,F1,str);
+					break;
+	}	
+	return(icmp_obj);	
+
+}
+
+
+
+void fill_icmp_hdr(JNIEnv *env,hs_pkt_hdr *hs_pkt,jobject pkt_obj,jclass cls_pkt)
+{
+
+	u_int32_t offset;	
+	
+	jobject get_icmp_hdr(JNIEnv *,hs_pkt_hdr *);	
+
+	jclass cls_icmp=(*env)->FindClass(env,"Core/Protocols/l4Proto/Icmphdr");
+	jobject icmp_obj=(*env)->AllocObject(env,cls_icmp);		
+	icmp_obj=get_icmp_hdr(env,hs_pkt);
+	jfieldID F1 = (*env)->GetFieldID(env,cls_pkt,"l4Packet","LCore/Protocols/l4Proto/L4proto;");
+	(*env)->SetObjectField(env,pkt_obj,F1,icmp_obj);
+
+	//change
+	offset = hs_pkt->pkf.extended_hdr.parsed_pkt.offset.l4_offset+sizeof(struct icmphdr);
+	//fill_buffer(env,hs_pkt,pkt_obj,cls_pkt,offset);
+	//change ends
 }
 
 
@@ -589,6 +838,7 @@ void fill_pfring_hdr(JNIEnv *env,hs_pkt_hdr *hs_pkt,jobject pkt_obj,jclass cls_p
 	pfring_obj=get_pfring_hdr(env,hs_pkt);
 	jfieldID F1 = (*env)->GetFieldID(env,cls_pkt,"pfpacket","LCore/PfringPktHdr;");
 	(*env)->SetObjectField(env,pkt_obj,F1,pfring_obj);
+	
 }
 
 
@@ -619,15 +869,76 @@ jobject get_udp_hdr(JNIEnv *env,hs_pkt_hdr *hs_pkt)
 	return(udp_obj);	
 }
 
+void fill_buffer(JNIEnv *env,hs_pkt_hdr *hs_pkt,jobject pkt_obj,jclass cls_pkt,int offset)
+{
+	jfieldID F1;
+	jstring jstr;
+	const char *str;
+	//change
+	//struct tcphdr *tcp = (struct tcphdr*)(hs_pkt->buffer+hs_pkt->pkf.extended_hdr.parsed_pkt.offset.l4_offset+sizeof(struct tcphdr));
+	//char *appold=(char *)(tcp);
+	jbyteArray jsh;
+	char *p;	
+	
+	jsh=(*env)->NewByteArray(env,hs_pkt->pkf.caplen-offset);	
+	jbyte *app=(jbyte *)(hs_pkt->buffer+offset);	
+	p=(char *)(hs_pkt->buffer+offset);	
+	if(strstr(p,"HTTP")==p || strstr(p,"GET")==p || strstr(p,"POST")==p)
+	{	
+		F1 = (*env)->GetFieldID(env,cls_pkt,"buffer","[B");
+		(*env)->SetByteArrayRegion(env,jsh,0,hs_pkt->pkf.caplen-offset,app);
+		(*env)->SetObjectField(env,pkt_obj,F1,jsh);//similar to setintfield but as array is a reference type it is setobjectfield
+		
+		F1 = (*env)->GetFieldID(env,cls_pkt,"appProto","Ljava/lang/String;");
+		jstr = (*env)->NewStringUTF(env,"HTTP");//creating a string in format specified in jni
+		(*env)->SetObjectField(env,pkt_obj,F1,jstr);
+		//check
+		//str = (*env)->GetStringUTFChars(env, jstr, NULL);
+		//printf("value stored in proto=%s\n",str);		
+		
+	}
+	if(strstr(p,"M-SEARCH")==p)
+	{	
+		printf("\nIN C FOR SSDP PROTOCOL");
+		F1 = (*env)->GetFieldID(env,cls_pkt,"buffer","[B");
+		(*env)->SetByteArrayRegion(env,jsh,0,hs_pkt->pkf.caplen-offset,app);
+		(*env)->SetObjectField(env,pkt_obj,F1,jsh);//similar to setintfield but as array is a reference type it is setobjectfield
+		
+		F1 = (*env)->GetFieldID(env,cls_pkt,"appProto","Ljava/lang/String;");
+		jstr = (*env)->NewStringUTF(env,"SSDP");//creating a string in format specified in jni
+		(*env)->SetObjectField(env,pkt_obj,F1,jstr);
+		//check
+		//str = (*env)->GetStringUTFChars(env, jstr, NULL);
+		//printf("value stored in proto=%s\n",str);		
+		
+	}
+
+	//jbyte *app=(jbyte *)(hs_pkt->buffer+offset);	
+	//printf("\n in c code %s ends here",app);			
+	//change ends
+	//F1 = (*env)->GetFieldID(env,cls_pkt,"buffer","[B");
+		
+	//str = (*env)->NewStringUTF(env,app);//creating a string in format specified in jni
+	//(*env)->SetObjectField(env,pkt_obj,F1,str);
+}
+
+
 
 void fill_udp_hdr(JNIEnv *env,hs_pkt_hdr *hs_pkt,jobject pkt_obj,jclass cls_pkt)
 {
+
+	u_int32_t offset;	
 	jobject get_udp_hdr(JNIEnv *,hs_pkt_hdr *);	
 	jclass cls_udp=(*env)->FindClass(env,"Core/Protocols/l4Proto/Udphdr");
 	jobject udp_obj=(*env)->AllocObject(env,cls_udp);		
 	udp_obj=get_udp_hdr(env,hs_pkt);
 	jfieldID F1 = (*env)->GetFieldID(env,cls_pkt,"l4Packet","LCore/Protocols/l4Proto/L4proto;");
 	(*env)->SetObjectField(env,pkt_obj,F1,udp_obj);
+
+	//change
+	offset = hs_pkt->pkf.extended_hdr.parsed_pkt.offset.l4_offset+sizeof(struct udphdr);
+	//fill_buffer(env,hs_pkt,pkt_obj,cls_pkt,offset);
+	//change ends
 }
 
 
@@ -672,17 +983,18 @@ jobject get_tcp_hdr(JNIEnv *env,hs_pkt_hdr *hs_pkt)
 
 void fill_tcp_hdr(JNIEnv *env,hs_pkt_hdr *hs_pkt,jobject pkt_obj,jclass cls_pkt)
 {
+	u_int32_t offset;	
 	jobject get_tcp_hdr(JNIEnv *,hs_pkt_hdr *);	
 	jclass cls_tcp=(*env)->FindClass(env,"Core/Protocols/l4Proto/Tcphdr");
 	jobject tcp_obj=(*env)->AllocObject(env,cls_tcp);		
 	tcp_obj=get_tcp_hdr(env,hs_pkt);
 	jfieldID F1 = (*env)->GetFieldID(env,cls_pkt,"l4Packet","LCore/Protocols/l4Proto/L4proto;");
 	(*env)->SetObjectField(env,pkt_obj,F1,tcp_obj);
+		
 	//change
 	struct tcphdr *tcp = (struct tcphdr*)(hs_pkt->buffer+hs_pkt->pkf.extended_hdr.parsed_pkt.offset.l4_offset);
-	char *app=(char *)(tcp+sizeof(struct tcphdr));	
-	printf("\n in c code %s ends here",app);			
-	
+	offset = hs_pkt->pkf.extended_hdr.parsed_pkt.offset.l4_offset+(4*tcp->doff);
+	fill_buffer(env,hs_pkt,pkt_obj,cls_pkt,offset);
 	//change ends
 }
 
@@ -871,8 +1183,137 @@ flow_rec_nos* decode_bitmap(unsigned char *map,int max_bits)
 	return flow_list;
 }
 
+void increase_size(struct pfring_pkthdr pkf,u_int64_t *arr)
+{
+  struct tm *time_val;
+  time_t tmk;
+  tmk=pkf.ts.tv_sec;
+  time_val=localtime(&tmk);
+  //printf("\n Time is %d:%d:%d",time_val->tm_mday,time_val->tm_hour,time_val->tm_min);
+  arr[time_val->tm_hour]+=pkf.caplen;
+}
+
+void set_rule(display_rule *dr,int val)
+{
+	int i;
+	dr->sip_oct=(short *)malloc(sizeof(short)*4);
+	dr->dip_oct=(short *)malloc(sizeof(short)*4);	
+	for(i=0;i<4;i++)
+	{
+		dr->sip_oct[i]=val;
+		dr->dip_oct[i]=val;
+	}
+	dr->src_port=val;
+	dr->dst_port=val;
+	dr->protocol=val;
+}
+
+u_int64_t* get_hourly_transfer(const char *path,capture_time *time_cap)
+{
+	int i;
+	display_rule dr;
+	char path1[100];
+  	u_int64_t *cap_size=(u_int64_t*)calloc(24,sizeof(u_int64_t));	
+	comp_flow_list* flow_list;	
+	set_rule(&dr,-1);	
+	/*time_cap->month=2;
+	time_cap->day=20;*/
+	time_cap->start_hr=0;
+	time_cap->start_min=0;
+	time_cap->end_hr=23;
+	time_cap->end_min=59;
+	flow_list=get_flow_packets(&dr,path,time_cap,1);
+
+	while(flow_list)
+	{
+		flow_rec_nos *frec=flow_list->frec;
+		while(frec)
+		{
+		        hs_pkt_hdr *hs_hdr=frec->pkt_list;
+			while(hs_hdr)
+			{
+				//Change begins(Code to calculate trafficof each hour in a day)
+				increase_size(hs_hdr->pkf,cap_size);
+				//Change Ends
+				hs_hdr=hs_hdr->next;
+			}			        
+       			frec=frec->next;
+       	 	}
+		flow_list=flow_list->down;
+	}
+	printf("\n");
+	for(i=0;i<24;i++)
+		printf("Hour %d == %llu Bytes\n",i,cap_size[i]);
+	return cap_size;
+}
+
+JNIEXPORT void JNICALL Java_FileAccess_datatransfer_fillData
+  (JNIEnv * env,jobject obj)// include packages in name
+{
+
+	jlongArray jint;
+	capture_time *cpt=(capture_time *)malloc(sizeof(capture_time));
+	jstring jpath;
+	const char *path;
+	u_int64_t *data;
+	jboolean iscopy;
+
+	
+	printf("in c");
+
+	jclass cls_data=(*env)->GetObjectClass(env,obj);
+	
+	jclass cls_cpt=(*env)->FindClass(env,"Core/CaptureTime");	
+	jobject cpt_obj=(*env)->AllocObject(env,cls_cpt);//create object	
+
+	jfieldID F1=(*env)->GetFieldID(env,cls_data,"cpt","LCore/CaptureTime;");
+	cpt_obj=(*env)->GetObjectField(env,obj,F1);//similar to setintfield but as array is a reference type it is setobjectfield
+	
+	F1=(*env)->GetFieldID(env,cls_cpt,"month","I");
+	cpt->month=(*env)->GetIntField(env,cpt_obj,F1);//similar to setintfield but as array is a reference type it is setobjectfield
+		
+	F1=(*env)->GetFieldID(env,cls_cpt,"day","I");
+	cpt->day=(*env)->GetIntField(env,cpt_obj,F1);//similar to setintfield but as array is a reference type it is setobjectfield
+	
+	F1=(*env)->GetFieldID(env,cls_cpt,"start_hr","I");
+	cpt->start_hr=(*env)->GetIntField(env,cpt_obj,F1);//similar to setintfield but as array is a reference type it is setobjectfield
+	
+	F1=(*env)->GetFieldID(env,cls_cpt,"start_min","I");
+	cpt->start_min=(*env)->GetIntField(env,cpt_obj,F1);//similar to setintfield but as array is a reference type it is setobjectfield
+	
+	F1=(*env)->GetFieldID(env,cls_cpt,"end_hr","I");
+	cpt->end_hr=(*env)->GetIntField(env,cpt_obj,F1);//similar to setintfield but as array is a reference type it is setobjectfield
+	
+	F1=(*env)->GetFieldID(env,cls_cpt,"end_min","I");
+	cpt->end_min=(*env)->GetIntField(env,cpt_obj,F1);//similar to setintfield but as array is a reference type it is setobjectfield
+		
+	//set path
+	F1=(*env)->GetFieldID(env,cls_data,"path","Ljava/lang/String;");
+	jpath=(*env)->GetObjectField(env,obj,F1);//similar to setintfield but as array is a reference type it is setobjectfield
+	
+	path =(*env)->GetStringUTFChars(env,jpath,&iscopy);
+	/*printf("\n in c path is %s",path);
+	printf("\n in c month is %d",cpt->month);
+	printf("\n in c day is %d",cpt->day);
+	printf("\n in c start_hr is %d",cpt->start_hr);
+	printf("\n in c start_min is %d",cpt->start_min);
+	printf("\n in c end_hr is %d",cpt->end_hr);
+	printf("\n in c end_min is %d",cpt->end_min);*/
+
+			
+	
+		//function call
+	data=get_hourly_transfer(path,cpt);
+	
+	F1 = (*env)->GetFieldID(env,cls_data,"bytes_transfer","[J");
+	jint=(*env)->NewLongArray(env,24);	
+	(*env)->SetLongArrayRegion(env,jint,0,24,data);
+	(*env)->SetObjectField(env,obj,F1,jint);//similar to setintfield but as array is a reference type it is setobjectfield
+	
+}
 
 
+/*
 int main()
 {
 	capture_time ct;
@@ -903,6 +1344,6 @@ int main()
 	//fill_flow_packets(&dr,"/storage/hs1234/",&ct);
 	return 0;
 
-}
+}*/
 
 

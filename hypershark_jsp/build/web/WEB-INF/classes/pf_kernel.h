@@ -27,7 +27,7 @@ typedef struct flow_record{
   u_int32_t start_pkt_no;
   u_int32_t nxtfr;
 //Change Begins
-  u_int16_t pkt_file_no;
+  int pkt_file_no;
 //Change Ends
 }flow_record;
 

@@ -29,10 +29,10 @@ public class DisplayTimeFilterBean {
     private String srcOctet1, srcOctet2, srcOctet3, srcOctet4;
     private String sortingField;  
     
-    public ArrayList<FlowRecord> queryPackets(DisplayPktRule dispRule,CaptureTime timRule)
+    public ArrayList<FlowRecord> queryPackets(DisplayPktRule dispRule,CaptureTime timRule,String path)
     {
         FlowController contr=new FlowController();
-        return contr.queryPackets(dispRule, timRule);
+        return contr.queryPackets(dispRule, timRule,path);
     }
 
     public String getSortingField() {
@@ -180,10 +180,29 @@ public class DisplayTimeFilterBean {
                         if(Conversions.shortToUnsigned(recArr[i].src_port)>Conversions.shortToUnsigned(recArr[j].src_port))
                             swap(recArr,i,j);
                     }
-                   else
-                        if(sortingField.equals("destPort"))
+                    else if(sortingField.equals("destPort"))
                     {
                         if(Conversions.shortToUnsigned(recArr[i].dst_port)>Conversions.shortToUnsigned(recArr[j].dst_port))
+                            swap(recArr,i,j);
+                    }
+                    else if(sortingField.equals("sourceIp"))
+                    {
+                        if((Conversions.intToUnsigned(recArr[i].ip_src))>(Conversions.intToUnsigned(recArr[j].ip_src)))
+                            swap(recArr,i,j);
+                    }
+                    else if(sortingField.equals("protocol"))
+                    {
+                        if(recArr[i].getProtocol()>recArr[j].getProtocol())
+                            swap(recArr,i,j);
+                    }
+                    else if(sortingField.equals("destIp"))
+                    {
+                        if((Conversions.intToUnsigned(recArr[i].getIp_dst()))>(Conversions.intToUnsigned(recArr[j].getIp_dst())))
+                            swap(recArr,i,j);
+                    }
+                    else if(sortingField.equals("numPackets"))
+                    {
+                        if((Conversions.intToUnsigned(recArr[i].getNop()))>(Conversions.intToUnsigned(recArr[j].getNop())))
                             swap(recArr,i,j);
                     }
                 }

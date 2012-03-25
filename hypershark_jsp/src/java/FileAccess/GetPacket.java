@@ -7,7 +7,6 @@ import Core.CaptureTime;
 import Core.CompletePacket;
 import Core.DisplayPktRule;
 import Core.FlowRecord;
-import Utils.Conversions;
 import java.util.ArrayList;
 
 /**
@@ -21,11 +20,20 @@ public class GetPacket {
     public DisplayPktRule rules = new DisplayPktRule();
     //public FlowRecord flow[]=new FlowRecord[100];
     public ArrayList<FlowRecord> flow=new ArrayList<FlowRecord>();
+    private String path;
         
     public void addFlowRecord(FlowRecord flwRec)
     {
         flow.add(flwRec);
-    }        
+    }
+
+    public String getPath() {
+        return path;
+    }
+
+    public void setPath(String path) {
+        this.path = path;
+    }
        
     public CaptureTime getCpt() {
         return cpt;
@@ -49,10 +57,11 @@ public class GetPacket {
     static {
         System.loadLibrary("packetlib");
     }
-    public ArrayList<FlowRecord> getPackets(DisplayPktRule dispRule,CaptureTime timRule)
+    public ArrayList<FlowRecord> getPackets(DisplayPktRule dispRule,CaptureTime timRule,String path)
     {
         cpt=timRule;      
         rules=dispRule;
+        this.path=path;
         fillpackets();
         return flow;
     }        
@@ -63,8 +72,9 @@ public class GetPacket {
        GetPacket f = new GetPacket();
         short[] dstHost = new short[4];
         short[] srcHost = new short[4];
-
-
+        
+        f.setPath("/storage/hs1234/");    
+        
         dstHost[0] = -1;
         dstHost[1] = -1;
         dstHost[2] = -1;
@@ -81,14 +91,14 @@ public class GetPacket {
         int i, j = 0, k = 0;
         //for rules
 
-        f.cpt.setDay(21);
-        f.cpt.setEnd_hr(17);
-        f.cpt.setEnd_min(27);
-        f.cpt.setMonth(1);
-        f.cpt.setStart_hr(17);
-        f.cpt.setStart_min(24);
+        f.cpt.setDay(25);
+        f.cpt.setEnd_hr(15);
+        f.cpt.setEnd_min(9);
+        f.cpt.setMonth(2);
+        f.cpt.setStart_hr(15);
+        f.cpt.setStart_min(9);
 
-        f.rules.setProtocol((short) -1);
+        f.rules.setProtocol((short)(-1));
         f.rules.setDstHost(dstHost);
         f.rules.setHighPort(-1);
         f.rules.setLowPort(-1);
@@ -141,12 +151,13 @@ public class GetPacket {
         f.fillpackets();//call native method
         int ctr = 0;
         int l = 0;
+        String value = null;
         System.out.println("Size is::"+f.flow.size());
-        /*for(FlowRecord flowRec:f.flow) 
+        for(FlowRecord flowRec:f.flow) 
         //while(f.flow[l]!=null)
         {
-            System.out.println("src_port is"+Conversions.shortToUnsigned(flowRec.src_port));
-            System.out.println("destination port is"+Conversions.shortToUnsigned(flowRec.dst_port));*/
+            //System.out.printlrsions.shortToUnsigned(flowRec.src_port));
+            //System.out.println("destination port is"+Conversions.shortToUnsigned(flowRec.dst_port));*/
           //  System.out.println(((f.flow[l].ip_src) & 0xFF) + "." + ((f.flow[l].ip_src >> 8) & 0xFF) + "." + ((f.flow[l].ip_src >> 16) & 0xFF) + "." + ((f.flow[l].ip_src >> 24) & 0xFF));
             /*System.out.println(((flowRec.ip_dst) & 0xFF) + "." + ((flowRec.ip_dst >> 8) & 0xFF) + "." + ((flowRec.ip_dst >> 16) & 0xFF) + "." + ((flowRec.ip_dst >> 24) & 0xFF));
             System.out.println(flowRec.protocol);
@@ -163,12 +174,29 @@ public class GetPacket {
             }
 
             j=0;*/
-            /*System.out.println("Size of packets is:"+flowRec.packets.size());
+            //System.out.println("Size of packets is:"+flowRec.packets.size());
             for(CompletePacket pkts:flowRec.packets)
-            {*/
-            //System.out.println("\nETHERNET HEADER:"+ pkts.l2Packet.getPacket());
-            //System.out.println("\nIP HEADER:"+pkts.l3Packet.getPacket());
+            {
             
+                if(pkts.getBuffer()!=null)     
+                {
+                    value = new String(pkts.getBuffer());
+                    //System.out.println("Start::"+value+"::End");
+                    //System.out.println("protocol is"+pkts.getAppProto());
+                }       
+                /*for(int g=0;g<pkts.getBuffer().length;g++)
+                {
+                    System.out.print(Byte.pkts.getBuffer()[g]);
+                }
+                    System.out.print("\n");*/
+                //System.out.println("\nETHERNET HEADER:"+ pkts.l2Packet.getPacket());
+            //System.out.println("\nIP HEADER:"+pkts.l3Packet.getPacket());
+                if(pkts.getL3Packet()!=null)
+                    System.out.println(pkts.getL3Packet().getPacket());
+                /*if(pkts.getL4Packet()!=null)
+                System.out.println(pkts.getL4Packet().getPacket());
+                else
+                System.out.println("pkts null at pos"+ctr);*/    
             //System.out.println(f.flow[0].packets[0].l2Packet.getPacket());
             //if((f.flow[0].packets[j].l4Packet.getPacket())!=null)
             
@@ -265,10 +293,10 @@ public class GetPacket {
             
             j++;*/
             
-            //}
+            }
             //l++;
-         /*   ctr++;
+           ctr++;
         }
-        System.out.println("total flowrecords"+ctr);*/
+        System.out.println("total flowrecords"+ctr);
     }
 }

@@ -20,6 +20,10 @@ public class Conversions
     {
         return(num&0xFFFF);
     }
+    public static int byteToUnsigned(byte num)
+    {
+        return(num&0xFF);
+    }
     public static long intToUnsigned(int num)
     {
         return(num&(0x0FFFFFFFFL));

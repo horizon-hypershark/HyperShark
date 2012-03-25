@@ -263,7 +263,7 @@ JNIEXPORT void JNICALL Java_FileAccess_ChangeStatus_startCapture
 
 	jclass cls_vm=(*env)->FindClass(env,"Core/VirtualMachine");	
 	jclass cls_main=(*env)->GetObjectClass(env,obj);
-	filtering_rule *filter=(filtering_rule*)malloc(sizeof(filtering_rule));
+	filtering_rule *filter;
 
 	start_recv *to_recv;	
 
@@ -278,11 +278,16 @@ JNIEXPORT void JNICALL Java_FileAccess_ChangeStatus_startCapture
 	M1=(*env)->GetMethodID(env,cls_main,"getCaptureRule","(I)LCore/CaptureRule;");
 	rule_obj=(*env)->CallObjectMethod(env,obj,M1,0);
 	if(rule_obj==NULL)
-	printf("\n in c object is null");
+	{
+		printf("\n in c capture rule object is null");
+		filter=(filtering_rule*)malloc(sizeof(filtering_rule));
+		memset(filter,0,sizeof(filtering_rule));
+	}
 	else
-	printf("object is not null");
-	filter=fillcapturefilter(env,rule_obj);
- 
+	{
+		printf("object capture rule obj is not null");
+		filter=fillcapturefilter(env,rule_obj);
+ 	}
 	//change ends
 	
 
@@ -350,7 +355,7 @@ JNIEXPORT void JNICALL Java_FileAccess_ChangeStatus_startCapture
 	printf(" in c vif   is =%s\n",elementstr);
 	printf("\n in c hashval is is =%d\n",hashval);
 
-	to_recv=start_capture(fill_start_data(cstr,elementstr,GFL,hashval,0,1,filter));
+	to_recv=start_capture(fill_start_data(cstr,elementstr,GFL,hashval,0,keep_packets,filter));
 	
 
 	//release strings

@@ -45,7 +45,20 @@ else
             }
         </style>
 
+        <!--hide textbox in graph page-->
+        
+        <script type="text/javascript">
+            function doClick()
+            {               
+                //document.getElementById("date").style.display="block";
+                //document.getElementById("date").style.visibility="visible";
+                var str="<form method=\"get\" action=\"piechart/bargraph.jsp\"> <input type=\"text\" name=\"date_selected\" id=\"datepicker\" onclick=\"showdate()\" onmouseout=\"this.value='Enter Date'\" value=\"Enter Date\"/>     <input type=\"submit\" value=\"Show Graph\" name=\"showGraph\" \"/></form>";
+                document.getElementById("show_textbox").innerHTML=str;
+            }
+        </script>   
+        
 
+        
         <script type="text/javascript">
             
             function sethighlight(x)
@@ -269,7 +282,7 @@ else
         <!--change for date ends-->
         <div class="section" id="page">
             <div class="title">
-                <h1><font color="#52A300">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;HyperShark</font></h1>
+                <h1><font color="#52A300">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Lucid</font></h1>
             </div>
             <div class="header">
             <h3><font color="#FFFFFF">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;See what you Pay for</font>
@@ -385,7 +398,8 @@ else
                                 }
                                 xmlhttp.open("GET","graph.jsp",true);
                                 xmlhttp.send();
-
+                                
+                                
                                         
                             }
                             </script>
@@ -470,7 +484,7 @@ else
                                         document.getElementById("myDiv").innerHTML=xmlhttp.responseText;
                                     }
                                 }
-                                xmlhttp.open("GET","query.jsp",true);
+                                xmlhttp.open("GET","query.jsp?index=<%=index%>",true);
                                 xmlhttp.send();
                              }
                             </script>

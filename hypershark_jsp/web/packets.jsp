@@ -72,7 +72,7 @@
         <div class="section" id="page">
 
             <div class="title">
-                <h1><font color="#52A300">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;HyperShark</font></h1>
+                <h1><font color="#52A300">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Lucid</font></h1>
                 <br/>
             </div>
             <div class="header">
@@ -183,15 +183,29 @@
                          
                         <%for (CompletePacket pkts : flowList.get(index).getPackets()) {%>
 
-                        <dt><%out.print(pkts.pfpacket.getPacket());%></dt>
+                        <dt><%out.print(pkts.getPfpacket().getPacket(pkts.getAppProto()));%></dt>
                         <dd>
                             <span>
-                                <%out.print(pkts.l2Packet.getPacket());%>
+                                <%out.print(pkts.getL2Packet().getPacket());%>
                                 <br/>
-                                <%out.print(pkts.l3Packet.getPacket());%>
+                                <%if(pkts.getL3Packet()!=null)
+                                out.print(pkts.getL3Packet().getPacket());%>
                                 <br/>
-                                <%out.print(pkts.l4Packet.getPacket());%>
+                                <%if(pkts.getL4Packet()!=null)
+                                out.print(pkts.getL4Packet().getPacket());%>
                                 <br/>
+                                <%if(pkts.getBuffer()!=null)     
+                                {
+                                    String value = new String(pkts.getBuffer());
+                                    System.out.println("Start::"+value+"::End");
+                                    out.print("<b>APPLICATION DATA</b>"+"<br/><b>PROTOCOL</b>:&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;");
+                                    out.print(pkts.getAppProto());
+                                    out.print("<br/><b>DETAILS</b>:&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;");
+                                    out.print(value);
+                                }
+                                %>
+                                <br/>
+                                
                             </span>
                         </dd>
 

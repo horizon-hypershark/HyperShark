@@ -7,35 +7,64 @@ package Controller;
 import Adapter.*;
 import Beans.UserDataBean;
 import Core.CaptureTime;
+import Core.CompletePacket;
 import Core.DisplayPktRule;
 import Core.FlowRecord;
 import Core.Graph.Statistics;
+import Core.Monitoring;
 import Core.VirtualMachine;
-import FileAccess.PortToNumberMapping;
 import GeoIP.GeoInfoLookup;
-import java.io.BufferedReader;
-import java.io.DataInputStream;
-import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
-import java.io.InputStreamReader;
 import java.util.ArrayList;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 /**
  *
  * @author varun
  */
 public class FlowController {
-    public ArrayList<FlowRecord> queryPackets(DisplayPktRule dispRule,CaptureTime timRule)
+    public ArrayList<FlowRecord> queryPackets(DisplayPktRule dispRule,CaptureTime timRule,String path)
     {
+        String []temp = null;
+        temp = path.split("/");      
+        path="/"+temp[temp.length-2]+"/"+temp[temp.length-1]+"/";    
+        //System.out.println("resultant string is"+path);        
         GetData getPkts=new GetData();
-        return getPkts.queryPackets(dispRule, timRule);
+        ArrayList<FlowRecord> flowList = getPkts.queryPackets(dispRule, timRule,path);
+        
+        for(FlowRecord flowRec : flowList)
+        {
+            PortMapping portMap= new PortMapping();
+            ProtoMapping protocolMap = new ProtoMapping();
+            flowRec.setSrc_port_str(portMap.getPortByNumber(flowRec.getSrc_port()));
+            flowRec.setDst_port_str(portMap.getPortByNumber(flowRec.getDst_port()));
+            flowRec.setProtocol_str(protocolMap.getProtoByNumber(flowRec.getProtocol()));
+            
+            for(CompletePacket pkts :flowRec.packets)
+            {
+                pkts.getPfpacket().setL4_src_port_str(portMap.getPortByNumber(pkts.getPfpacket().getL4_src_port()));
+                pkts.getPfpacket().setL4_dst_port_str(portMap.getPortByNumber(pkts.getPfpacket().getL4_dst_port()));
+                pkts.getPfpacket().setL3_proto_str(protocolMap.getProtoByNumber(pkts.getPfpacket().getL3_proto()));
+                
+            }
+        }    
+        return flowList;
     }
     public boolean getUserData(UserDataBean userData)
     {
         Authentication authUser = new Authentication();
         if(authUser.authenticateUser(userData.getUsername(),userData.getPassword()))
         {
+            Monitoring.mapVmToVif();            
+            VmDetails vmDetails=new VmDetails();
+            ArrayList<VirtualMachine> updatedVmList=vmDetails.getUpdatedVmDetails();
+            for(VirtualMachine vm :updatedVmList)
+            {
+                vmDetails.updateVmState(vm.getState(), vm.getVmId());
+                vmDetails.updateVmVifs(vm);
+            }   
             UserDetails usrDetails=new UserDetails();
             userData.setUserDetails(usrDetails.getUserDetails(userData.getUsername()));
             userData.getUserDetails().setVirMachineList(new VmDetails().getVmDetails(userData.getUserDetails().getUserId()));
@@ -52,7 +81,7 @@ public class FlowController {
         }
         return false;
     }
-    public ArrayList<Statistics> getGraphData(String type,int no,String ordinateLabel,String abscissaLabel) throws FileNotFoundException, IOException
+    public ArrayList<Statistics> getGraphData(String type,int no,String ordinateLabel,String abscissaLabel) 
     {
         ArrayList<Statistics> stringStat=new ArrayList<Statistics>();        
         if(type.equals("srcIp"))
@@ -127,13 +156,13 @@ public class FlowController {
         vm.setPackets(packets);        
         if(vm.isMonitoringStatus())
         {  //monnitoring going on
-            //System.out.println("In change status Flowcontrollor Stop");
+            Monitoring.stopDaemon(vm.getDirPath(), userData.getUserDetails().getUserId());
             changStat.stop(vm);            
             vmDet.updateGFL(vm.getGlobalFlowCount(), vm.getVmId());
         }    
         else 
         {    
-            //System.out.println("In change status Flowcontrollor Start");
+            Monitoring.startDaemon(vm.getDirPath(), vm.getMemAlloc(), userData.getUserDetails().getUserId());
             changStat.start(userData.getUserDetails().getUserId(), vm);
             vmDet.updateHash(vm.getHashVal(), vm.getVmId());
         }    

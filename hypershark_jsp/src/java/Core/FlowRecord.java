@@ -19,10 +19,13 @@ public class FlowRecord
  
     public int flow_id; 
     public short src_port;
+    private String src_port_str;
+    private String dst_port_str;
     public short dst_port;
     public int ip_src;
     public int ip_dst;
     public byte protocol;
+    private String protocol_str;
     public int nop;
     public int start_pkt_no;
     public int nxtfr;    
@@ -32,8 +35,31 @@ public class FlowRecord
     public long end_tv_sec;
     public long end_tv_usec;
 
+    public String getProtocol_str() {
+        return protocol_str;
+    }
+
+    public void setProtocol_str(String protocol_str) {
+        this.protocol_str = protocol_str;
+    }
     public FlowRecord() {       
         packets=new ArrayList<CompletePacket>();        
+    }
+
+    public String getDst_port_str() {
+        return dst_port_str;
+    }
+
+    public void setDst_port_str(String dst_port_str) {
+        this.dst_port_str = dst_port_str;
+    }
+
+    public String getSrc_port_str() {
+        return src_port_str;
+    }
+
+    public void setSrc_port_str(String src_port_str) {
+        this.src_port_str = src_port_str;
     }
     
     

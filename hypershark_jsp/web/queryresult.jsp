@@ -23,6 +23,7 @@ if(userData==null){
 }    
 else 
 {    
+    int index=Integer.parseInt(request.getParameter("index"));
 %>
 
 <!DOCTYPE html>
@@ -63,7 +64,7 @@ else
     <body>
         <div class="section" id="page">
             <div class="title">
-                <h1><font color="#52A300">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;HyperShark</font></h1>
+                <h1><font color="#52A300">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Lucid</font></h1>
             </div>
             <div class="header">
             <h3><font color="#FFFFFF">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;See what you Pay for</font>
@@ -72,7 +73,7 @@ else
                 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
                 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
                 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-               <a href="../logout.jsp"><font color="#FFFFFF" size="4px">Logout</font></a>
+               <a href="logout.jsp"><font color="#FFFFFF" size="4px">Logout</font></a>
              </h3>       
                 
             </div>
@@ -92,7 +93,7 @@ else
         DisplayPktRule dispRule=new DisplayPktRule();
         CaptureTime timRule=new CaptureTime();
         dispFilter.createDisplayRule(dispRule,timRule);        
-        flowRec=dispFilter.queryPackets(dispRule, timRule);        
+        flowRec=dispFilter.queryPackets(dispRule,timRule,userData.getUserDetails().getVirMachineList().get(index).getDirPath());        
         if(session.getAttribute("flows")!=null)
             session.removeAttribute("flows");
         session.setAttribute("flows",flowRec);
@@ -150,9 +151,18 @@ else
             dispFilter.sortFlowRecord(recArray);
         }
         for(j=0;j<recArray.length;j++)
-        { %>
+        { 
+            if(recArray[j].getProtocol()==6)
+                               {
+        %>
         
         <tr onclick="show_packets(<%=j%>)" bgcolor="white"  align="center" onmouseout="this.style.background='white';" onmouseover="this.style.background='#EEEEEE';this.style.cursor='pointer';">   
+            <%  }
+            else
+                  {
+            %>
+            <tr onclick="show_packets(<%=j%>)" bgcolor="black"  align="center" onmouseout="this.style.background='white';" onmouseover="this.style.background='#EEEEEE';this.style.cursor='pointer';">   
+                <%}%>
             <td width="10%">
                 <%out.println(m);
                 m++;
@@ -160,10 +170,20 @@ else
             </td>    
             
         <td width="10%">   
-        <%out.println(Conversions.shortToUnsigned(recArray[j].src_port));%>
+            <%if(recArray[j].getSrc_port_str()==null)
+              out.println(Conversions.shortToUnsigned(recArray[j].src_port));
+              else
+              out.println(recArray[j].getSrc_port_str());
+                   
+            %>
         </td>
         <td width="10%">
-            <%out.println(Conversions.shortToUnsigned(recArray[j].dst_port));%>
+            <%if(recArray[j].getDst_port_str()==null)
+              out.println(Conversions.shortToUnsigned(recArray[j].dst_port));
+              else
+              out.println(recArray[j].getDst_port_str());
+                   
+            %>
         </td> 
         <td width="10%">
                 <%out.println(((recArray[j].ip_src>>24) & 0xFF) + "." + ((recArray[j].ip_src >> 16) & 0xFF) + "." + ((recArray[j].ip_src>> 8) & 0xFF) +"."+ ((recArray[j].ip_src) & 0xFF));%>
@@ -174,7 +194,12 @@ else
             %>
         </td>  
         <td width="10%">
-                <%out.println(recArray[j].protocol);%>
+                <%if(recArray[j].getProtocol_str()== null)
+              out.println(recArray[j].getProtocol());
+              else
+              out.println(recArray[j].getProtocol_str());
+                   
+            %>
         </td>
         
         <td width="10%">
@@ -184,6 +209,7 @@ else
         </tr>
          <%  } 
                }
+               
         %>
         </table>
         </div>

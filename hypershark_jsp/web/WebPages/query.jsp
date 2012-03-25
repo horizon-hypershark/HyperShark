@@ -176,7 +176,7 @@
            
             <div class="article" id="article1"> -->
         
-        <form action="../queryresult.jsp" method="GET">
+        <form action="../queryresult.jsp?index=<%=request.getParameter("index")%>" method="POST">
         <table height="100%" width="100%" border="0">    
             <tr>
                 <td>

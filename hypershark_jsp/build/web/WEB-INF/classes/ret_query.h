@@ -26,4 +26,11 @@ typedef struct comp_flow_list
 	struct comp_flow_list *down;		
 }comp_flow_list;
 
+
+typedef struct mapstr
+{
+	int type;
+	char typestr[90];
+}mapstr;
+
 flow_rec_nos* decode_bitmap(unsigned char *map,int max_bits);

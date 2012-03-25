@@ -70,7 +70,7 @@ else
     <body>
        <div class="section" id="page">
             <div class="title">
-                <h1><font color="#52A300">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;HyperShark</font></h1>
+                <h1><font color="#52A300">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Lucid</font></h1>
             </div>
             <div class="header">
             <h3><font color="#FFFFFF">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;See what you Pay for</font>
@@ -159,7 +159,7 @@ else
                                                            <%int packet=0;
                                                            
                                                              %>
-                                                          <a href="../toggle_status.jsp?index=<%=j%>" onclick="location.href=this.href+'&packets='+store_packets[<%=j%>];return false;"> <button background-color="#000000"><%=(virMach.isMonitoringStatus())?"STOP":"START"%></button></a>
+                                                          <a href="../toggle_status.jsp?index=<%=j%>" onclick="location.href=this.href+'&packets='+store_packets[<%=j%>];return false;"> <button background-color="#000000" <%=(virMach.getState().equals("shut"))?"disabled=\"disabled\"":""%>><%=(virMach.isMonitoringStatus())?"STOP":"START"%></button></a>
                                                            &nbsp;&nbsp;&nbsp;
                                                            <input type="checkbox" id="packets<%=j%>" name="packets<%=j%>" value="<%=j%>" onchange="markcheck(<%=j%>)"/> Keep Packets<br />
  

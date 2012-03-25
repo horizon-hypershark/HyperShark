@@ -15,10 +15,10 @@ import java.util.ArrayList;
  * @author root
  */
 public class GetData {
-    public ArrayList<FlowRecord> queryPackets(DisplayPktRule dispRule,CaptureTime timRule)
+    public ArrayList<FlowRecord> queryPackets(DisplayPktRule dispRule,CaptureTime timRule,String path)
     {
         GetPacket getPkts=new GetPacket();
-        return getPkts.getPackets(dispRule, timRule);
+        return getPkts.getPackets(dispRule, timRule,path);
     }
     
 }
