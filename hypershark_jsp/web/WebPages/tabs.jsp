@@ -24,7 +24,7 @@ else
 <html xmlns="http://www.w3.org/1999/xhtml">
     <head>
         <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
-        <title>TABS</title>
+        <title>Lucid - Options</title>
         <link href="style.css" rel="stylesheet" type="text/css" />
         <link rel="stylesheet" type="text/css" href="button_form.css" />
 
@@ -38,13 +38,6 @@ else
             .content { float: left; clear: both; border: 1px solid #ccf; border-top: none; border-left: none; background: #EEEEEE; padding: 10px 20px 20px; width: 850px; height:450px; overflow-y:scroll; overflow-x: scroll;}
         </style>
         
-        <style type="text/css">
-            body
-            {
-                background-image:url('background.png');
-            }
-        </style>
-
         <!--hide textbox in graph page-->
         
         <script type="text/javascript">
@@ -70,57 +63,7 @@ else
 
         <!--dor date and time-->
 
-        <script>
-            
-        function verify(input)
-        {
-            var ret;
-            ret=verify_mac(document.getElementById(input).value);
-            switch(ret)
-            {
-                case 0:
-                    alert("insufficient address length: example address AB:01:23:CD:EF:45");
-                    break;
-                case 2:
-                    alert(" : missing ");
-                    break;
-                case 3:
-                    alert("invalid characters : only 0=9 and A-F acceptable ");
-                    break;
-            }
-            if(ret!=1)
-                document.getElementById(input).value=" ";
-        }
-            
-        function verify_mac(add)
-        {
-            var i,ch;
-                
-                
-            if(add.length!=17)
-                return(0);
-            for(i=0;i<add.length;i++)
-            {
-                ch=add.charCodeAt(i);
-                if(i==2||i==5||i==8||i==11||i==14)
-                {
-                    if(ch!=':')
-                        return(2);    
-                }
-                else
-                {
-                    if(!((ch>47&&ch<59)||(ch>96&&ch<103)||(ch>64&&ch<71)))
-                    {
-                        return(3);
-                    }    
-                }    
-            }
-            return(1);
-        }
-              
-             
-        </script>
-
+       
 
         <!--pop up form-->
         <script type="text/javascript" src="http://code.jquery.com/jquery-latest.pack.js"></script>
@@ -144,7 +87,7 @@ else
     <script type="text/javascript" src="timepicker/jquery.ui.timepicker.js?v=0.2.9"></script>
 
     <style type="text/css">
-        body { font-size: 10px;}
+        body { font-size: 14px;}/*change: earlier 10*/
         #content { font-size: 1.2em; 
                    font-family: "Lucida Sans Unicode", "Lucida Grande", Verdana, Arial, Helvetica, sans-serif;
                    width: 950px; margin: auto;
@@ -184,22 +127,42 @@ else
             }
 
         </script>
-	
-        
+	    
  	
 	
         
         <!--change for time ends-->
-       
-        
-        
-
-         <script type="text/javascript">
-                                                                             
-            function verify_port(port)
+       <script>
+        function verify_port(input)
             {
-                var ret;
-                ret=checkport(document.getElementById(port).value);
+                var i;
+                
+                if(input>65535)
+                {
+                    return(2);
+                }
+                else
+                {
+                    for(i=0;i<input.length;i++)
+                    {
+                        ch=input.charCodeAt(i);
+                        if(!(ch>47&&ch<58))
+                        {
+                            
+                            return(3);//different return codes based on error 
+                        }    
+                    }    
+                }
+                                                                            
+                return(1);
+                                                                            
+            }
+                                                                        
+            function check_port(input)
+            {
+                var ret;   
+                                                                                       
+                ret=verify_port(document.getElementById(input).value);
                 switch(ret)
                 {
                     case 0:
@@ -213,47 +176,16 @@ else
                         break;
                     default:
                         return;
-                                                                                        
+ 
                 }
                 if(ret!=1)
-                   document.getElementById(port).value=" "; 
-            }    
-                                                                        
-                                                                       
-                                                                        
-                                                                        
-            function checkport(input)
-            {
-                var i,input;
-                                                                           
-                                                                            
-                if(input=="")
-                {
-                    return(0);
-                }
-                if(input>65535)
-                {
-                    return(2);
-                }
-                else
-                {
-                    for(i=0;i<input.length;i++)
-                    {
-                        ch=input.charCodeAt(i);
-                        if(!(ch>47&&ch<59))
-                        {
-                            return(3);//different return codes based on error 
-                        }    
-                    }    
-                }
-                                                                            
-                return(1);
-                                                                            
+                    document.getElementById(input).value=" ";
+             
             }
-                                                                        
-                                                                                   
+            
         </script>
 
+        
 
         
         
@@ -272,6 +204,7 @@ else
     <body>
         <!--change foe date-->
         <script src="datepicker/jquery.ui.datepicker.js"></script>
+       
 	<script>
         function showdate()
         {
@@ -292,6 +225,8 @@ else
                 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
                 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
                 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+                &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+                &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
                <a href="../logout.jsp"><font color="#FFFFFF" size="4px">Logout</font></a>
              </h3>       
                 
@@ -323,8 +258,8 @@ else
                                   
                                             <!--<input type="button" name="Set Filters" value="Set Filters" onclick="dialog"/>-->
                                             <!--<button align="center" onclick="#dialog" name="modal"> Set Filters</button>-->
-                                            
-                                            <%out.println("<a href=\"filterlist.jsp?index="+index+"\">Edit Filters</a>");%> 
+                                            <!--
+                                            <%/*out.println("<a href=\"filterlist.jsp?index="+index+"\">Edit Filters</a>");*/%> -->
                                     </td>
                                 </tr>
 
@@ -337,7 +272,7 @@ else
                         <div id="tabs">
 
                             <ul id="menu" class="menu">
-                                <li class="active"><a href="#displayflows" onclick="displayFlows()">View Sessions</a></li>
+                                <!--<li class="active"><a href="#displayflows" onclick="displayFlows()">View Sessions</a></li>-->
                                 <!--<li><a href="#displaypackets" onclick="displayPackets()">View Packets</a></li>--><!--raviraj 1st comment next comment line 379-->
                                 <li><a href="#querypackets"  onclick="queryPackets()">Query Packets</a></li>
                                 <li><a href="#viewgraph"  onclick="displayGraph()">Display Graph</a></li>
@@ -499,7 +434,7 @@ else
             
             <br/><br/>			
             <div class="footer">
-                <p>&copy HyperShark.com</p> <!-- Change the copyright notice -->
+                <p>&copy Lucid.com</p> <!-- Change the copyright notice -->
                 <a href="#" class="up">Go UP</a>
             </div>
         </div>

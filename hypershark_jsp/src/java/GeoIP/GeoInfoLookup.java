@@ -16,7 +16,7 @@ public class GeoInfoLookup {
 	    LookupService cl = new LookupService("GeoIPCity.dat",
 					LookupService.GEOIP_MEMORY_CACHE );
             Location l2 = cl.getLocation(ipAddr);
-	    System.out.println("countryCode: " + l2.countryCode +
+	    /*System.out.println("countryCode: " + l2.countryCode +
                                "\n countryName: " + l2.countryName +
                                "\n region: " + l2.region +
                                "\n regionName: " + regionName.regionNameByCode(l2.countryCode, l2.region) +
@@ -27,7 +27,7 @@ public class GeoInfoLookup {
  			       "\n metro code: " + l2.metro_code +
  			       "\n area code: " + l2.area_code +
                                "\n timezone: " + timeZone.timeZoneByCountryAndRegion(l2.countryCode, l2.region));
-
+*/
 	    cl.close();
             return l2;
 	}

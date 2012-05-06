@@ -26,7 +26,7 @@
     <script type="text/javascript" src="timepicker/jquery.ui.timepicker.js?v=0.2.9"></script>
 
     <style type="text/css">
-        body { font-size: 10px;}
+        body { font-size: 14px;}
         #content { font-size: 1.2em; 
                    font-family: "Lucida Sans Unicode", "Lucida Grande", Verdana, Arial, Helvetica, sans-serif;
                    width: 950px; margin: auto;
@@ -45,7 +45,7 @@
 		//alert("time called");
                $('#timepicker_customrange').timepicker({
                    hours: { starts: 0, ends: 24 },
-                   minutes: { interval: 5 },
+                   minutes: { interval: 3 },
                    rows: 4,
                    showPeriodLabels: true,
                    minuteText: 'Min'
@@ -59,7 +59,7 @@
 		//alert("time called");
                $('#timepicker_customrangeend').timepicker({
                    hours: { starts: 0, ends: 24 },
-                   minutes: { interval: 5 },
+                   minutes: { interval: 3 },
                    rows: 4,
                    showPeriodLabels: true,
                    minuteText: 'Min'
@@ -75,12 +75,7 @@
         function verify_port(input)
             {
                 var i;
-                                                                           
-                                                                            
-                if(input=="")
-                {
-                    return(0);
-                }
+                
                 if(input>65535)
                 {
                     return(2);
@@ -90,8 +85,9 @@
                     for(i=0;i<input.length;i++)
                     {
                         ch=input.charCodeAt(i);
-                        if(!(ch>47&&ch<59))
+                        if(!(ch>47&&ch<58))
                         {
+                            alert("u entered"+input.charCodeAt(i));
                             return(3);//different return codes based on error 
                         }    
                     }    
@@ -156,17 +152,15 @@
         <!--change for date-->
         <script src="datepicker/jquery.ui.datepicker.js"></script>
 	<script>
-        function showdate()
-        {
-		alert("date called");
-                $( "#datepicker" ).datepicker({ maxDate: "+0M +0D" });
-	}
+        $(function() {
+		$( "#datepicker" ).datepicker({ maxDate: "+0M +0D" });
+	});
 	</script>
         <!--change for date ends-->
         
         <!--<div class="section" id="page"> 
             <div class="header"> 
-                <h1><font color="#FFFFFF">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;HyperShark</font></h1>
+                <h1><font color="#FFFFFF">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Lucid</font></h1>
                 <h2><font color="#FFFFFF">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;See what you Pay for</font></h2>
 
             </div>
@@ -184,15 +178,15 @@
                     <table border="0">
                         <tr>
                             <td width="400px" align="center">
-                                <p>Enter Date: <input type="text" id="datepicker" name="date" onclick="showdate()"></p><!--change-->
+                                <p>Enter Date: <input type="text" id="datepicker" name="date" onmouseover="showdate()"></p><!--change-->
                               
                             </td>
                             <td width="300px" align="center">
-                                Start time:<input type="text" name="startTime" style="width: 70px" id="timepicker_customrange" onclick="showstarttime()"/>
+                                Start time:<input type="text" name="startTime" style="width: 70px" id="timepicker_customrange" onmouseover="showstarttime()"/>
         
                             </td>
                             <td width="300px" align="center">
-                                End time:<input type="text" name="endTime"  style="width: 70px" id="timepicker_customrangeend" onclick="showendtime()"/>
+                                End time:<input type="text" name="endTime"  style="width: 70px" id="timepicker_customrangeend" onmouseover="showendtime()"/>
                             </td>   
                         </tr>    
                     </table>
@@ -272,8 +266,8 @@
                                 </select>
                                 <br/> 
                                 <br/>
-                                &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Port:&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Source:&nbsp;&nbsp;:&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<input type="text" name="lowPort" id="ChoiceFromPort" title="Any positive integer between 0-65535"/>
-                                &nbsp;&nbsp;&nbsp;&nbsp;Destination:&nbsp;&nbsp;:&nbsp;&nbsp;<input type="text" id="ChoiceToPort" name="highPort" Title="Any positive integer between 0-65535" />
+                                &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Port:&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Source:&nbsp;&nbsp;:&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<input type="text" name="lowPort" id="ChoiceFromPort" title="Any positive integer between 0-65535" onchange="check_port('ChoiceFromPort')"/>
+                                &nbsp;&nbsp;&nbsp;&nbsp;Destination:&nbsp;&nbsp;:&nbsp;&nbsp;<input type="text" id="ChoiceToPort" name="highPort" Title="Any positive integer between 0-65535" onchange="check_port('ChoiceToPort')" />
                                 <br/>
                                 <br/>
                                 &nbsp;&nbsp;&nbsp;&nbsp;Protocol&nbsp;&nbsp;:&nbsp;&nbsp;&nbsp;&nbsp;<select name="protocol">
@@ -302,7 +296,7 @@
         <!--<div class="footer"> 
     <div class="line"></div>
 
-    <p>&copy HyperShark.com</p> 
+    <p>&copy Lucid.com</p> 
 
     <a href="#" class="up">Go UP</a>
 </div>-->

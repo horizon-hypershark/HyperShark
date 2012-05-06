@@ -96,14 +96,9 @@ JNIEXPORT void JNICALL Java_FileAccess_VMInfo_fillInfo
 		//jni 
 		jclass cls_vm=(*env)->FindClass(env,"Core/VirtualMachine");//find data class	
 		
-		//vm_obj=(*env)->AllocObject(env,cls_vm);
-					
 		M1=(*env)->GetMethodID(env,cls_vm,"<init>","()V");
 		vm_obj=(*env)->NewObject(env,cls_vm,M1);
 
-		//M1=(*env)->GetMethodID(env,cls_vm,"<init>","()V");
-		//vm_obj=(*env)->NewObject(env,cls_vm,M1);
-		
 		F1 = (*env)->GetFieldID(env,cls_vm,"vmName","Ljava/lang/String;");
 		str = (*env)->NewStringUTF(env,head->vm_name);//creating a string in format specified in jni
 		(*env)->SetObjectField(env,vm_obj,F1,str);
@@ -120,7 +115,7 @@ JNIEXPORT void JNICALL Java_FileAccess_VMInfo_fillInfo
 		str = (*env)->NewStringUTF(env,head->vm_uuid);//creating a string in format specified in jni
 		for(i=0;i<36;i++)
 			printf("%c",head->vm_uuid[i]);
-		printf("\n in c vmid is %s",head->vm_uuid);			
+		//printf("\n in c vmid is %s",head->vm_uuid);			
 		(*env)->SetObjectField(env,vm_obj,F1,str);
 	
 		//printf("\n in c %d",head->vif_count);
@@ -128,7 +123,7 @@ JNIEXPORT void JNICALL Java_FileAccess_VMInfo_fillInfo
 		for(i=0;i<(head->vif_count);i++)
 		{		
 			
-			printf("\n in c %s",head->vm_vif[i]);			
+			//printf("\n in c %s",head->vm_vif[i]);			
 			M1=(*env)->GetMethodID(env,cls_vm,"addVif","(Ljava/lang/String;)V");
 			str = (*env)->NewStringUTF(env,head->vm_vif[i]);//creating a string in format specified in jni
 			(*env)->CallVoidMethod(env,vm_obj,M1,str);

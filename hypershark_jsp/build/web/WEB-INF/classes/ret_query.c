@@ -528,9 +528,10 @@ void fill_arp_hdr(JNIEnv *env,hs_pkt_hdr *hs_pkt,jobject pkt_obj,jclass cls_pkt)
 	jobject arp_obj=(*env)->AllocObject(env,cls_arp);		
 	arp_obj=get_arp_hdr(env,hs_pkt);
 	if(arp_obj==NULL)	
-	printf("\n in c arp_obj is null");
-	else
-	printf("\n in c arp_obj is not null");
+	{	
+		printf("\n in c arp_obj is null");
+		return;
+	}
 	jfieldID F1 = (*env)->GetFieldID(env,cls_pkt,"l3Packet","LCore/Protocols/l3Proto/L3proto;");
 	(*env)->SetObjectField(env,pkt_obj,F1,arp_obj);
 }
@@ -550,26 +551,12 @@ void fill_flow_packets(display_rule *dr,char *path,capture_time *time_cap,JNIEnv
 	int i=0,index;
 	jint integ;
 	int get_packets=1;
-
-	/*void fill_eth_hdr(JNIEnv *env,hs_pkt_hdr *,jobject,jclass);
-	void fill_ip_hdr(JNIEnv *env,hs_pkt_hdr *,jobject,jclass);
-	void fill_tcp_hdr(JNIEnv *env,hs_pkt_hdr *,jobject,jclass);
-	void fill_udp_hdr(JNIEnv *env,hs_pkt_hdr *,jobject,jclass);
-	void fill_pfring_hdr(JNIEnv *env,hs_pkt_hdr *,jobject,jclass);*/	
 	
-
 	cls_flow=(*env)->FindClass(env,"Core/FlowRecord");//find data class			
 	if(cls_flow==NULL)
 		printf("\nerror in getting class");
-	//make an array of objects
-	//flow_obj_arr=(*env)->NewObjectArray(env,length,cls_flow,NULL);
-
-	//main_obj_arr=(*env)->NewObjectArray(env,length,cls_main,NULL);
-	//main_obj=(*env)->AllocObject(env,cls_main);//create object	
-
 	
 	comp_flow_list* flow_list=get_flow_packets(dr,path,time_cap,get_packets);
-
 	while(flow_list)
 	{
 	
@@ -616,16 +603,8 @@ void fill_flow_packets(display_rule *dr,char *path,capture_time *time_cap,JNIEnv
 		flow_list=flow_list->down;
 	
 	}
-	//jni code
-
-
 	cls_main=(*env)->GetObjectClass(env,obj);
-	
-	//F1 = (*env)->GetFieldID(env,cls_main,"flow","[LCore/FlowRecord;");//signature for data class.also it is an array of objects so [ is required
-	//(*env)->SetObjectField(env,obj,F1,flow_obj_arr);
-
-	//ends
-	printf("\n");
+	//printf("\n");
 }
 
 
@@ -645,23 +624,23 @@ jobject get_icmp_hdr(JNIEnv *env,hs_pkt_hdr *hs_pkt)
 	jobject icmp_obj=(*env)->AllocObject(env,cls_icmp);
 	
 	F1 = (*env)->GetFieldID(env,cls_icmp,"type","B");
-	printf("type in c is %d",icmp->type);	
+	//printf("type in c is %d",icmp->type);	
 	(*env)->SetByteField(env,icmp_obj,F1,icmp->type);
 			
 	F1 = (*env)->GetFieldID(env,cls_icmp,"code","B");
-	printf("code in c is %d",icmp->code);
+	//printf("code in c is %d",icmp->code);
 	(*env)->SetByteField(env,icmp_obj,F1,icmp->code);
 
 	F1 = (*env)->GetFieldID(env,cls_icmp,"checksum","S");
-	printf("checksum in c is %d",icmp->checksum);	
+	//printf("checksum in c is %d",icmp->checksum);	
 	(*env)->SetShortField(env,icmp_obj,F1,icmp->checksum);
 	
 	F1 = (*env)->GetFieldID(env,cls_icmp,"idOrUnused","I");
-	printf("id in c is %d",icmp->un.echo.id);	
+	//printf("id in c is %d",icmp->un.echo.id);	
 	(*env)->SetIntField(env,icmp_obj,F1,icmp->un.echo.id);
 		
 	F1 = (*env)->GetFieldID(env,cls_icmp,"sequenceOrMtu","I");
-	printf("sequence in c is %d",icmp->un.echo.sequence);	
+	//printf("sequence in c is %d",icmp->un.echo.sequence);	
 	(*env)->SetIntField(env,icmp_obj,F1,icmp->un.echo.sequence);
 	
 	F1 = (*env)->GetFieldID(env,cls_icmp,"typeStr","Ljava/lang/String;");
@@ -694,21 +673,14 @@ jobject get_icmp_hdr(JNIEnv *env,hs_pkt_hdr *hs_pkt)
 
 void fill_icmp_hdr(JNIEnv *env,hs_pkt_hdr *hs_pkt,jobject pkt_obj,jclass cls_pkt)
 {
-
 	u_int32_t offset;	
-	
 	jobject get_icmp_hdr(JNIEnv *,hs_pkt_hdr *);	
-
 	jclass cls_icmp=(*env)->FindClass(env,"Core/Protocols/l4Proto/Icmphdr");
 	jobject icmp_obj=(*env)->AllocObject(env,cls_icmp);		
 	icmp_obj=get_icmp_hdr(env,hs_pkt);
 	jfieldID F1 = (*env)->GetFieldID(env,cls_pkt,"l4Packet","LCore/Protocols/l4Proto/L4proto;");
 	(*env)->SetObjectField(env,pkt_obj,F1,icmp_obj);
-
-	//change
 	offset = hs_pkt->pkf.extended_hdr.parsed_pkt.offset.l4_offset+sizeof(struct icmphdr);
-	//fill_buffer(env,hs_pkt,pkt_obj,cls_pkt,offset);
-	//change ends
 }
 
 
@@ -856,16 +828,16 @@ jobject get_udp_hdr(JNIEnv *env,hs_pkt_hdr *hs_pkt)
 	jobject udp_obj=(*env)->AllocObject(env,cls_udp);
 	
 	F1 = (*env)->GetFieldID(env,cls_udp,"source","S");
-	(*env)->SetShortField(env,udp_obj,F1,udp->source);
+	(*env)->SetShortField(env,udp_obj,F1,ntohs(udp->source));
 			
 	F1 = (*env)->GetFieldID(env,cls_udp,"dest","S");
-	(*env)->SetShortField(env,udp_obj,F1,udp->dest);
+	(*env)->SetShortField(env,udp_obj,F1,ntohs(udp->dest));
 
 	F1 = (*env)->GetFieldID(env,cls_udp,"len","S");
-	(*env)->SetShortField(env,udp_obj,F1,udp->len);
+	(*env)->SetShortField(env,udp_obj,F1,ntohs(udp->len));
 
 	F1 = (*env)->GetFieldID(env,cls_udp,"check","S");
-	(*env)->SetShortField(env,udp_obj,F1,udp->check);
+	(*env)->SetShortField(env,udp_obj,F1,ntohs(udp->check));
 	return(udp_obj);	
 }
 
@@ -874,9 +846,6 @@ void fill_buffer(JNIEnv *env,hs_pkt_hdr *hs_pkt,jobject pkt_obj,jclass cls_pkt,i
 	jfieldID F1;
 	jstring jstr;
 	const char *str;
-	//change
-	//struct tcphdr *tcp = (struct tcphdr*)(hs_pkt->buffer+hs_pkt->pkf.extended_hdr.parsed_pkt.offset.l4_offset+sizeof(struct tcphdr));
-	//char *appold=(char *)(tcp);
 	jbyteArray jsh;
 	char *p;	
 	
@@ -892,9 +861,6 @@ void fill_buffer(JNIEnv *env,hs_pkt_hdr *hs_pkt,jobject pkt_obj,jclass cls_pkt,i
 		F1 = (*env)->GetFieldID(env,cls_pkt,"appProto","Ljava/lang/String;");
 		jstr = (*env)->NewStringUTF(env,"HTTP");//creating a string in format specified in jni
 		(*env)->SetObjectField(env,pkt_obj,F1,jstr);
-		//check
-		//str = (*env)->GetStringUTFChars(env, jstr, NULL);
-		//printf("value stored in proto=%s\n",str);		
 		
 	}
 	if(strstr(p,"M-SEARCH")==p)
@@ -907,19 +873,8 @@ void fill_buffer(JNIEnv *env,hs_pkt_hdr *hs_pkt,jobject pkt_obj,jclass cls_pkt,i
 		F1 = (*env)->GetFieldID(env,cls_pkt,"appProto","Ljava/lang/String;");
 		jstr = (*env)->NewStringUTF(env,"SSDP");//creating a string in format specified in jni
 		(*env)->SetObjectField(env,pkt_obj,F1,jstr);
-		//check
-		//str = (*env)->GetStringUTFChars(env, jstr, NULL);
-		//printf("value stored in proto=%s\n",str);		
 		
 	}
-
-	//jbyte *app=(jbyte *)(hs_pkt->buffer+offset);	
-	//printf("\n in c code %s ends here",app);			
-	//change ends
-	//F1 = (*env)->GetFieldID(env,cls_pkt,"buffer","[B");
-		
-	//str = (*env)->NewStringUTF(env,app);//creating a string in format specified in jni
-	//(*env)->SetObjectField(env,pkt_obj,F1,str);
 }
 
 
@@ -934,11 +889,7 @@ void fill_udp_hdr(JNIEnv *env,hs_pkt_hdr *hs_pkt,jobject pkt_obj,jclass cls_pkt)
 	udp_obj=get_udp_hdr(env,hs_pkt);
 	jfieldID F1 = (*env)->GetFieldID(env,cls_pkt,"l4Packet","LCore/Protocols/l4Proto/L4proto;");
 	(*env)->SetObjectField(env,pkt_obj,F1,udp_obj);
-
-	//change
 	offset = hs_pkt->pkf.extended_hdr.parsed_pkt.offset.l4_offset+sizeof(struct udphdr);
-	//fill_buffer(env,hs_pkt,pkt_obj,cls_pkt,offset);
-	//change ends
 }
 
 
@@ -954,26 +905,26 @@ jobject get_tcp_hdr(JNIEnv *env,hs_pkt_hdr *hs_pkt)
 	//create object of this class
 	jobject tcp_obj=(*env)->AllocObject(env,cls_tcp);
 	F1 = (*env)->GetFieldID(env,cls_tcp,"source","S");
-	(*env)->SetShortField(env,tcp_obj,F1,tcp->source);
+	(*env)->SetShortField(env,tcp_obj,F1,ntohs(tcp->source));
 
 	F1 = (*env)->GetFieldID(env,cls_tcp,"dest","S");
-	(*env)->SetShortField(env,tcp_obj,F1,tcp->dest);
+	(*env)->SetShortField(env,tcp_obj,F1,ntohs(tcp->dest));
 	
 	F1 = (*env)->GetFieldID(env,cls_tcp,"seq","I");
-	(*env)->SetIntField(env,tcp_obj,F1,tcp->seq);
+	(*env)->SetIntField(env,tcp_obj,F1,ntohl(tcp->seq));
 
 	F1 = (*env)->GetFieldID(env,cls_tcp,"ack_seq","I");
-	(*env)->SetIntField(env,tcp_obj,F1,tcp->ack_seq);
+	(*env)->SetIntField(env,tcp_obj,F1,ntohl(tcp->ack_seq));
 
 	
 	F1 = (*env)->GetFieldID(env,cls_tcp,"window","S");
-	(*env)->SetShortField(env,tcp_obj,F1,tcp->window);
+	(*env)->SetShortField(env,tcp_obj,F1,ntohs(tcp->window));
 
 	F1 = (*env)->GetFieldID(env,cls_tcp,"check","S");
-	(*env)->SetShortField(env,tcp_obj,F1,tcp->check);
+	(*env)->SetShortField(env,tcp_obj,F1,ntohs(tcp->check));
 
 	F1 = (*env)->GetFieldID(env,cls_tcp,"urg_ptr","S");
-	(*env)->SetShortField(env,tcp_obj,F1,tcp->urg_ptr);
+	(*env)->SetShortField(env,tcp_obj,F1,ntohs(tcp->urg_ptr));
 	
 	return(tcp_obj);	
 }
@@ -1216,8 +1167,6 @@ u_int64_t* get_hourly_transfer(const char *path,capture_time *time_cap)
   	u_int64_t *cap_size=(u_int64_t*)calloc(24,sizeof(u_int64_t));	
 	comp_flow_list* flow_list;	
 	set_rule(&dr,-1);	
-	/*time_cap->month=2;
-	time_cap->day=20;*/
 	time_cap->start_hr=0;
 	time_cap->start_min=0;
 	time_cap->end_hr=23;
@@ -1241,9 +1190,9 @@ u_int64_t* get_hourly_transfer(const char *path,capture_time *time_cap)
        	 	}
 		flow_list=flow_list->down;
 	}
-	printf("\n");
+	/*printf("\n");
 	for(i=0;i<24;i++)
-		printf("Hour %d == %llu Bytes\n",i,cap_size[i]);
+		printf("Hour %d == %llu Bytes\n",i,cap_size[i]);*/
 	return cap_size;
 }
 
@@ -1259,7 +1208,7 @@ JNIEXPORT void JNICALL Java_FileAccess_datatransfer_fillData
 	jboolean iscopy;
 
 	
-	printf("in c");
+	//printf("in c");
 
 	jclass cls_data=(*env)->GetObjectClass(env,obj);
 	
@@ -1312,38 +1261,5 @@ JNIEXPORT void JNICALL Java_FileAccess_datatransfer_fillData
 	
 }
 
-
-/*
-int main()
-{
-	capture_time ct;
-	display_rule dr;
-	
-	
-	dr.sip_oct[0]=74;
-	dr.sip_oct[1]=-1;
-	dr.sip_oct[2]=-1;
-	dr.sip_oct[3]=-1;
-
-	dr.dip_oct[0]=-1;
-	dr.dip_oct[1]=-1;
-	dr.dip_oct[2]=-1;
-	dr.dip_oct[3]=-1;
-
-	dr.src_port=80;
-	dr.dst_port=-1;
-	dr.protocol=-1;
-
-	ct.month=0;
-	ct.day=31;
-	ct.start_hr=9,ct.start_min=20;
-	ct.end_hr=9,ct.end_min=29;
-
-	//comp_flow_list *flow=get_flow_packets();
-	
-	//fill_flow_packets(&dr,"/storage/hs1234/",&ct);
-	return 0;
-
-}*/
 
 

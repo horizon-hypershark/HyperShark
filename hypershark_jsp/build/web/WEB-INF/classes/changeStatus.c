@@ -239,11 +239,11 @@ filtering_rule* fillcapturefilter(JNIEnv *env,jobject rule_obj)
 	//change ends
 
 	filterr=filter->core_fields;
-	printf("\nprinting values in c code\n");
+	/*printf("\nprinting values in c code\n");
 
 	printf("smac=%d-%d-%d-%d-%d-%d\ndmac=%d-%d-%d-%d-%d-%d\nsrcip=%d.%d.%d.%d",filterr.smac[0],filterr.smac[1],filterr.smac[2],filterr.smac[3],filterr.smac[4],filterr.smac[5],filterr.dmac[0],filterr.dmac[1],filterr.dmac[2],filterr.dmac[3],filterr.dmac[4],filterr.dmac[5],((filterr.host_low.v4>>24)& 0xFF),((filterr.host_low.v4 >> 16) & 0xFF),((filterr.host_low.v4 >> 8) & 0xFF),((filterr.host_low.v4 >> 0) & 0xFF));
 
-	printf("\ndstipip=%d.%d.%d.%d\nlowsrcport=%d\nhighsrcport=%dprotocol=%d",((filterr.host_high.v4>>24)& 0xFF),((filterr.host_high.v4 >> 16) & 0xFF),((filterr.host_high.v4 >> 8) & 0xFF),((filterr.host_high.v4 >> 0) & 0xFF),filterr.port_low,filterr.port_high,filterr.proto);
+	printf("\ndstipip=%d.%d.%d.%d\nlowsrcport=%d\nhighsrcport=%dprotocol=%d",((filterr.host_high.v4>>24)& 0xFF),((filterr.host_high.v4 >> 16) & 0xFF),((filterr.host_high.v4 >> 8) & 0xFF),((filterr.host_high.v4 >> 0) & 0xFF),filterr.port_low,filterr.port_high,filterr.proto);*/
 		
 	return filter;
 
@@ -267,7 +267,6 @@ JNIEXPORT void JNICALL Java_FileAccess_ChangeStatus_startCapture
 
 	start_recv *to_recv;	
 
-	//change : fill object
 	//call function to fill capture filter
 	jobject rule_obj;
 	jclass cls_rule=(*env)->FindClass(env,"Core/CaptureRule");	
@@ -279,43 +278,26 @@ JNIEXPORT void JNICALL Java_FileAccess_ChangeStatus_startCapture
 	rule_obj=(*env)->CallObjectMethod(env,obj,M1,0);
 	if(rule_obj==NULL)
 	{
-		printf("\n in c capture rule object is null");
 		filter=(filtering_rule*)malloc(sizeof(filtering_rule));
 		memset(filter,0,sizeof(filtering_rule));
 	}
 	else
 	{
-		printf("object capture rule obj is not null");
 		filter=fillcapturefilter(env,rule_obj);
  	}
-	//change ends
-	
-
 	//create vm object
 	vm_obj=(*env)->AllocObject(env,cls_vm);
-	printf("\nin c function startcapture\n");
-
-	
 	jfieldID F1 = (*env)->GetFieldID(env,cls_main,"vm","LCore/VirtualMachine;");
 	vm_obj=(*env)->GetObjectField(env,obj,F1); 
 
-	//change	
 	F1 = (*env)->GetFieldID(env,cls_vm,"packets","I");
 	keep_packets=(*env)->GetIntField(env,vm_obj,F1);
-	printf("\n in c jni keep packets is %d",keep_packets);	
-
-	//change ends
 	F1 = (*env)->GetFieldID(env,cls_vm,"vmId","Ljava/lang/String;");
 	vm_id=(*env)->GetObjectField(env,vm_obj,F1);
 	if(vm_id==NULL)
 	vmstr=NULL;	
 	else	
 	vmstr =(*env)->GetStringUTFChars(env,vm_id,&iscopy);
-		
-
-
-	
-	//printf("\n in c vm id =%d\n",vm_id);
 	F1 = (*env)->GetFieldID(env,cls_vm,"dirPath","Ljava/lang/String;");
 	str=(*env)->GetObjectField(env,vm_obj,F1);
 	
@@ -324,14 +306,6 @@ JNIEXPORT void JNICALL Java_FileAccess_ChangeStatus_startCapture
 	else	
 	cstr = (*env)->GetStringUTFChars(env,str,NULL);
 		
-	printf("\n IN C CODE\n");	
-	printf("\n in c PATH  is =%s\n",cstr);
-	
-	//accessing arraylist	
-	//F1 = (*env)->GetFieldID(env,cls_vm,"vifs","Ljava/util/ArrayList;");
-	
-
-	//accessing method getvif
 	jmethodID mid =(*env)->GetMethodID(env,cls_vm,"getVif","(I)Ljava/lang/String;");
 	element=(*env)->CallObjectMethod(env,vm_obj,mid,0);
 	if(element==NULL)
@@ -339,32 +313,16 @@ JNIEXPORT void JNICALL Java_FileAccess_ChangeStatus_startCapture
 	else	
 	elementstr = (*env)->GetStringUTFChars(env,element,NULL);
 	
-	//printf("\n in c code vifs=%s",elementstr);
 	F1 = (*env)->GetFieldID(env,cls_vm,"globalFlowCount","I");
 	GFL=(*env)->GetIntField(env,vm_obj,F1);
-	
-	//accessing hashval
-	
 	F1 = (*env)->GetFieldID(env,cls_vm,"hashVal","I");
 	hashval=(*env)->GetIntField(env,vm_obj,F1);
-		
-
-	//printing thevalues
-	printf("\n in c vm id =%s\n",vmstr);
-	printf("\n in c PATH  is =%s\n",cstr);
-	printf(" in c vif   is =%s\n",elementstr);
-	printf("\n in c hashval is is =%d\n",hashval);
-
 	to_recv=start_capture(fill_start_data(cstr,elementstr,GFL,hashval,0,keep_packets,filter));
-	
-
 	//release strings
 	(*env)->ReleaseStringUTFChars(env,str,cstr);
 	(*env)->ReleaseStringUTFChars(env,vm_id,vmstr);
 	(*env)->ReleaseStringUTFChars(env,element,elementstr);
 
-	
-	
 }
 
 
@@ -380,13 +338,13 @@ JNIEXPORT void JNICALL Java_FileAccess_ChangeStatus_stopCapture(JNIEnv * env,job
 		
 	jfieldID F1 = (*env)->GetFieldID(env,cls_main,"vm","LCore/VirtualMachine;");
 	vm_obj=(*env)->GetObjectField(env,obj,F1);
-	printf("in c function stopcapture");	
+	//printf("in c function stopcapture");	
 
 
 	F1 = (*env)->GetFieldID(env,cls_vm,"hashVal","I");
 	hashval=(*env)->GetIntField(env,vm_obj,F1);
 	
-	printf("\n in c code hashaval is =%d",hashval);
+	//printf("\n in c code hashaval is =%d",hashval);
 
 
 	recv=stop_capture(fill_stop_data(hashval));	

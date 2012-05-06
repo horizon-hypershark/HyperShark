@@ -34,7 +34,7 @@
 <script id="source">
 $(function () {
 	  
-          var ms_data = [{"label":"FOO","data":[
+          var ms_data = [{"label":"","data":[
                     <%for(int i=0;i<24;i++){%>[<%=i%>,<%=transfer.getBytes_transfer()[i]%>],<%}%>]}];
           
 	  var ms_ticks = [ <%for(int i=0;i<24;i++){%>[<%=i%>,<%=i%>],<%}%>];

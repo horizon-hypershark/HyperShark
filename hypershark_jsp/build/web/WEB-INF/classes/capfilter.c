@@ -11,21 +11,6 @@
 #include "Core_capfilter.h"
 #include<linux/pf_ring.h>
 
-/*typedef struct capturefilter
-{
-	short *smac;
-	short *dmac;
-	int srcHost;
-	short *dstHost;
-	short *srcHostMask;
-	short *dstHostMask;
-	u_int16_t lowSrcPort;
-	u_int16_t highSrcPort;
-	u_int16_t lowDstPort;
-	u_int16_t highDstPort;
-	u_int16_t protocol;
-
-}capturefilter;*/
 
 u_int32_t set_ip(int shift,short src_host)
 {
@@ -100,25 +85,6 @@ JNIEXPORT void JNICALL Java_Core_capfilter_fillcapfilter
 
 	
 
-	//fill srchost
-	/*temp=srcHost[0];
-	temp<<=24;
-	srcip=srcip|temp;
-	
-	temp=0;
-	temp=srcHost[1];
-	temp<<=16;
-	srcip=srcip|temp;
-	
-	temp=0;
-	temp=srcHost[2];
-	temp<<=8;
-	srcip=srcip|temp;
-	
-	temp=0;
-	temp=srcHost[3];
-	srcip=srcip|temp;*/
-	
 	
 	//FOR source IP
 	shift=24;
@@ -163,11 +129,11 @@ JNIEXPORT void JNICALL Java_Core_capfilter_fillcapfilter
 
 
 	//change ends
-	printf("\nprinting values in c code\n");
+	/*printf("\nprinting values in c code\n");
 
 	printf("smac=%d-%d-%d-%d-%d-%d\ndmac=%d-%d-%d-%d-%d-%d\nsrcip=%d.%d.%d.%d",filter.smac[0],filter.smac[1],filter.smac[2],filter.smac[3],filter.smac[4],filter.smac[5],filter.dmac[0],filter.dmac[1],filter.dmac[2],filter.dmac[3],filter.dmac[4],filter.dmac[5],((filter.host_low.v4>>24)& 0xFF),((filter.host_low.v4 >> 16) & 0xFF),((filter.host_low.v4 >> 8) & 0xFF),((filter.host_low.v4 >> 0) & 0xFF));
 
-	printf("\ndstipip=%d.%d.%d.%d\nlowsrcport=%d\nhighsrcport=%dprotocol=%d",((filter.host_high.v4>>24)& 0xFF),((filter.host_high.v4 >> 16) & 0xFF),((filter.host_high.v4 >> 8) & 0xFF),((filter.host_high.v4 >> 0) & 0xFF),filter.port_low,filter.port_high,filter.proto);
+	printf("\ndstipip=%d.%d.%d.%d\nlowsrcport=%d\nhighsrcport=%dprotocol=%d",((filter.host_high.v4>>24)& 0xFF),((filter.host_high.v4 >> 16) & 0xFF),((filter.host_high.v4 >> 8) & 0xFF),((filter.host_high.v4 >> 0) & 0xFF),filter.port_low,filter.port_high,filter.proto);*/
 	
 }
 

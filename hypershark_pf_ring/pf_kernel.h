@@ -2,9 +2,9 @@
 #define MAX_FLOW_BYTE 13
 
 struct eth_hdr {
-  unsigned char   h_dest[ETH_ALEN];       /* destination eth addr */
-  unsigned char   h_source[ETH_ALEN];     /* source ether addr    */
-  u_int16_t       h_proto;                /* packet type ID field */
+	unsigned char   h_dest[ETH_ALEN];       /* destination eth addr */
+	unsigned char   h_source[ETH_ALEN];     /* source ether addr    */
+	u_int16_t       h_proto;                /* packet type ID field */
 };
 
 typedef struct hs_pkt_hdr{
@@ -14,19 +14,17 @@ typedef struct hs_pkt_hdr{
 }hs_pkt_hdr;
 
 typedef struct flow_record{
-  u_int32_t flow_id;
-  u_int16_t src_port, dst_port;
-  ip_addr   ip_src, ip_dst;
-  u_int8_t  protocol;
-  struct timeval start_time;
-  struct timeval end_time;
-  u_int64_t bytes_transfer;
-  u_int32_t nop;
-  u_int32_t start_pkt_no;
-  u_int32_t nxtfr;
-//Change Begins
-  int pkt_file_no;
-//Change Ends
+	u_int32_t flow_id;
+	u_int16_t src_port, dst_port;
+	ip_addr   ip_src, ip_dst;
+	u_int8_t  protocol;
+	struct timeval start_time;
+	struct timeval end_time;
+	u_int64_t bytes_transfer;
+	u_int32_t nop;
+	u_int32_t start_pkt_no;
+	u_int32_t nxtfr;
+	int pkt_file_no;
 }flow_record;
 
 typedef struct ip_bits
@@ -43,11 +41,6 @@ typedef struct port_bits
 }port_bits;
 
 typedef port_bits protocol_bits;
-
-//typedef struct protcol_bits
-//{
-//	char octet_1[13];
-//}protocol_bits;
 
 typedef struct bitmap
 {
@@ -66,18 +59,18 @@ typedef struct bitmap_start_offsets
 }bitmap_start_offsets;
 
 typedef struct offset_node{
-  loff_t offset;
-  struct offset_node *next;
+	loff_t offset;
+	struct offset_node *next;
 }offset_node;
 
 typedef struct offset_table{
-  struct offset_node *start;
-  struct offset_node *end;
+	struct offset_node *start;
+	struct offset_node *end;
 }offset_table;
 
 typedef struct vm_id
 {
-  u_int32_t  v_id[4];
+	u_int32_t  v_id[4];
 }vm_id;
 
 typedef struct maprecord{
@@ -86,9 +79,7 @@ typedef struct maprecord{
 	char path[50];
 	u_int16_t  link;
 	u_int16_t GFL;//global flow location
-//Change
 	u_int16_t GPKT;//global packet trace file number
-//Change ends
 	u_int32_t GPC;//global packet count	
 	loff_t pkt_offset;
 	char interface_name[15];

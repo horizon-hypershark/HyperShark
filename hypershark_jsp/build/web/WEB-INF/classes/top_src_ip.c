@@ -2,6 +2,7 @@
 #include "pf_kernel.h"
 #include <stdlib.h>
 #include <jni.h>
+#include <string.h>
 #include "FileAccess_GraphData.h"
 
 typedef struct sip
@@ -69,34 +70,40 @@ JNIEXPORT void JNICALL Java_FileAccess_GraphData_fillips
 
 	ip_list top[5],t;
 	int chk=0,count=1,i=1,j=1,num; 
-	char *fname1;
+	char *fname1,*fname2;
+	char command[200];
 	sip *s_ip=0,*temp=0,*temp1=0;
 	flow_record flow_struct;
 	void fillgraphobject(jclass,ip_list[],JNIEnv *,jobject);
 	fname1=(char*)malloc(20*sizeof(char));
+	fname2=(char*)malloc(70*sizeof(char));
+		
 	FILE *fp1,*fp; 
 
-	system("ls | grep flow.* > temp.txt");
+	system("ls /storage/hs1234/Flowrecords/ | grep flow.* > temp.txt");
 	fp1=fopen("temp.txt","r");
 	if(fp1==NULL)
-	printf("\nerror in opening file");
-
+	{
+		printf("\nerror in opening file");
+		return;
+	}
 	while(fscanf(fp1,"%s",fname1)!=EOF)
 	{
-		fp=fopen(fname1,"rb");
+		strcpy(fname2,"/storage/hs1234/Flowrecords/");
+		strcat(fname2,fname1);
+		sprintf(command,"%s%s","lzop -dU ",fname2);
+		system(command);
+		fname2[strlen(fname2)-4]='\0';		
+		fp=fopen(fname2,"rb");
 		if(fp==NULL)
-		printf("\n error in opening file");
-		printf("\nReading File %s\n",fname1);
+		{		
+			printf("\n error in opening file");
+			return;
+		}
+		//printf("\nReading File %s\n",fname1);
 
 		while((fread(&flow_struct,sizeof(flow_record),1,fp))==1)
 		{
-			//change 
-			/*printf("\n without sorting in jni c ip is %u.%u.%u.%u",(flow_struct.ip_src.v4 >> 24) & 0xFF,(flow_struct.ip_src.v4 >> 16) & 0xFF,(flow_struct.ip_src.v4 >> 8) & 0xFF,(flow_struct.ip_src.v4) & 0xFF);
-			
-				
-			printf("and nop is %u",flow_struct.nop); */
-
-			//change ends			
 			if(s_ip==0)
 			{
 				s_ip=temp=get_node(flow_struct);
@@ -108,13 +115,14 @@ JNIEXPORT void JNICALL Java_FileAccess_GraphData_fillips
 				if(chk==0)
 				{        
 					temp->next=get_node(flow_struct);
-					//count++;
 					temp=temp->next;
 				}  
 			}
 					    
 		} // end of while
 		fclose(fp);
+		sprintf(command,"%s%s","lzop -U ",fname2);
+		system(command);		
 	} // end of while
 	fclose(fp1);
 
@@ -154,12 +162,12 @@ JNIEXPORT void JNICALL Java_FileAccess_GraphData_fillips
 		temp=temp->next;
 	}
 	i=0;
-	printf("\nSorted\n");
+	//printf("\nSorted\n");
 	while(i<5)
 	{
 	   
-	   printf("\nIn c code SRC_IP=%u.%u.%u.%u",(top[i].ip_src.v4 >> 24) & 0xFF,(top[i].ip_src.v4 >> 16) & 0xFF,(top[i].ip_src.v4 >> 8) & 0xFF,(top[i].ip_src.v4) & 0xFF);   
-	   printf(" nop = %d",top[i].nop);
+	   //printf("\nIn c code SRC_IP=%u.%u.%u.%u",(top[i].ip_src.v4 >> 24) & 0xFF,(top[i].ip_src.v4 >> 16) & 0xFF,(top[i].ip_src.v4 >> 8) & 0xFF,(top[i].ip_src.v4) & 0xFF);   
+	   //printf(" nop = %d",top[i].nop);
 	   i++;
 	}
 
@@ -181,30 +189,6 @@ JNIEXPORT void JNICALL Java_FileAccess_GraphData_fillips
 	}
 	
 
-	/*while(k<5)
-	{
-		iparr[k]=top[k].ip_src.v4;
-		k++;
-	}		
-	k=0;
-	while(k<5)
-	{
-		freqarr[k]=top[k].nop;
-		k++;
-	}
-
-		F1 = (*env)->GetFieldID(env,cls_main,"Ips","[I");
-		jint=(*env)->NewIntArray(env,5);	
-		(*env)->SetIntArrayRegion(env,jint,0,5,iparr);
-		(*env)->SetObjectField(env,obj,F1,jint);//similar to setintfield but as array is a reference type it is setobjectfield
-		F1 = (*env)->GetFieldID(env,cls_main,"frequency","[I");
-		jint=(*env)->NewIntArray(env,5);	
-		(*env)->SetIntArrayRegion(env,jint,0,5,freqarr);
-		(*env)->SetObjectField(env,obj,F1,jint);//similar to setintfield but as array is a reference type it is setobjectfield*/
-				
-	//fillgraphobject(cls_main,top,env,obj);
-	//jni code ends here	
-	//return top;
 
 } // end of main
 
@@ -227,18 +211,6 @@ void fillgraphobject(jclass cls_main,ip_list top[],JNIEnv *env,jobject obj)
 		i++;
 	}
 
-	//while(i<5)
-	//{
-		/*F1 = (*env)->GetFieldID(env,cls_main,"Ips","[I");
-		jint=(*env)->NewIntArray(env,5);	
-		(*env)->SetIntArrayRegion(env,jint,0,5,iparr);
-		(*env)->SetObjectField(env,obj,F1,jint);//similar to setintfield but as array is a reference type it is setobjectfield
-		F1 = (*env)->GetFieldID(env,cls_main,"frequency","[I");
-		(*env)->SetIntArrayRegion(env,jint,0,5,freqarr);
-		(*env)->SetObjectField(env,obj,F1,jint);//similar to setintfield but as array is a reference type it is setobjectfield
-			*/	
-		//i++;
-	//}
 }
 
 
@@ -289,24 +261,23 @@ JNIEXPORT void JNICALL Java_FileAccess_GraphData_fillSrcPorts
 	system("ls | grep flow.* > srcport.txt");
 	fp1=fopen("srcport.txt","r");
 	if(fp1==NULL)
-	printf("\nerror in opening file");
-
+	{
+		printf("\nerror in opening file");
+		return;
+	}
+	
 	while(fscanf(fp1,"%s",fname1)!=EOF)
 	{
 		fp=fopen(fname1,"rb");
 		if(fp==NULL)
-		printf("\n error in opening file");
-		printf("\nReading File %s\n",fname1);
+		{
+			printf("\n error in opening file");
+			return;
+		}
+		//printf("\nReading File %s\n",fname1);
 
 		while((fread(&flow_struct,sizeof(flow_record),1,fp))==1)
 		{
-			//change 
-			/*printf("\n without sorting in jni c ip is %u.%u.%u.%u",(flow_struct.ip_src.v4 >> 24) & 0xFF,(flow_struct.ip_src.v4 >> 16) & 0xFF,(flow_struct.ip_src.v4 >> 8) & 0xFF,(flow_struct.ip_src.v4) & 0xFF);
-			
-				
-			printf("and nop is %u",flow_struct.nop); */
-
-			//change ends			
 			if(s_port==0)
 			{
 				s_port=temp=get_node_src_port(flow_struct);
@@ -318,7 +289,6 @@ JNIEXPORT void JNICALL Java_FileAccess_GraphData_fillSrcPorts
 				if(chk==0)
 				{        
 					temp->next=get_node_src_port(flow_struct);
-					//count++;
 					temp=temp->next;
 				}  
 			}
@@ -364,12 +334,12 @@ JNIEXPORT void JNICALL Java_FileAccess_GraphData_fillSrcPorts
 		temp=temp->next;
 	}
 	i=0;
-	printf("\nSorted\n");
+	//printf("\nSorted\n");
 	while(i<5)
 	{
 	   
-	   printf("\nIn c code port is %d",top[i].port);
-	   printf(" nop = %d",top[i].nop);
+	   //printf("\nIn c code port is %d",top[i].port);
+	   //printf(" nop = %d",top[i].nop);
 	   i++;
 	}
 
@@ -389,31 +359,6 @@ JNIEXPORT void JNICALL Java_FileAccess_GraphData_fillSrcPorts
 		(*env)->CallVoidMethod(env,obj,M1,top[k].port,top[k].nop);
 		k++;
 	}
-
-	/*while(k<5)
-	{
-		portarr[k]=top[k].port;
-		k++;
-	}		
-	k=0;
-	while(k<5)
-	{
-		freqarr[k]=top[k].nop;
-		k++;
-	}
-
-		F1 = (*env)->GetFieldID(env,cls_main,"srcPort","[I");
-		jint=(*env)->NewIntArray(env,5);	
-		(*env)->SetIntArrayRegion(env,jint,0,5,portarr);
-		(*env)->SetObjectField(env,obj,F1,jint);//similar to setintfield but as array is a reference type it is setobjectfield
-		F1 = (*env)->GetFieldID(env,cls_main,"srcPortFreq","[I");
-		jint=(*env)->NewIntArray(env,5);	
-		(*env)->SetIntArrayRegion(env,jint,0,5,freqarr);
-		(*env)->SetObjectField(env,obj,F1,jint);//similar to setintfield but as array is a reference type it is setobjectfield
-	*/			
-	//fillgraphobject(cls_main,top,env,obj);
-	//jni code ends here	
-	//return top;
 
 } // end of main
 

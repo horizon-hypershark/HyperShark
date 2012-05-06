@@ -87,7 +87,8 @@ public class CaptureTimeFilterBean {
         
         */
         
-        userData.getUserDetails().getVirMachineList().get(index).getCaptureRules().add(captRule);        
+        userData.getUserDetails().getVirMachineList().get(index).getCaptureRules().add(captRule);
+        
     }
     
    

@@ -94,8 +94,15 @@ public class Icmphdr extends L4proto
     {
         String icmp_pkt_str=new String();
         //System.out.println("in getpacket fr icmp type is"+type+"code is"+Conversions.byteToUnsigned(code)+"checksum is"+Conversions.shortToUnsigned(checksum));
-        icmp_pkt_str="<b>ICMP HEADER</b>"+"<br>"+"<br>"+"<b>TYPE&nbsp;&nbsp;::&nbsp;&nbsp;"+type+"&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"+"<b>CODE&nbsp;&nbsp;::&nbsp;&nbsp;</b>"+Conversions.byteToUnsigned(code)+"&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"+"<b>CHECKSUM&nbsp;&nbsp;::&nbsp;&nbsp;</b>"+Conversions.shortToUnsigned(checksum)+"&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"+"<b>TYPE_DESCRIPTION&nbsp;&nbsp;::&nbsp;&nbsp;</b>"+typeStr+"<br/>"+"<b>CODE_DESCRIPTION&nbsp;&nbsp;::&nbsp;&nbsp;</b>"+codeStr
-                        +"<b>ID OR UNUSED&nbsp;&nbsp;::&nbsp;&nbsp;</b>"+idOrUnused+"<b>SEQORMTU&nbsp;&nbsp;::&nbsp;&nbsp;</b>"+sequenceOrMtu;  
+        icmp_pkt_str="<b>ICMP HEADER</b>"+"<br>"+"<br>"+"<b>TYPE&nbsp;&nbsp;::&nbsp;&nbsp;"+type+"&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"+"<b>CODE&nbsp;&nbsp;::&nbsp;&nbsp;</b>"+Conversions.byteToUnsigned(code)+"&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"+"<b>CHECKSUM&nbsp;&nbsp;::&nbsp;&nbsp;</b>"+Conversions.shortToUnsigned(checksum)+"&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;";
+                          
+        
+        if(typeStr!=null)
+            icmp_pkt_str+="<b>TYPE_DESCRIPTION&nbsp;&nbsp;::&nbsp;&nbsp;</b>"+typeStr+"<br/>";
+        if(codeStr!=null)
+            icmp_pkt_str+="<b>CODE_DESCRIPTION&nbsp;&nbsp;::&nbsp;&nbsp;</b>"+codeStr;
+        icmp_pkt_str+="<b>ID OR UNUSED&nbsp;&nbsp;::&nbsp;&nbsp;</b>"+idOrUnused+"<b>SEQORMTU&nbsp;&nbsp;::&nbsp;&nbsp;</b>"+sequenceOrMtu;
+        
         return(icmp_pkt_str);
     }
 }

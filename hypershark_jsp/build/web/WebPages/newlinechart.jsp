@@ -39,7 +39,7 @@
 
     <div class="section" id="page"> 
             <div class="header"> 
-                <h1><font color="#FFFFFF">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;HyperShark</font></h1>
+                <h1><font color="#FFFFFF">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Lucid</font></h1>
                 <h2><font color="#FFFFFF">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;See what you Pay for</font></h2>
 
             </div>
@@ -91,7 +91,7 @@ $(function () {
 <div class="footer"> 
             <div class="line"></div>
 
-            <p>&copy HyperShark.com</p> 
+            <p>&copy Lucid.com</p> 
 
             <a href="#" class="up">Go UP</a>
         </div>

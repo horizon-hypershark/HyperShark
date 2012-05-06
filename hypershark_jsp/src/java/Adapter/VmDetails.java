@@ -14,17 +14,30 @@ import java.util.ArrayList;
  * @author varun
  */
 public class VmDetails {
-    
+    public boolean updateMaxMem(String vmId,int maxMem)
+    {
+        VmDetailsDAO vmDao=new VmDetailsDAO();
+        return vmDao.updateMaxMem(vmId, maxMem);
+    }
     public boolean updateVmState(String state,String vmId)
     {
         VmDetailsDAO vmDao=new VmDetailsDAO();
         return vmDao.updateVmState(state, vmId);
     }
-    
+    public boolean updateServiceActive(String vmId,String userId,int activeService)
+    {
+        VmDetailsDAO vmDao=new VmDetailsDAO();
+        return vmDao.updateServiceActive(vmId, userId, activeService);
+    }
     public boolean updateVmVifs(VirtualMachine virtMach)
     {
         VmDetailsDAO vmDao=new VmDetailsDAO();        
         return vmDao.updateVmVifs(virtMach);
+    }
+    public ArrayList<VirtualMachine> getVmDetailsForUser(String userId)
+    {
+        VmDetailsDAO vmDao=new VmDetailsDAO();
+        return vmDao.getVmDetailsForUser(userId);
     }
     public ArrayList<VirtualMachine> getVmDetails(String userId)
     {

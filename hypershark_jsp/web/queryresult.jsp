@@ -11,33 +11,34 @@
 <%@page import="Core.DisplayPktRule"%>
 <%@page import="Core.Rules"%>
 <%@page import="Core.CaptureTime"%>
-<%@page import="Core.func"%>
 <%@page import="Utils.*"%>
 <%@page contentType="text/html" pageEncoding="UTF-8"%>
 <jsp:useBean id="dispFilter" class="Beans.DisplayTimeFilterBean" scope="page">
     <jsp:setProperty name="dispFilter" property="*"/>
 </jsp:useBean>
 <%UserDataBean userData=(UserDataBean)session.getAttribute("userData");
+    int index;
 if(userData==null){
     response.sendRedirect("WebPages/homepage.jsp");    
 }    
 else 
 {    
-    int index=Integer.parseInt(request.getParameter("index"));
+    index=Integer.parseInt(request.getParameter("index"));
 %>
 
 <!DOCTYPE html>
 <html>
     <head>
         <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
-        <title>HyperShark- Packets</title>
+        <title>Lucid- FlowRecords</title>
         <link href="style.css" rel="stylesheet" type="text/css" />
 
         <script type="text/javascript">
         function sortResult(param)
         {
            //alert("script working"+param); 
-           window.location.href="queryresult.jsp?sortingField="+param;
+           window.location.href="queryresult.jsp?index=<%=index%>&sortingField="+param;
+       
         }
         
         </script>
@@ -146,9 +147,13 @@ else
         {
             recArray[j++]=flowRecord;
         }
+        if(session.getAttribute("flowArr")!=null)
+            session.removeAttribute("flowArr");
+        session.setAttribute("flowArr",recArray);
         if(dispFilter.getSortingField()!=null && (!dispFilter.getSortingField().equals("recNo")))
         {
             dispFilter.sortFlowRecord(recArray);
+            
         }
         for(j=0;j<recArray.length;j++)
         { 
@@ -156,14 +161,30 @@ else
                                {
         %>
         
-        <tr onclick="show_packets(<%=j%>)" bgcolor="white"  align="center" onmouseout="this.style.background='white';" onmouseover="this.style.background='#EEEEEE';this.style.cursor='pointer';">   
+        <tr onclick="show_packets(<%=j%>)" bgcolor="#00FFFF"  align="center" onmouseout="this.style.background='#00FFFF';" onmouseover="this.style.background='#EEEEEE';this.style.cursor='pointer';">   
             <%  }
-            else
+            else 
+            if(recArray[j].getProtocol()==17)    
                   {
             %>
-            <tr onclick="show_packets(<%=j%>)" bgcolor="black"  align="center" onmouseout="this.style.background='white';" onmouseover="this.style.background='#EEEEEE';this.style.cursor='pointer';">   
-                <%}%>
-            <td width="10%">
+            <tr onclick="show_packets(<%=j%>)" bgcolor="#FFFF5F"  align="center" onmouseout="this.style.background='#FFFF5F';" onmouseover="this.style.background='#EEEEEE';this.style.cursor='pointer';">   
+                <%}
+            else        
+            if(recArray[j].getProtocol()==1)    
+                  {
+                  
+                %>
+            <tr onclick="show_packets(<%=j%>)" bgcolor="#D5F5F5"  align="center" onmouseout="this.style.background='#D5F5F5';" onmouseover="this.style.background='#EEEEEE';this.style.cursor='pointer';">   
+                <%}
+                else
+                  {
+                %>
+            <tr onclick="show_packets(<%=j%>)" bgcolor="white"  align="center" onmouseout="this.style.background='white';" onmouseover="this.style.background='#EEEEEE';this.style.cursor='pointer';">   
+                <%}
+                %>
+            
+                
+                <td width="10%">
                 <%out.println(m);
                 m++;
                 %></a>
@@ -207,7 +228,8 @@ else
         </td>
         
         </tr>
-         <%  } 
+             <%
+        } 
                }
                
         %>
@@ -216,7 +238,7 @@ else
         
         <br/><br/>			
 	<div class="footer">
-	   <p>&copy HyperShark.com</p> <!-- Change the copyright notice -->
+	   <p>&copy Lucid.com</p> <!-- Change the copyright notice -->
 	   <a href="#" class="up">Go UP</a>
 	</div>
         </div>  

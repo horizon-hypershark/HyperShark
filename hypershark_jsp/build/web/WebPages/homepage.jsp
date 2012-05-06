@@ -8,7 +8,7 @@
 <html xmlns="http://www.w3.org/1999/xhtml">
     <head>
         <meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1" />
-        <title>HyperShark - Home</title>
+        <title>Lucid - Home</title>
         <link href="style.css" rel="stylesheet" type="text/css" />
         <script type="text/javascript">
             function sethighlight(x)
@@ -91,7 +91,7 @@
 
             <br/><br/>
             <div class="articleBody clear" id="articles">
-                <div class="figure"><img src="Shark.JPG"/></div> 
+                <div class="figure"><img src="LUCID.jpg" width="380px"/></div> 
 
                 <div class="login">
                     <h3><font face="Times New Roman" color="#52A300"><b>&nbsp;SIGN IN</b></font></h3>
@@ -120,15 +120,15 @@
             </div>
             <br/><br/><br/>            
             <div class="signup"  onmouseout="this.style.background='#DEDEDE';" onmouseover="this.style.background='rgb(255,224,61)';this.style.cursor='pointer';">
-            SIGNUP FOR HYPERSHARK&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+            SIGNUP FOR LUCID&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
             &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-            <input type="text" name="Custid" onmouseout="this.value='Enter ID here'" onclick="this.value=' '" value="Enter ID here"/>    
+            <form action="register.jsp" method="get"><input type="text" name="userId"  onclick="this.value=''" value="Enter ID here"/>    
             &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<input type="submit" name="submit" id="submit" value="REGISTER" style="height:20px;width:100px" onclick="window.location='register.jsp'"/>
-       
+            </form>
             </div>    
             <br/><br/>
             <div class="footer">
-                &copy HyperShark.com<!-- Change the copyright notice -->
+                &copy Lucid.com<!-- Change the copyright notice -->
 
             </div>
         </div>

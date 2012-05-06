@@ -25,6 +25,7 @@ public class VirtualMachine {
     private String vmType;
     private ArrayList<CaptureRule> captureRules;
     private ArrayList<String> vifs;
+    private int serviceActive;
 
     public VirtualMachine() 
     {
@@ -38,6 +39,14 @@ public class VirtualMachine {
         System.out.println("vifs is"+vifs);
         System.out.println("vif is"+vif);
         vifs.add(vif);      
+    }
+
+    public int getServiceActive() {
+        return serviceActive;
+    }
+
+    public void setServiceActive(int serviceActive) {
+        this.serviceActive = serviceActive;
     }
     
     

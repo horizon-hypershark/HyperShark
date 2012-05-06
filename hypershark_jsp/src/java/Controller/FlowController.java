@@ -5,6 +5,7 @@
 package Controller;
 
 import Adapter.*;
+import Beans.RegisterFormBean;
 import Beans.UserDataBean;
 import Core.CaptureTime;
 import Core.CompletePacket;
@@ -14,6 +15,7 @@ import Core.Graph.Statistics;
 import Core.Monitoring;
 import Core.VirtualMachine;
 import GeoIP.GeoInfoLookup;
+import com.maxmind.geoip.Location;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.util.ArrayList;
@@ -25,6 +27,23 @@ import java.util.logging.Logger;
  * @author varun
  */
 public class FlowController {
+    public void updateRegDetails(RegisterFormBean regDet,ArrayList<Integer> service,ArrayList<Integer> limit)
+    {
+        ArrayList<VirtualMachine> virtList=regDet.getVirtList();
+        for(int i=0;i<virtList.size();i++)
+        {
+            virtList.get(i).setServiceActive(service.get(i));
+            virtList.get(i).setMemAlloc(limit.get(i));
+            VmDetails vmDet=new VmDetails();
+            vmDet.updateMaxMem(virtList.get(i).getVmId(), limit.get(i));
+            vmDet.updateServiceActive(virtList.get(i).getVmId(), regDet.getUserId(), service.get(i));
+        }    
+    }        
+    public ArrayList<VirtualMachine> getSubscriptionList(String userId)
+    {
+        VmDetails vmDet=new VmDetails();
+        return vmDet.getVmDetailsForUser(userId);
+    }
     public ArrayList<FlowRecord> queryPackets(DisplayPktRule dispRule,CaptureTime timRule,String path)
     {
         String []temp = null;
@@ -95,17 +114,22 @@ public class FlowController {
                 int abscissa=(Integer)stat.getAbscissa();
                 String strAbscissa=(((abscissa>>24) & 0xFF) + "." + ((abscissa >> 16) & 0xFF) + "." + ((abscissa>> 8) & 0xFF) +"."+ (abscissa & 0xFF));
                 temp.setAbscissa(strAbscissa);
-                String country=GeoInfoLookup.getCity(strAbscissa).countryName;
-                String city=GeoInfoLookup.getCity(strAbscissa).city;
-                //change
-                info="<font size='1px'>"+"IP : "+temp.getAbscissa()+"<br/>";
-                
-                //change ends
-                if(country!=null)
-                    info+="Country:"+country;
-                if(city!=null)
-                    info+="&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"+"City:"+city;
-                info+="<br/></font>";
+                Location loc=GeoInfoLookup.getCity(strAbscissa);
+                if(loc!=null){
+                    String country=GeoInfoLookup.getCity(strAbscissa).countryName;
+                    String city=GeoInfoLookup.getCity(strAbscissa).city;
+                    //change
+                    info="<font size='1px'>"+"IP : "+temp.getAbscissa()+"<br/>";
+
+                    //change ends
+                    if(country!=null)
+                        info+="Country:"+country;
+                    if(city!=null)
+                        info+="&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"+"City:"+city;
+                    info+="<br/></font>";
+                }
+                //else
+                    //info="Failed to resolve Ip";
                 temp.setInfo(info);
                 
                 stringStat.add(temp);
@@ -146,7 +170,7 @@ public class FlowController {
         VirtualMachine vm=userData.getUserDetails().getVirMachineList().get(index);
         int vmNo=vm.getCaptureRules().size()-1;
         vm.getCaptureRules().get(vmNo).setRuleId(captFilter.recordCaptureFilter(vm.getCaptureRules().get(vmNo), vm.getVmId()));
-         //System.out.println("RuleId is ::"+vm.getCaptureRules().get(vmNo).getRuleId());
+        //System.out.println("RuleId is ::"+vm.getCaptureRules().get(vmNo).getRuleId());
     }
     public void changeMonitoringStatus(UserDataBean userData,int index,int packets)
     {

@@ -37,10 +37,6 @@
                 <td width ="9%"> DEST. MAC</d>
                 <td width ="7%"> SOURCE PORT LOW</d>
                 <td width ="7%"> SOURCE PORT HIGH</d>
-                <td width ="7%"> DEST. PORT LOW</d> 
-                <td width ="7%"> DEST. PORT HIGH</d>
-                <td width ="8%"> SOURCE MASK</d>
-                <td width ="8%"> DEST. MASK</d>
                 <td width ="8%"> PROTOCOL</d>    
 
             </tr>

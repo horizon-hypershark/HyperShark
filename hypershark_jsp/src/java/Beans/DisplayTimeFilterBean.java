@@ -10,7 +10,6 @@ import Core.DisplayPktRule;
 import Core.FlowRecord;
 import Utils.Conversions;
 import java.util.ArrayList;
-import java.util.Arrays;
 
 /**
  *

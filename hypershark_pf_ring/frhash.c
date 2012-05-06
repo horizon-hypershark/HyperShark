@@ -14,23 +14,24 @@
   Calculating the CRC*/
 
 u_int32_t *CRCTable;
+
 void lookupcreate(void)
 {
-  u_int8_t i,j;
-  u_int32_t CRC;
-  CRCTable=kmalloc(256*sizeof(u_int32_t),GFP_KERNEL);
-  for(i=0;i<25;i++)
-    {
-      CRC=i;
-      for(j=8;j>0;j--)
+	u_int8_t i,j;
+	u_int32_t CRC;
+	CRCTable=kmalloc(256*sizeof(u_int32_t),GFP_KERNEL);
+	for(i=0;i<25;i++)
 	{
-	  if(CRC & 1)
-	    CRC=(CRC >> 1)^0x04C11DB7;//Generator Polynomial
-	  else
-	    CRC>>=1;
+		CRC=i;
+		for(j=8;j>0;j--)
+		{
+			  if(CRC & 1)
+			  	CRC=(CRC >> 1)^0x04C11DB7;//Generator Polynomial
+			  else
+			  	CRC>>=1;
+		}
+		CRCTable[i]=CRC;
 	}
-      CRCTable[i]=CRC;
-    }
 }
 
 int crc32(u_int32_t reg,u_int32_t flowkey)
@@ -78,17 +79,3 @@ u_int32_t map_hash(u_int32_t cust_id,vm_id *vmid)
        	return hash%256;
 }
 
-/*int main()
-{
-	struct pfring_pkthdr pfr;
-	u_int32_t hh;
-	pfr.extended_hdr.parsed_pkt.l4_src_port=80;
-	pfr.extended_hdr.parsed_pkt.l4_dst_port=90;
-	pfr.extended_hdr.parsed_pkt.ip_src=199;
-	pfr.extended_hdr.parsed_pkt.ip_dst=200;
-	pfr.extended_hdr.parsed_pkt.l3_proto=1;
-	lookup_create();
-	//	hh=(calc_hash(&pfr));
-	//printf("hash:%u",calc_hash(&pfr));
-	return 0;		
-}*/

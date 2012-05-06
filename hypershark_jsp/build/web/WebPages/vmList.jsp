@@ -22,7 +22,7 @@ else
 <html>
     <head>
         <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
-        <title>HyperShark-VMList</title>
+        <title>Lucid-VMList</title>
         <link rel="stylesheet" type="text/css" href="style.css" />
         <!--<link href="styles.css" rel="stylesheet" type="text/css" />-->
         <!-- pop up form-->  
@@ -41,6 +41,8 @@ else
             }
         
         </script>
+        
+        <!--change-->
         <!--change -->
         <script><%int count=userData.getUserDetails().getVirMachineList().size();%>
         var store_packets=new Array(<%=count%>);
@@ -78,7 +80,10 @@ else
                 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
                 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
                 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-                &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+                &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+                &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+                &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+                &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
                <a href="../logout.jsp"><font color="#FFFFFF" size="4px">Logout</font></a>
              </h3>       
                 
@@ -122,7 +127,7 @@ else
                                                     </td>
                                                 </tr>
                                                 <tr height="3px">
-                                                    <td><p>VMs assigned&nbsp;&nbsp;:&nbsp;&nbsp;<%out.println(userData.getUserDetails().getNoOfVms());%></p>
+                                                    <td><p>VMs assigned&nbsp;&nbsp;:&nbsp;&nbsp;<%out.println(userData.getUserDetails().getVirMachineList().size());%></p>
                                                     </td>
                                                 </tr>
                                             </table>
@@ -165,7 +170,7 @@ else
  
 
                                                     </td>    
-                                                    <td width="20%">
+                                                    <td width="15%">
                                                      
                                                             <!--<input type="button" name="Set Filters" value="Set Filters" onclick="dialog"/>-->
                                                             <!--<button align="center" onclick="#dialog" name="modal"> Set Filters</button>-->
@@ -174,13 +179,18 @@ else
                                                     </td>   
                                                    
                                                     
-                                                    <td width="20%">
+                                                    <td width="15%">
                                                                                                                  <!--<input type="button" name="Set Filters" value="Set Filters" onclick="dialog"/>-->
                                                             <!--<button align="center" onclick="#dialog" name="modal"> Set Filters</button>-->
                                                             
                                                             <a href="tabs.jsp?index=<%=j%>"><button width="50px"/>Show history</button></a>
                                                     </td>
 
+                                                    <td width="15%">
+                                                        <img src="<%if(virMach.getState().equals("shut")){ out.print("grayscale.png");%> " width="25px" height="25px" <% }else if(virMach.isMonitoringStatus()){ out.print("greensignal.png");}else {out.print("redsignal.png");}%>" width="25px" height="25px" align="right"/>
+                                                        
+                                                    </td>
+                                                    
                                                     
                                                 </tr>    
                                             </table>    
@@ -455,7 +465,7 @@ else
             <div class="footer"> <!-- Marking the footer section -->
                 <div class="line"></div>
 
-                <p>&copy HyperShark.com</p> <!-- Change the copyright notice -->
+                <p>&copy Lucid.com</p> <!-- Change the copyright notice -->
 
                 <a href="#" class="up">Go UP</a>
             </div>
